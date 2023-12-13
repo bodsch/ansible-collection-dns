@@ -1,0 +1,17 @@
+---
+
+- name: systemctl daemon-reload
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    force: true
+  when:
+    - ansible_service_mgr | lower == "systemd"
+
+- name: reload bind
+  become: true
+  ansible.builtin.service:
+    name: "{{ bind_service }}"
+    state: reloaded
+
+...

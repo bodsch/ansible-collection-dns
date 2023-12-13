@@ -1,0 +1,321 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+//
+// named.conf
+//
+// {{ ansible_managed }}
+
+{% for acl in bind_acls %}
+acl "{{ acl.name }}" {
+  {% for match in acl.match_list %}
+  {{ match }};
+  {% endfor %}
+};
+
+{% endfor %}
+
+options {
+{% if bind_listen is defined and
+      bind_listen | bodsch.core.type == "dict" %}
+  {% if bind_listen.ipv4 is defined and
+        bind_listen.ipv4 | bodsch.core.type == "list" %}
+    {% for listener in bind_listen.ipv4 %}
+      {% if listener.port is defined and listener.addresses is defined %}
+  listen-on port {{ listener.port | default('53') }} {
+    {{ listener.addresses | join(';\n') | indent(4) }};
+  };
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% if bind_listen.ipv6 is defined and
+        bind_listen.ipv6 | bodsch.core.type == "list" %}
+    {% for listener in bind_listen.ipv6 %}
+      {% if listener.port is defined and listener.addresses is defined %}
+  listen-on-v6 port {{ listener.port | default('53') }} {
+    {{ listener.addresses | join(';\n') | indent(4) }};
+  };
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endif %}
+
+  directory          "{{ bind_dir }}";
+  dump-file          "{{ bind_dir }}/data/cache_dump.db";
+  statistics-file    "{{ bind_dir }}/data/named_stats.txt";
+  memstatistics-file "{{ bind_dir }}/data/named_mem_stats.txt";
+  allow-query {
+    {{ bind_allow_query | join(';\n') | indent(4) }};
+  };
+
+{% if bind_acls | string | length > 0 %}
+  allow-transfer  {
+    {% for acl in bind_acls %}
+    "{{ acl.name }}";
+    {% endfor %}
+  };
+{% endif %}
+
+{% if bind_check_names is defined %}
+  check-names  {{ bind_check_names }};
+{% endif %}
+
+  recursion {{ bind_recursion | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% if bind_recursion is defined and
+        bind_recursion | string | length > 0 and
+        bind_recursion | bool %}
+  allow-recursion {
+    {{ bind_allow_recursion | join(';\n') | indent(4) }};
+  };
+  {% endif %}
+
+  {% if bind_forwarders | length > 0 %}
+  forwarders {
+    {{ bind_forwarders | join(';\n') | indent(4) }};
+  };
+  {% endif %}
+  {% if bind_forward_only %}
+  forward only;
+  {% endif %}
+
+  rrset-order {
+    order {{ bind_rrset_order }};
+  };
+
+{% if bind_dnssec is defined and
+      bind_dnssec | bodsch.core.type == "dict" %}
+  {% if bind_dnssec.enable is defined and
+        bind_dnssec.enable | string | length > 0 and
+        bind_version.full_version is version('9.18.0', '<') %}
+  dnssec-enable {{ bind_dnssec.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% else %}
+  /*
+    NOTE: In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
+
+    dnssec-enable {{ bind_dnssec.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  */
+  {% endif %}
+  {% if bind_dnssec.validation is defined and
+        bind_dnssec.validation | string | length > 0 %}
+    {% if bind_dnssec.validation | bodsch.core.type == "string" and
+          bind_dnssec.validation == "auto" %}
+  dnssec-validation {{ bind_dnssec_validation }};
+    {% endif %}
+    {% if bind_dnssec.validation | bodsch.core.type == "bool" %}
+  dnssec-validation {{ bind_dnssec.validation | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+  /* Path to ISC DLV key */
+  bindkeys-file "{{ bind_bindkeys_file }}";
+
+  managed-keys-directory "{{ bind_dir }}/dynamic";
+
+  pid-file "{{ bind_pid_file }}";
+  session-keyfile "{{ bind_session_keyfile }}";
+
+{% if bind_logging is defined and
+      bind_logging | bodsch.core.type == "dict" %}
+  {% if bind_logging.enable is defined and
+        bind_logging.enable | string | length > 0 %}
+  querylog {{ bind_logging.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% endif %}
+{% endif %}
+
+{% if bind_dns64 %}
+  dns64 64:ff9b::/96 {
+    clients {
+      {{ bind_dns64_clients | join(';\n') | indent(6) }};
+    };
+  };
+{% endif %}
+};
+
+{% if bind_statistics is defined and
+      bind_statistics | bodsch.core.type == "dict" %}
+
+  {% if bind_statistics.channels is defined and
+        bind_statistics.channels | string | length > 0 %}
+statistics-channels {
+  inet {{ bind_statistics.host }} port {{ bind_statistics.port }} allow {
+    {{ bind_statistics.allow| join(';\n') | indent(4) }};
+  };
+};
+  {% endif %}
+{% endif %}
+
+{% if bind_logging is defined %}
+  {% if bind_logging.enable is defined and
+        bind_logging.enable | string | length > 0 and
+        bind_logging.enable %}
+    {% if bind_logging.channels is defined %}
+logging {
+      {% for channel in bind_logging.channels %}
+  channel {{ channel.channel }} {
+        {% if channel.file is defined%}
+    file "{{ channel.file }}";
+        {%endif %}
+        {% if channel.syslog is defined%}
+    syslog {{ channel.syslog }};
+        {%endif %}
+        {% if channel.print_category is defined and
+              channel.print_category | bodsch.core.type == "bool" %}
+    print-category yes;
+        {%endif %}
+        {% if channel.print_severity is defined and
+              channel.print_severity | bodsch.core.type == "bool" %}
+    print-severity yes;
+        {%endif %}
+        {% if channel.print_time is defined and
+              channel.print_time | bodsch.core.type == "bool" %}
+    print-time {{ channel.print_time | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+        {%endif %}
+        {% if channel.severity is defined and
+              channel.severity in ["critical","error","warning","notice","info","dynamic"] %}
+    severity {{ channel.severity }};
+        {%endif %}
+  };
+      {% endfor %}
+
+      {% for categories, values in bind_logging.categories.items() %}
+  category {{ categories }} { {{ values | join('; ') }}; };
+      {% endfor %}
+};
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% for file in bind_default_zone_files %}
+include "{{ file }}";
+{% endfor %}
+{% for file in bind_extra_include_files %}
+include "{{ file }}";
+{% endfor %}
+
+{% if bind_zones is defined and
+      bind_zones | default([]) | bodsch.core.type == "list" and
+      bind_zones | count > 0 %}
+  {% for bind_zone in bind_zones %}
+    {% if bind_zone.create_forward_zones is not defined or bind_zone.create_forward_zones %}
+      {# Start: set zone type  #}
+      {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %}
+      {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=_all_addresses) %}
+      {# End: set zone type #}
+zone "{{ bind_zone.name }}" IN {
+      {% if _type == 'primary' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ bind_zone.name }}";
+  notify yes;
+        {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+        {% endif %}
+        {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+        {% else %}
+  allow-update {
+    none;
+  };
+        {% endif %}
+      {% elif _type == 'secondary' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ bind_zone.name }}";
+      {% elif _type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+      {% endif %}
+};
+    {% endif %}
+
+    {% if bind_zone.networks is defined %}
+      {% if bind_zone.create_reverse_zones is not defined or bind_zone.create_reverse_zones %}
+        {% for network in bind_zone.networks %}
+
+zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa" IN {
+          {% if _type == 'primary' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa";
+  notify yes;
+            {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+            {% endif %}
+            {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+            {% else %}
+  allow-update {
+    none;
+  };
+            {% endif %}
+          {% elif _type == 'secondary' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa";
+          {% elif _type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+          {% endif %}
+};
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+
+    {% if bind_zone.ipv6_networks is defined %}
+      {% if bind_zone.create_reverse_zones is not defined or bind_zone.create_reverse_zones %}
+        {% for network in bind_zone.ipv6_networks %}
+
+zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):] }}" IN {
+          {% if _type == 'primary' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):-1] }}";
+  notify yes;
+            {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+            {% endif %}
+            {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+            {% else %}
+  allow-update {
+    none;
+  };
+            {% endif %}
+          {% elif _type == 'secondary' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):-1] }}";
+          {% elif _type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+          {% endif %}
+};
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}

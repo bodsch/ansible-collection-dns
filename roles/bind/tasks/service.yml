@@ -1,0 +1,12 @@
+---
+
+- name: ensure bind is enabled on boot
+  become: true
+  ansible.builtin.service:
+    name: "{{ bind_service }}"
+    enabled: true
+    state: started
+  tags:
+    - bind
+
+...

@@ -1,0 +1,41 @@
+---
+
+namespace: bodsch
+name: dns
+
+version: 0.0.1
+
+readme: README.md
+
+authors:
+  - Bodo Schulz <bodo@boone-schulz.de>
+
+description: A collection of Ansible roles for DNS handling.
+
+license:
+  - Apache-2.0
+
+license_file: ''
+
+tags:
+  - system
+  - dns
+
+dependencies:
+  bodsch.core: ">=1.1.2"
+
+repository: https://github.com/bodsch/ansible-collection-dns
+documentation: https://github.com/bodsch/ansible-collection-dns/README.md
+homepage: https://github.com/bodsch/ansible-collection-dns
+issues: https://github.com/bodsch/ansible-collection-dns/issues
+
+build_ignore:
+  - "galaxy.yml"
+  - "*.pyc"
+  - "*.retry"
+  - ".ansible-lint"
+  - ".editorconfig"
+  - ".flake8"
+  - ".gitignore"
+  - ".yamllint"
+  - ".github"

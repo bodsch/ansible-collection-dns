@@ -1,0 +1,142 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{#
+ #  First create a dict holding the entire zone information and create a hash
+ #  from it, that it can be compared with subsequent task executions. In this
+ #  way the serial will only be updated if there are some content changes.
+ #}
+{% set _zone_data = item | bodsch.dns.zone_data(bind_zone_soa, ansible_hostname) %}
+{#
+ #  Compare the zone file hash with the current zone data hash and set serial
+ #  accordingly
+ #}
+{% set _zone = {'hash': _zone_data | string | hash('sha256')} %}
+{% for _result in forward_hashes if _result.name == item.name %}
+  {% set _hash_serial = _result.hash.split(' ')[2:] %}
+  {% if _hash_serial and _hash_serial[0] == _zone['hash'] %}
+    {% set _ = _zone.update({'serial': _hash_serial[1]}) %}
+  {% else %}
+    {% set _ = _zone.update({'serial': timestamp.stdout}) %}
+  {% endif %}
+{% endfor %}
+{#
+ #  Eventually output the zone data
+ #}
+; {{ ansible_managed }}
+; Zone file for {{ _zone_data['domain'] }}
+; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
+
+$ORIGIN {{ _zone_data['domain'] }}.
+$TTL {{ _zone_data['ttl'] }}
+
+; soa
+@ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
+  {{ _zone['serial'] }}
+  {{ _zone_data['refresh'] }}
+  {{ _zone_data['retry'] }}
+  {{ _zone_data['expire'] }}
+  {{ _zone_data['minimum'] }} )
+; --------------------------------------------------------------------------------------
+; dns
+{% if _zone_data['soa_name_server'] | length > 0 %}
+  {% for ns in _zone_data['soa_name_server'] %}
+                           IN  NS     {{ ns }}
+  {% endfor %}
+{% endif %}
+{% if _zone_data.other_name_servers is defined and
+      _zone_data.other_name_servers | bodsch.core.type == "list" %}
+  {% for ns in _zone_data.other_name_servers %}
+                           IN  NS     {{ ns }}
+  {% endfor %}
+{% endif %}
+; --------------------------------------------------------------------------------------
+; mail
+{% for mail in _zone_data['mail'] %}
+{% if loop.first %}@{% else %} {% endif %}                          IN  MX     {{ mail.preference | default('90') }}  {{ mail.name }}
+{% endfor %}
+; --------------------------------------------------------------------------------------
+; delegate
+{% if _zone_data['delegate'] | length > 0 %}
+  {% for host in _zone_data['delegate'] %}
+{{ host.zone.ljust(20) }}       IN  NS     {{ host.dns }}
+  {% endfor %}
+{% endif %}
+
+{% if _zone_data['hosts'] | length > 0 %}
+; --------------------------------------------------------------------------------------
+; hosts
+  {% for host in _zone_data['hosts'] %}
+    {% if host.ip is defined %}
+      {% if host.ip is string %}
+        {% if "$GENERATE" not in host.name.upper() %}
+{{ host.name.ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  A      {{ host.ip }}
+        {% endif %}
+        {% if "$GENERATE" in host.name.upper() %}
+{{ host.name.ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  A      {{ host.ip }}
+        {% endif %}
+      {% else %}
+        {% for ip in host.ip %}
+{{ host.name.ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  A      {{ ip }}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+    {% if host.ipv6 is defined %}
+      {% if host.ipv6 is string %}
+{{ host.name.ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  AAAA   {{ host.ipv6 }}
+      {% else %}
+        {% for ip6 in host.ipv6 %}
+{{ host.name.ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  AAAA   {{ ip6 }}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+    {% if host.aliases is defined %}
+      {% for alias in host.aliases %}
+        {% if "$GENERATE" not in host.name.upper() %}
+{{ (alias.name | default(alias)).ljust(20) }}{{ (host.ttl | string).rjust(6) if host.ttl is defined else ''.ljust(6) }} IN  {{ alias.type | default('cname')|upper}}  {{ host.name }}
+        {% endif %}
+        {% if "$GENERATE" in host.name.upper() %}
+{{ alias.ljust(20) }}            IN  CNAME  {{ host.name.rsplit(None, 1)[1] }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if host.sshfp is defined %}
+      {% for sshfp in host.sshfp %}
+{{ host.name.ljust(20) }}        IN SSHFP {{ sshfp }}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% else %}
+{{ ansible_hostname.ljust(26) }} IN A     {{ ansible_default_ipv4.address }}
+; --------------------------------------------------------------------------------------
+{% endif %}
+; services
+{% for service in _zone_data['services'] %}
+{{ service.name.ljust(20) }}{{ (service.ttl | string).rjust(6) if service.ttl is defined else ''.ljust(6) }} IN  SRV    {{ service.priority | default('0') }} {{ service.weight | default('0') }} {{ service.port }} {{ service.target }}
+{% endfor %}
+; --------------------------------------------------------------------------------------
+; text
+{% for text in _zone_data['text'] %}
+  {% if text.text is string %}
+{{ text.name.ljust(20) }}       IN  TXT    "{{ text.text }}"
+  {% else %}
+    {% for entry in text.text %}
+{{ text.name.ljust(20) }}       IN  TXT    "{{ entry }}"
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+; --------------------------------------------------------------------------------------
+; caa
+{% for caa in _zone_data['caa'] %}
+  {% if caa.text is string %}
+{{ caa.name.ljust(20) }}        IN  CAA    {{ caa.text }}
+  {% else %}
+    {% for entry in caa.text %}
+{{ caa.name.ljust(20) }}        IN  CAA    {{ entry }}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+; --------------------------------------------------------------------------------------
+; naptr
+{% for naptr in _zone_data['naptr'] %}
+{{ naptr.name.ljust(20) }}      IN  NAPTR  {{ naptr.order|default('100') }} {{ naptr.pref|default('10') }} "{{ naptr.flags }}" "{{ naptr.service }}" "{{ naptr.regex }}" {{ naptr.replacement }}
+{% endfor %}
+; --------------------------------------------------------------------------------------

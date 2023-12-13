@@ -1,0 +1,107 @@
+---
+
+# List of zones for which this name server is authoritative
+bind_zones: []
+
+# List of acls.
+bind_acls: []
+
+# Key binding for secondary servers
+bind_dns_keys: []
+#  - name: primary_key
+#    algorithm: hmac-sha256
+#    secret: "azertyAZERTY123456"
+
+# List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# to listen on all interfaces
+bind_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+  ipv6:
+    - port: 53
+      addresses:
+        - "::1"
+
+# bind_listen:
+# # List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# # to listen on all interfaces
+#   ipv4:
+#     - "127.0.0.1"
+#   # The list of ports to listen on for IPv4 addresses
+#   ipv4_port:
+#     - 53
+#   # List of IPv6 address of the network interface(s) to listen on.
+#   ipv6:
+#     - "::1"
+#   # The list of ports to listen on for IPv6 addresses
+#   ipv6_port:
+#     - 53
+
+# List of hosts that are allowed to query this DNS server.
+bind_allow_query:
+  - "localhost"
+
+# A key-value list mapping server-IPs to TSIG keys for signing requests
+bind_key_mapping: {}
+
+# Determines whether recursion should be allowed. Typically, an authoritative
+# name server should have recursion turned OFF.
+bind_recursion: false
+bind_allow_recursion:
+  - "any"
+
+# Allows BIND to be set up as a caching name server
+bind_forward_only: false
+
+# List of name servers to forward DNS requests to.
+bind_forwarders: []
+
+# DNS round robin order (random or cyclic)
+bind_rrset_order: "random"
+
+# statistics channels configuration
+bind_statistics:
+  channels: false
+  port: 8053
+  host: 127.0.0.1
+  allow:
+    - "127.0.0.1"
+
+# DNSSEC configuration
+# NOTE In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
+bind_dnssec:
+  enable: true
+# dnssec-validation ( yes | no | auto );
+  validation: true
+
+bind_extra_include_files: []
+
+# SOA information
+bind_zone_soa:
+  ttl: "1W"
+  time_to_refresh: "1D"
+  time_to_retry: "1H"
+  time_to_expire: "1W"
+  minimum_ttl: "1D"
+
+bind_query_log:
+  enable: true
+
+# File mode for primary zone files (needs to be something like 0660 for dynamic updates)
+bind_zone_file_mode: "0640"
+
+# DNS64 support
+bind_dns64: false
+bind_dns64_clients:
+  - "any"
+
+# Set Python version
+# bind_python_version: "{{ bind_default_python_version }}"
+
+# Log file
+bind_logging: {}
+# bind_log: "data/named.run"
+
+...

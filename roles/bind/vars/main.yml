@@ -1,0 +1,141 @@
+---
+
+bind_requirements:
+  - iproute2
+
+bind_packages:
+  - python3-netaddr
+  - python3-dnspython
+  - bind9
+  - bind9utils
+
+bind_service: bind9
+
+# Main config file
+bind_config: /etc/bind/named.conf
+
+# reverse_hashes_temp: []
+
+# Localhost zone
+bind_default_zone_files:
+  - /etc/bind/named.conf.default-zones
+
+# Directory with run-time stuff
+bind_dir: /var/cache/bind
+bind_conf_dir: "/etc/bind"
+auth_file: "auth_transfer.conf"
+bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
+
+bind_owner: root
+bind_group: bind
+
+bind_bindkeys_file: "/etc/named.iscdlv.key"
+bind_pid_file: "/run/named/named.pid"
+bind_session_keyfile: "/run/named/session.key"
+
+# Custom location for zone files
+bind_zone_dir: "{{ bind_dir }}"
+bind_secondary_dir: "{{ bind_dir }}/secondary"
+
+bind_defaults_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+  ipv6:
+    - port: 53
+      addresses:
+        - "::1"
+
+# statistics channels configuration
+bind_defaults_statistics:
+  channels: false
+  port: 8053
+  host: 127.0.0.1
+  allow:
+    - "127.0.0.1"
+
+# DNSSEC configuration
+bind_defaults_dnssec:
+  enable: true
+  validation: true
+
+# SOA information
+bind_defaults_zone_soa:
+  ttl: "1W"
+  time_to_refresh: "1D"
+  time_to_retry: "1H"
+  time_to_expire: "1W"
+  minimum_ttl: "1D"
+
+bind_defaults_query_log:
+  enable: true
+
+bind_defaults_logging:
+  enable: true
+  channels:
+  - channel: general
+    file: "data/general.log"
+    versions: 3
+    size: 10M
+    print_time: true           # true | false
+    print_category: true
+    print_severity: true
+    severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+  - channel: query
+    file: "data/query.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: dnssec
+    file: "data/dnssec.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: notify
+    file: "data/notify.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: transfers
+    file: "data/transfers.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: slog
+    syslog: security        # kern | user | mail | daemon | auth | syslog | lpr |
+                            # news | uucp | cron | authpriv | ftp |
+                            # local0 | local1 | local2 | local3 |
+                            # local4 | local5 | local6 | local7
+    # file: "data/transfers.log"
+    #versions: 5
+    #size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  categories:
+    "xfer-out":
+      - transfers
+      - slog
+    "xfer-in":
+      - transfers
+      - slog
+    notify:
+      - notify
+    "lame-servers":
+      - general
+    config:
+      - general
+    default:
+      - general
+    security:
+      - general
+      - slog
+    dnssec:
+      - dnssec
+    queries:
+      - query
+

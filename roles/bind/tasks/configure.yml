@@ -1,0 +1,62 @@
+---
+
+- name: create runtime directories
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: 0770
+  loop:
+    - "{{ bind_dir }}/dynamic"
+    - "{{ bind_dir }}/data"
+    - "{{ bind_zone_dir }}"
+  tags:
+    - bind
+
+- name: create directory for cached secondary zones
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: "{{ bind_secondary_dir }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: 0770
+  tags:
+    - bind
+
+- name: create extra config for authenticated XFR request
+  become: true
+  ansible.builtin.template:
+    src: etc/auth_transfer.j2
+    dest: "{{ bind_conf_dir }}/{{ auth_file }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: 0640
+  when:
+    - bind_dns_keys is defined
+    - bind_dns_keys | length > 0
+  notify:
+    - reload bind
+  tags:
+    - bind
+
+# TODO
+# zones
+
+- name: create main bind config file
+  become: true
+  ansible.builtin.template:
+    src: etc/bind.conf.j2
+    dest: "{{ bind_config }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: 0640
+    backup: true
+    # validate: 'named-checkconf %s'
+  notify:
+    - validate configuration
+    - reload bind
+
+...

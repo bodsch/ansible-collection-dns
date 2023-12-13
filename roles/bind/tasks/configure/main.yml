@@ -1,0 +1,83 @@
+---
+
+- name: merge bind configuration between defaults and custom
+  ansible.builtin.set_fact:
+    bind_listen: "{{ bind_defaults_listen | combine(bind_listen, recursive=True) }}"
+    bind_statistics: "{{ bind_defaults_statistics | combine(bind_statistics, recursive=True) }}"
+    bind_logging: "{{ bind_defaults_logging | combine(bind_logging, recursive=True) }}"
+    bind_zone_soa: "{{ bind_defaults_zone_soa | combine(bind_zone_soa, recursive=True) }}"
+
+#     bind_addresses: "{{ bind_defaults_addresses | union(bind_addresses) }}"
+#     bind_alias: "{{ bind_defaults_alias | combine(bind_alias, recursive=True) }}"
+#     bind_dhcp: "{{ bind_defaults_dhcp | combine(bind_dhcp, recursive=True) }}"
+#     bind_dnssec: "{{ bind_defaults_dnssec | combine(bind_dnssec, recursive=True) }}"
+#     bind_domain: "{{ bind_defaults_domain | combine(bind_domain, recursive=True) }}"
+#     bind_ipset: "{{ bind_defaults_ipset | combine(bind_ipset, recursive=True) }}"
+#     bind_local: "{{ bind_defaults_local | combine(bind_local, recursive=True) }}"
+#     bind_mx: "{{ bind_defaults_mx | combine(bind_mx, recursive=True) }}"
+#     bind_nftset: "{{ bind_defaults_nftset | combine(bind_nftset, recursive=True) }}"
+#     bind_pxe: "{{ bind_defaults_pxe | combine(bind_pxe, recursive=True) }}"
+#     bind_server: "{{ bind_defaults_server | combine(bind_server, recursive=True) }}"
+#     bind_tftp: "{{ bind_defaults_tftp | combine(bind_tftp, recursive=True) }}"
+#     bind_records: "{{ bind_defaults_records | combine(bind_records, recursive=True) }}"
+
+- name: create runtime directories
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: 0770
+  loop:
+    - "{{ bind_dir }}/dynamic"
+    - "{{ bind_dir }}/data"
+    - "{{ bind_zone_dir }}"
+  tags:
+    - bind
+
+- name: create directory for cached secondary zones
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: "{{ bind_secondary_dir }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: 0770
+  tags:
+    - bind
+
+- name: create extra config for authenticated XFR request
+  become: true
+  ansible.builtin.template:
+    src: etc/auth_transfer.j2
+    dest: "{{ bind_conf_dir }}/{{ auth_file }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: 0640
+  when:
+    - bind_dns_keys is defined
+    - bind_dns_keys | length > 0
+  notify:
+    - reload bind
+  tags:
+    - bind
+
+- name: configure
+  ansible.builtin.include_tasks: configure/zones.yml
+
+# - name: create main bind config file {{ bind_config }}
+#   become: true
+#   ansible.builtin.template:
+#     src: etc/named.conf.j2
+#     dest: "{{ bind_config }}"
+#     owner: "{{ bind_owner }}"
+#     group: "{{ bind_group }}"
+#     mode: 0640
+#     backup: true
+#     validate: 'named-checkconf %s'
+#   notify:
+#     # - validate configuration
+#     - reload bind
+
+...
