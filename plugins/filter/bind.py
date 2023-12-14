@@ -41,7 +41,8 @@ class FilterModule(object):
             # display.v(f"  = {result}")
 
         elif not _type and _primaries:
-            primaries_in_all_addresses = len([x for x in all_addresses if x in _primaries]) > 0
+            primaries_in_all_addresses = len(
+                [x for x in all_addresses if x in _primaries]) > 0
             if primaries_in_all_addresses:
                 result = "primary"
             else:
@@ -59,10 +60,12 @@ class FilterModule(object):
     def zone_serial(self, data, zone_hash, exists_hashes, network):
         """
         """
-        display.v(f"zone_serial({data}, {zone_hash}, {exists_hashes}, {network})")
+        display.v(
+            f"zone_serial({data}, {zone_hash}, {exists_hashes}, {network})")
 
         result = dict(
-            hash = zone_hash
+            hash=zone_hash,
+            serial=int(time.time())
         )
 
         if isinstance(exists_hashes, list) and len(exists_hashes) > 0:
@@ -82,9 +85,7 @@ class FilterModule(object):
                         display.v(f"   - {_hash} | {_serial}")
 
                     if _serial:
-                        result.update({"serial": _serial })
-                    else:
-                        result.update({"serial": int(time.time()) })
+                        result.update({"serial": _serial})
 
         display.v(f"  = {result}")
 
@@ -142,9 +143,11 @@ class FilterModule(object):
             naptr=data.get("naptr", []),
         )
 
-        # display.v(f"  = {result}")
+        result_hash = self.__hash(result)
 
-        return result
+        display.v(f"  = {result} - {result_hash}")
+
+        return (result, result_hash)
 
     def reverse_zone_data(self, data, soa, ansible_hostname):
         """
@@ -214,13 +217,10 @@ class FilterModule(object):
             revip=reverse_ip,
         )
 
-        result_str = str(result)
-        _bytes = result_str.encode('utf-8')
-
-        result_hash = hashlib.sha256(_bytes).hexdigest()
+        result_hash = self.__hash(result)
 
         display.v(f"  = {result} - {result_hash}")
-        return result, result_hash
+        return (result, result_hash)
 
     def __append(self, data, domain=None):
         """
@@ -255,12 +255,22 @@ class FilterModule(object):
 
         return data
 
-
     def __reverse_dns(self, data):
         """
         """
         _network = netaddr.IPNetwork(str(data))
+        _prefix = _network.prefixlen
         _ipaddress = netaddr.IPAddress(_network)
         reverse_ip = _ipaddress.reverse_dns
 
+        reverse_ip = reverse_ip[-(9 + _prefix // 2):]
+
         return reverse_ip
+
+    def __hash(self, data):
+        """
+        """
+        result_str = str(data)
+        _bytes = result_str.encode('utf-8')
+
+        return hashlib.sha256(_bytes).hexdigest()

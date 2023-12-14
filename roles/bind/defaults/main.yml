@@ -86,8 +86,17 @@ bind_zone_soa:
   time_to_expire: "1W"
   minimum_ttl: "1D"
 
-bind_query_log:
+bind_logging:
   enable: true
+  channels:
+  - channel: general
+    file: "data/general.log"
+    versions: 3
+    size: 10M
+    print_time: true           # true | false
+    print_category: true
+    print_severity: true
+    severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
 
 # File mode for primary zone files (needs to be something like 0660 for dynamic updates)
 bind_zone_file_mode: "0640"

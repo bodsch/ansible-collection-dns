@@ -52,7 +52,8 @@ class BindVersion(object):
             #
             # named -v
             # BIND 9.18.19-1~deb12u1-Debian (Extended Support Version) <id:>
-            pattern = re.compile(r"^BIND (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
+            pattern = re.compile(
+                r"^BIND (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
             version = re.search(pattern, out)
             if version:
                 version_full_string = version.group('version')

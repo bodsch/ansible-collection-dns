@@ -1,10 +1,13 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+//
 // {{ ansible_managed }}
+
 {% if bind_key_mapping | length > 0 %}
-{% for primary in bind_key_mapping.keys() %}
+  {% for primary in bind_key_mapping.keys() %}
 server {{ primary }} {
   keys { {{ bind_key_mapping[primary] }}; };
 };
-{% endfor %}
+  {% endfor %}
 
 {% endif %}
 server {{ ansible_default_ipv4.address }} {
