@@ -9,7 +9,7 @@
 - name: configure
   ansible.builtin.include_tasks: configure/main.yml
 
-- name: service
-  ansible.builtin.include_tasks: service.yml
+# - name: service
+#   ansible.builtin.include_tasks: service.yml
 
 ...

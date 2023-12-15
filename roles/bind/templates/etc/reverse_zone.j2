@@ -5,7 +5,8 @@
  #  way the serial will only be updated if there are some content changes.
  #}
 {% set _zone_data, _zone_hash = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
-{% set _zone = {} | bodsch.dns.zone_serial(_zone_hash, reverse_hashes, network=item.1) %}
+{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, reverse_hashes, network=item.1) %}
+
 ; {{ ansible_managed }}
 ; Reverse zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}

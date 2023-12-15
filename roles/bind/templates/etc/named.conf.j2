@@ -164,32 +164,36 @@ logging {
   channel {{ channel.channel }} {
         {% if channel.file is defined%}
     file "{{ channel.file }}";
-        {%endif %}
+        {% endif %}
         {% if channel.syslog is defined%}
     syslog {{ channel.syslog }};
-        {%endif %}
+        {% endif %}
         {% if channel.print_category is defined and
               channel.print_category | bodsch.core.type == "bool" %}
     print-category yes;
-        {%endif %}
+        {% endif %}
         {% if channel.print_severity is defined and
               channel.print_severity | bodsch.core.type == "bool" %}
     print-severity yes;
-        {%endif %}
+        {% endif %}
         {% if channel.print_time is defined and
               channel.print_time | bodsch.core.type == "bool" %}
     print-time {{ channel.print_time | bodsch.core.config_bool(true_as='yes', false_as='no') }};
-        {%endif %}
+        {% endif %}
         {% if channel.severity is defined and
               channel.severity in ["critical","error","warning","notice","info","dynamic"] %}
     severity {{ channel.severity }};
-        {%endif %}
+        {% endif %}
   };
       {% endfor %}
+      {% if bind_logging.categories is defined and
+            bind_logging.categories | bodsch.core.type == "dict" and
+            bind_logging.categories | count > 0 %}
 
-      {% for categories, values in bind_logging.categories.items() %}
+        {% for categories, values in bind_logging.categories.items() %}
   category {{ categories }} { {{ values | join('; ') }}; };
-      {% endfor %}
+        {% endfor %}
+      {% endif %}
 };
     {% endif %}
   {% endif %}

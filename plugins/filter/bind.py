@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.utils.display import Display
+import json
 import netaddr
 import hashlib
 import time
@@ -19,7 +20,7 @@ class FilterModule(object):
         return {
             'zone_type': self.zone_type,
             'zone_serial': self.zone_serial,
-            'zone_data': self.zone_data,
+            'forward_zone_data': self.forward_zone_data,
             'reverse_zone_data': self.reverse_zone_data,
         }
 
@@ -57,44 +58,69 @@ class FilterModule(object):
 
         return result
 
-    def zone_serial(self, data, zone_hash, exists_hashes, network):
+    def zone_serial(self, domain, zone_hash, exists_hashes, network):
         """
+            define serial for zone data or take existing serial when hash are equal
+
+            input:
+                domain:
+                    - 'acme-inc.com'
+                zone_hash:
+                    - '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d'
+                exists_hashes:
+                    - '{
+                         'failed': False, 'changed': False,
+                         'hash': [
+                           {'name': 'example.com', 'hash': '; Hash: 8d591afa6aa30ca0ea7b0293a2468b57b81f591681cd932a7e7a42de5a2a0004 1702628637'},
+                           {'name': 'acme-inc.com', 'hash': '; Hash: 79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d 1702628637'}
+                          ]
+                        }'
+                network:
+                    - 'acme-inc.com'
         """
-        display.v(
-            f"zone_serial({data}, {zone_hash}, {exists_hashes}, {network})")
+        display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
 
         result = dict(
             hash=zone_hash,
             serial=int(time.time())
         )
 
-        if isinstance(exists_hashes, list) and len(exists_hashes) > 0:
-            for r in exists_hashes:
-                display.v(f" - {r}")
-                _network = r.get("network")
+        # display.v(f" -> {exists_hashes} {type(exists_hashes)}")
 
-                if _network == network:
-                    _hash = r.get("hash", None)
-                    _serial = None
+        if isinstance(exists_hashes, str):
+            exists_hashes = json.loads(exists_hashes)
 
-                    display.v(f"   - {_hash}")
+        # display.v(f" -> {exists_hashes} {type(exists_hashes)}")
+        hashes = exists_hashes.get("hash", [])
 
-                    if _hash:
-                        # split string: '; Hash: 2b7871f417f5034fb83486b0147ef663f9b72893bfdd7eb754895cbfe4feca95 1702451711'
-                        _, _, _hash, _serial = _hash.split(" ")
-                        display.v(f"   - {_hash} | {_serial}")
+        domain_data = [x for x in hashes if x.get("name") == domain]
 
-                    if _serial:
-                        result.update({"serial": _serial})
+        # display.v(f" -> {domain_data}")
+
+        if isinstance(domain_data, list) and len(domain_data) > 0:
+            domain_data = domain_data[0]
+
+        domain_hash = domain_data.get("hash", "")
+
+        if domain_hash and len(domain_hash) > 0:
+            # display.v(f"   - split {domain_hash}")
+            # split string: '; Hash: 2b7871f417f5034fb83486b0147ef663f9b72893bfdd7eb754895cbfe4feca95 1702451711'
+            _, _, _present_hash, _serial = domain_hash.split(" ")
+
+            #if zone_hash == _present_hash:
+            # display.v(f"     {_present_hash} with {_serial}")
+
+            if _serial:
+                result.update({"serial": _serial})
 
         display.v(f"  = {result}")
 
         return result
 
-    def zone_data(self, data, soa, ansible_hostname):
+    def forward_zone_data(self, data, soa, ansible_hostname):
         """
         """
-        # display.v(f"zone_data({data}, {soa}, {ansible_hostname})")
+        # display.v(f"forward_zone_data({data}, {soa}, {ansible_hostname})")
 
         domain = data.get("name")
         hostmaster_email = data.get("hostmaster_email", None)
@@ -145,9 +171,14 @@ class FilterModule(object):
 
         result_hash = self.__hash(result)
 
-        display.v(f"  = {result} - {result_hash}")
+        # display.v("forward_zone_data")
+        # display.v(f"  = forward_zone_data: {result}")
+        # display.v(f"  = zone_hash        : {result_hash}")
 
-        return (result, result_hash)
+        return dict(
+            forward_zone_data=result,
+            zone_hash=result_hash
+        )
 
     def reverse_zone_data(self, data, soa, ansible_hostname):
         """

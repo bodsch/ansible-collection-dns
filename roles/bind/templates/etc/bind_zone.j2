@@ -4,8 +4,16 @@
  #  from it, that it can be compared with subsequent task executions. In this
  #  way the serial will only be updated if there are some content changes.
  #}
-{% set _zone_data, _zone_hash = item | bodsch.dns.zone_data(bind_zone_soa, ansible_hostname) %}
-{% set _zone = {} | bodsch.dns.zone_serial(_zone_hash, forward_hashes, network=item.name) %}
+{# set _zone_data, _zone_hash = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_hostname) #}
+{% set _data = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_hostname) %}
+{# ; {{ _data }} #}
+{% set _zone_data = _data.get("forward_zone_data", None) %}
+{#; {{ _zone_data }} #}
+{% set _zone_hash = _data.get("zone_hash", None) %}
+{#; {{ _zone_hash }} #}
+
+{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, forward_hashes, network=item.name) %}
+
 ; {{ ansible_managed }}
 ; Zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}

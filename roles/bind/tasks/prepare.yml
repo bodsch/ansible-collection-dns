@@ -22,6 +22,8 @@
   ansible.builtin.package:
     name: "{{ bind_requirements }}"
     state: present
+  when:
+    - bind_requirements | default([]) | count > 0
 
 - name: get latest system information
   ansible.builtin.setup:

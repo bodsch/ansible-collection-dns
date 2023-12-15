@@ -24,21 +24,6 @@ bind_listen:
       addresses:
         - "::1"
 
-# bind_listen:
-# # List of IPv4 address of the network interface(s) to listen on. Set to "any"
-# # to listen on all interfaces
-#   ipv4:
-#     - "127.0.0.1"
-#   # The list of ports to listen on for IPv4 addresses
-#   ipv4_port:
-#     - 53
-#   # List of IPv6 address of the network interface(s) to listen on.
-#   ipv6:
-#     - "::1"
-#   # The list of ports to listen on for IPv6 addresses
-#   ipv6_port:
-#     - 53
-
 # List of hosts that are allowed to query this DNS server.
 bind_allow_query:
   - "localhost"
@@ -86,17 +71,7 @@ bind_zone_soa:
   time_to_expire: "1W"
   minimum_ttl: "1D"
 
-bind_logging:
-  enable: true
-  channels:
-  - channel: general
-    file: "data/general.log"
-    versions: 3
-    size: 10M
-    print_time: true           # true | false
-    print_category: true
-    print_severity: true
-    severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+bind_logging: {}
 
 # File mode for primary zone files (needs to be something like 0660 for dynamic updates)
 bind_zone_file_mode: "0640"
@@ -105,12 +80,5 @@ bind_zone_file_mode: "0640"
 bind_dns64: false
 bind_dns64_clients:
   - "any"
-
-# Set Python version
-# bind_python_version: "{{ bind_default_python_version }}"
-
-# Log file
-bind_logging: {}
-# bind_log: "data/named.run"
 
 ...

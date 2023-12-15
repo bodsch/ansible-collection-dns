@@ -35,7 +35,34 @@
   register: reverse_hashes_ipv6
   tags: bind
 
+- name: forward_hashes
+  debug:
+    msg: "{{ forward_hashes | default([]) }}"
+
+- name: reverse_hashes
+  debug:
+    msg: "{{ reverse_hashes | default([]) }}"
+
+- name: reverse_hashes_ipv6
+  debug:
+    msg: "{{ reverse_hashes_ipv6 | default([]) }}"
+
 # ---------------------------------------------------------------------------------------------------
+
+# - name: define zone information
+#   ansible.builtin.set_fact:
+#     bind_zone_data: "{{ item | bodsch.dns.zone_data(bind_zone_soa, ansible_hostname) }}"
+#   tags: bind
+#   loop: "{{ bind_zones }}"
+#   loop_control:
+#     label: "{{ item.name }}"
+#   when:
+#     - bind_zones is defined
+#     - bind_zones | count > 0
+#
+# - name: d
+#   debug:
+#     msg: "{{ bind_zone_data | default({}) }}"
 
 - name: Create forward lookup zone file
   become: true

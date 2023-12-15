@@ -1,293 +1,279 @@
 
-# Ansible Role:  `dnsmasq`
+# Ansible Role:  `bind`
 
-Ansible role to install and configure dnsmasq on various linux systems.
-
-[sourcecode](https://thekelleys.org.uk/gitweb/?p=dnsmasq.git;a=summary)
-
-
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-dnsmasq/main.yml?branch=main)][ci]
-[![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-dnsmasq)][issues]
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-dnsmasq)][releases]
-[![Ansible Quality Score](https://img.shields.io/ansible/quality/50067?label=role%20quality)][quality]
-
-[ci]: https://github.com/bodsch/ansible-dnsmasq/actions
-[issues]: https://github.com/bodsch/ansible-dnsmasq/issues?q=is%3Aopen+is%3Aissue
-[releases]: https://github.com/bodsch/ansible-dnsmasq/releases
-[quality]: https://galaxy.ansible.com/bodsch/dnsmasq
+Ansible role to install and configure bind on various linux systems.
 
 
 ## usage
 
 ```yaml
-dnsmasq_systemd:
-  unit:
-    after: []
-    wants: []
-    requires: []
+# List of zones for which this name server is authoritative
+bind_zones: []
 
-dnsmasq_global: {}
-#   port: 53
-#   user: ""
-#   group: ""
-#   filterwin2k: false
-#   resolv_file: ""
-#   strict_order: false
-#   no_hosts: false
-#   no_resolv: false
-#   no_poll: false
-#   domain_needed: false
-#   bogus_priv: false
-#   cache_size: 150
-#   all_servers: false
-#   no_negcache: false
-#   conf_file: ""
-#   conf_dir: ""
+# List of acls.
+bind_acls: []
 
-dnsmasq_interfaces:
-  listen_address: "127.0.0.1"
-  # Define specific interfaces to listen on
-  interfaces: []
-  #  - "{{ ansible_default_ipv4['interface'] }}"
-  #  - eth0
-  #  - eth1
-  # Define any interface to not listen on
-  except_interfaces: []
-  #  - eth1
-  # Defines if DNSMasq only listens on specific interfaces instead of all interfaces
-  bind_only: false
+# Key binding for secondary servers
+bind_dns_keys: []
+#  - name: primary_key
+#    algorithm: hmac-sha256
+#    secret: "azertyAZERTY123456"
 
-dnsmasq_logging:
-  log_queries: false
-  log_facility: /var/log/dnsmasq.log
-  log_dhcp: false
+# List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# to listen on all interfaces
+bind_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+  ipv6:
+    - port: 53
+      addresses:
+        - "::1"
 
-dnsmasq_addresses: []
-# - address: 192.168.202.133
-#   name: node1.test.com
+# List of hosts that are allowed to query this DNS server.
+bind_allow_query:
+  - "localhost"
 
-dnsmasq_alias: {}
+# A key-value list mapping server-IPs to TSIG keys for signing requests
+bind_key_mapping: {}
 
-dnsmasq_dhcp:
-#   enabled: false
-#   dhcp_authoritative: false
-#   dhcp_boot: "pxelinux.0,{{ inventory_hostname }},{{ dnsmasq_domain }}"
-#   dhcp_hosts: []
-#   dhcp_options: []
-#   dhcp_options_tagged: []
-#   dhcp_range: []
+# Determines whether recursion should be allowed. Typically, an authoritative
+# name server should have recursion turned OFF.
+bind_recursion: false
+bind_allow_recursion:
+  - "any"
 
-dnsmasq_dnssec: {}
-#  enabled: false
-#  conf_file: ""
-#  dnssec_check_unsigned: false
+# Allows BIND to be set up as a caching name server
+bind_forward_only: false
 
-dnsmasq_domain:
-  name: example.org
-  custom: []
+# List of name servers to forward DNS requests to.
+bind_forwarders: []
 
-dnsmasq_ipset: {}
+# DNS round robin order (random or cyclic)
+bind_rrset_order: "random"
 
-dnsmasq_local: {}
+# statistics channels configuration
+bind_statistics:
+  channels: false
+  port: 8053
+  host: 127.0.0.1
+  allow:
+    - "127.0.0.1"
 
-dnsmasq_mx: {}
+# DNSSEC configuration
+# NOTE In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
+bind_dnssec:
+  enable: true
+# dnssec-validation ( yes | no | auto );
+  validation: true
 
-dnsmasq_nftset: {}
+bind_extra_include_files: []
 
-dnsmasq_pxe: {}
+# SOA information
+bind_zone_soa:
+  ttl: "1W"
+  time_to_refresh: "1D"
+  time_to_retry: "1H"
+  time_to_expire: "1W"
+  minimum_ttl: "1D"
 
-dnsmasq_server: {}
-#  nameservers: []
-#  forwarders: []
+bind_logging: {}
 
-dnsmasq_tftp: {}
-#   enabled: false
-#   tftp_root: ""
-#   tftp_no_fail: false
-#   tftp_secure: false
-#   tftp_no_blocksize: false
+# File mode for primary zone files (needs to be something like 0660 for dynamic updates)
+bind_zone_file_mode: "0640"
 
-dnsmasq_records:
-  cname: []
-#  - target:
-#    cnames:
-#      - cname
-  ptr: []
-  srv: []
-  txt: []
+# DNS64 support
+bind_dns64: false
+bind_dns64_clients:
+  - "any"
 ```
-### `dnsmasq_systemd`
 
-Adds a possibility to make the service dependent on others.
-
-For example, if binding to a VPN network interface is desired and the VPN must be started beforehand.
+### `bind_listen`
 
 ```yaml
-dnsmasq_systemd:
-  unit:
-    after:
-      - ssh.service
-    wants: []
-    requires: []
+bind_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+        - "{{ ansible_default_ipv4.address }}"
+    - port: 5353
+      addresses:
+        - "127.0.1.1"
+  ipv6:
+    - port: 53
+      addresses:
+        - "{{ ansible_default_ipv4.address }}"
 ```
 
 
-### `dnsmasq_global`
+### `bind_logging`
 
 ```yaml
-dnsmasq_global:
-  port: 53
-  user: ""
-  group: ""
-  filterwin2k: false
-  resolv_file: ""
-  strict_order: false
-  no_hosts: false
-  no_resolv: false
-  no_poll: false
-  domain_needed: false
-  bogus_priv: false
-  cache_size: 150
-  all_servers: false
-  no_negcache: false
-  conf_file: ""
-  conf_dir: ""
+bind_logging:
+  enable: true
+  channels:
+  - channel: general
+    file: "data/general.log"
+    versions: 3
+    size: 10M
+    print_time: true           # true | false
+    print_category: true
+    print_severity: true
+    severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+  - channel: query
+    file: "data/query.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: dnssec
+    file: "data/dnssec.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: notify
+    file: "data/notify.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: transfers
+    file: "data/transfers.log"
+    versions: 5
+    size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  - channel: slog
+    syslog: security        # kern | user | mail | daemon | auth | syslog | lpr |
+                            # news | uucp | cron | authpriv | ftp |
+                            # local0 | local1 | local2 | local3 |
+                            # local4 | local5 | local6 | local7
+    # file: "data/transfers.log"
+    #versions: 5
+    #size: 10M
+    print_time: ""          # true | false
+    severity: info          #
+  categories:
+    "xfer-out":
+      - transfers
+      - slog
+    "xfer-in":
+      - transfers
+      - slog
+    notify:
+      - notify
+    "lame-servers":
+      - general
+    config:
+      - general
+    default:
+      - general
+    security:
+      - general
+      - slog
+    dnssec:
+      - dnssec
+    queries:
+      - query
 ```
 
-### `dnsmasq_interfaces`
+### `bind_zones`
 
 ```yaml
-dnsmasq_interfaces:
-  listen_address: "127.0.0.1"
-  # Define specific interfaces to listen on
-  interfaces: []
-  #  - "{{ ansible_default_ipv4['interface'] }}"
-  #  - eth0
-  #  - eth1
-  # Define any interface to not listen on
-  except_interfaces: []
-  #  - eth1
-  # Defines if DNSMasq only listens on specific interfaces instead of all interfaces
-  bind_only: false
-```
+bind_zones:
+  - name: 'example.com'
+    primaries:
+      - 10.11.0.4
+    networks:
+      - '192.0.2'
+    ipv6_networks:
+      - '2001:db9::/48'
+    name_servers:
+      - ns1.acme-inc.com.
+      - ns2.acme-inc.com.
+    hostmaster_email: admin
+    hosts:
+      - name: srv001
+        ip: 192.0.2.1
+        ipv6: '2001:db9::1'
+        aliases:
+          - www
+      - name: srv002
+        ip: 192.0.2.2
+        ipv6: '2001:db9::2'
+      - name: mail001
+        ip: 192.0.2.10
+        ipv6: '2001:db9::3'
+    mail_servers:
+      - name: mail001
+        preference: 10
 
-### `dnsmasq_logging`
-
-```yaml
-dnsmasq_logging:
-  log_queries: false
-  log_facility: /var/log/dnsmasq.log
-  log_dhcp: false
-```
-
-### `dnsmasq_address`
-
-```yaml
-dnsmasq_address: []
-# - address: 192.168.202.133
-#   name: node1.test.com
-```
-
-### `dnsmasq_alias`
-
-```yaml
-dnsmasq_alias: {}
-```
-
-### `dnsmasq_dhcp`
-
-```yaml
-dnsmasq_dhcp: {}
-#   enabled: false
-#   dhcp_authoritative: false
-#   dhcp_boot: "pxelinux.0,{{ inventory_hostname }},{{ dnsmasq_domain }}"
-#   dhcp_hosts: []
-#   dhcp_options: []
-#   dhcp_options_tagged: []
-#   dhcp_range: []
-```
-
-### `dnsmasq_dnssec`
-
-```yaml
-dnsmasq_dnssec: {}
-#  enabled: false
-#  conf_file: ""
-#  dnssec_check_unsigned: false
-```
-
-### `dnsmasq_domain`
-
-```yaml
-dnsmasq_domain:
-  name: example.org
-  # Define custom domains per subnet, ip range, etc.
-  custom:
-    - domain: "example.local"
-      network:
-        - 192.168.10.0/24 # Define as range
-```
-
-### `dnsmasq_ipset`
-
-```yaml
-dnsmasq_ipset: {}
-```
-
-### `dnsmasq_local`
-
-```yaml
-dnsmasq_local: {}
-```
-
-### `dnsmasq_mx`
-
-```yaml
-dnsmasq_mx: {}
-```
-
-### `dnsmasq_nftset`
-
-```yaml
-dnsmasq_nftset: {}
-```
-
-### `dnsmasq_pxe`
-
-```yaml
-dnsmasq_pxe: {}
-```
-
-### `dnsmasq_server`
-
-```yaml
-dnsmasq_server: {}
-#  nameservers: []
-#  forwarders: []
-```
-
-### `dnsmasq_tftp`
-
-```yaml
-dnsmasq_tftp: {}
-#   enabled: false
-#   tftp_root: ""
-#   tftp_no_fail: false
-#   tftp_secure: false
-#   tftp_no_blocksize: false
-```
-
-### `dnsmasq_records`
-
-```yaml
-dnsmasq_records:
-  cname: []
-#  - target:
-#    cnames:
-#      - cname
-  ptr: []
-  srv: []
-  txt: []
+  - name: 'acme-inc.com'
+    primaries:
+      - 10.11.0.4
+    networks:
+      - '10.11'
+    ipv6_networks:
+      - '2001:db8::/48'
+    name_servers:
+      - ns1
+      - ns2
+    hosts:
+      - name: ns1
+        ip: 10.11.0.4
+      - name: ns2
+        ip: 10.11.0.5
+      - name: srv001
+        ip: 10.11.1.1
+        ipv6: 2001:db8::1
+        aliases:
+          - www
+      - name: srv002
+        ip: 10.11.1.2
+        ipv6: 2001:db8::2
+        aliases:
+          - mysql
+      - name: mail001
+        ip: 10.11.2.1
+        ipv6: 2001:db8::d:1
+        aliases:
+          - smtp
+          - mail-in
+      - name: mail002
+        ip: 10.11.2.2
+        ipv6: 2001:db8::d:2
+      - name: mail003
+        ip: 10.11.2.3
+        ipv6: 2001:db8::d:3
+        aliases:
+          - imap
+          - mail-out
+      - name: srv010
+        ip: 10.11.0.10
+      - name: srv011
+        ip: 10.11.0.11
+      - name: srv012
+        ip: 10.11.0.12
+    mail_servers:
+      - name: mail001
+        preference: 10
+      - name: mail002
+        preference: 20
+    services:
+      - name: _ldap._tcp
+        weight: 100
+        port: 88
+        target: srv010
+    text:
+      - name: _kerberos
+        text: KERBEROS.ACME-INC.COM
+      - name: '@'
+        text:
+          - 'some text'
+          - 'more text'
 ```
 
 
@@ -296,10 +282,6 @@ dnsmasq_records:
 Please read [Contribution](CONTRIBUTING.md)
 
 ## Development,  Branches (Git Tags)
-
-The `master` Branch is my *Working Horse* includes the "latest, hot shit" and can be complete broken!
-
-If you want to use something stable, please use a [Tagged Version](https://github.com/bodsch/ansible-dnsmasq/tags)!
 
 
 ## Author

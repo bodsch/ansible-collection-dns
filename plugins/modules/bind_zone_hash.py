@@ -55,14 +55,14 @@ class BindZoneHash(object):
                 _hash.append(
                     dict(
                         name=str(name),
-                        hash=str(line)
+                        hash=line
                     )
                 )
             else:
                 _hash.append(
                     dict(
                         name=str(name),
-                        hash=str(line),
+                        hash=line,
                         network=str(network)
                     )
                 )
