@@ -1,0 +1,14 @@
+# Configuration for /etc/init.d/kres-cache-gc
+
+# Time interval in milliseconds how often to run GC.
+garbage_interval={{ knot_resolver_cache.garbage_interval }}
+
+command_user="{{ knot_resolver_owner }}:{{ knot_resolver_group }}"
+
+# Path to directory with knot resolver's cache.
+# If not specified, it tries to get it from /etc/conf.d/kresd and if
+# it's not even there, defaults to /var/cache/knot-resolver.
+cachedir={{ knot_resolver_cache.directory }}
+
+# Additional arguments to pass to kres-cache-gc.
+#command_args=

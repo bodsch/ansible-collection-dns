@@ -1,0 +1,32 @@
+---
+
+- name: create knot resolver configuration
+  ansible.builtin.template:
+    src: kresd.conf.j2
+    dest: /etc/knot-resolver/kresd.conf
+    mode: 0o664
+    backup: true
+  notify:
+    - restart kresd
+
+- name: openrc
+  when:
+    - ansible_service_mgr | lower == 'openrc'
+  block:
+    - name: create kres-cache-gc config
+      ansible.builtin.template:
+        src: init/openrc/conf.d/kres-cache-gc.j2
+        dest: /etc/conf.d/kres-cache-gc
+        mode: 0640
+      notify:
+        - restart kres-cache-gc
+
+    - name: create kresd config
+      ansible.builtin.template:
+        src: init/openrc/conf.d/kresd.j2
+        dest: /etc/conf.d/kresd
+        mode: 0640
+      notify:
+        - restart kresd
+
+...

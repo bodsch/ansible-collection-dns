@@ -1,0 +1,161 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+-- {{ ansible_managed }}
+--
+-- Refer to manual: https://knot-resolver.readthedocs.org/en/stable/
+
+{% if knot_resolver_log.level is defined and
+      knot_resolver_log.level | length > 0 %}
+log_level('{{ knot_resolver_log.level }}')
+{% endif %}
+{% if knot_resolver_log.target is defined and
+      knot_resolver_log.target | length > 0 %}
+log_target('{{ knot_resolver_log.target }}')
+{% endif %}
+
+user(
+  '{{ knot_resolver_owner }}',
+  '{{ knot_resolver_group }}'
+)
+
+-- trust_anchors.add_file('/var/lib/knot-resolver/root.key')
+-- trust_anchors.hold_down_time = 3 * day
+trust_anchors.refresh_time = 10 * sec
+trust_anchors.keep_removed = 2
+
+{% if knot_resolver_support_ipv6 %}
+net.ipv6 = true
+{% else %}
+net.ipv6 = false
+{% endif %}
+
+{% if knot_resolver_listener is defined and
+      knot_resolver_listener | count > 0 %}
+  {% for listener in knot_resolver_listener %}
+net.listen({{ listener | bodsch.dns.resolver_listener }})
+  {% endfor %}
+{% endif %}
+
+{%- if knot_resolver_support_ipv6 %}
+net.listen('::1', 53, { kind = 'dns', freebind = true })
+net.listen('::1', 853, { kind = 'tls', freebind = true })
+{% endif %}
+
+{%- if knot_resolver_service_ip4 is defined and
+    knot_resolver_service_ip4 | length > 0 %}
+net.listen('{{ knot_resolver_service_ip4 }}', 53, { kind = 'dns' })
+net.listen('{{ knot_resolver_service_ip4 }}', 853, { kind = 'tls' })
+{% endif %}
+
+-- Load useful modules
+modules = {
+  'stats',                  -- Track internal statistics
+  'predict',                -- Prefetch expiring/frequent records
+  'cache',
+  'serve_stale < cache',
+  'workarounds < iterate',
+  'hints > iterate',        -- Load /etc/hosts and allow custom root hints
+}
+
+-- module configuration
+
+-- - stats
+
+-- - http
+{% if knot_resolver_prometheus.enabled %}
+modules.load('http')
+-- Set Prometheus namespace
+http.prometheus.namespace = '{{ knot_resolver_prometheus.namespace }}'
+http.config()
+{% endif %}
+
+-- - predict
+--   Prefetch learning
+predict.config({
+  window = {{ knot_resolver_predict.window }},        -- 90 minutes sampling window
+  period = {{ knot_resolver_predict.period }}*(60/15) -- track last 48 hours
+})
+
+-- - cache config
+cache.open( {{ knot_resolver_cache.size }} * MB, 'lmdb://{{ knot_resolver_cache.directory }}')
+{% if knot_resolver_cache.min_ttl is defined %}
+cache.min_ttl({{ knot_resolver_cache.min_ttl | int }})
+{% endif %}
+{% if knot_resolver_cache.max_ttl is defined %}
+cache.max_ttl({{ knot_resolver_cache.max_ttl | int }})
+{% endif %}
+
+{% if knot_resolver_log.level == "debug" %}
+policy.add(
+  policy.all(
+    policy.DEBUG_ALWAYS
+  )
+)
+{% endif %}
+
+{% if knot_resolver_views is defined and
+    knot_resolver_views | length > 0 %}
+modules.load('view')
+  {% for view in knot_resolver_views %}
+    {% if view.pass  is defined and view.pass | count > 0%}
+      {% for k,v in view.items() %}
+        {% for ip in v %}
+view:addr('{{ ip }}', policy.all(policy.PASS))
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+    {% if view.drop  is defined and view.drop | count > 0%}
+      {% for k,v in view.items() %}
+        {% for ip in v %}
+view:addr('{{ ip }}', policy.all(policy.DROP))
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+-- policy.add(
+--   policy.suffix(
+--     policy.REQTRACE, policy.todnames({'.'})
+--   )
+-- )
+
+{% if knot_resolver_internal_domain is defined and
+    knot_resolver_internal_domain | length > 0 %}
+  {# https://knot-resolver.readthedocs.io/en/stable/modules-policy.html#replacing-part-of-the-dns-tree #}
+-- define list of internal-only domains
+-- forward only queries for names under domain example.com to a single IP address
+  {% for domain in knot_resolver_internal_domain %}
+
+internal_domains = policy.todnames({ '{{ domain.domains | join("', '") }}' })
+
+policy.add(
+  policy.suffix(
+    policy.FLAGS(
+      {'NO_CACHE', 'NO_EDNS'}
+    ),
+    internal_domains
+  )
+)
+policy.add(
+  policy.suffix(
+    {% if domain.policy.forward is defined %}
+    policy.FORWARD(
+      '{{ domain.policy.forward | default('127.0.1.1@53') }}'
+    ),
+    {% elif domain.policy.stub is defined %}
+    policy.STUB(
+      '{{ domain.policy.stub | default('127.0.1.1@53') }}'
+    ),
+    {% endif %}
+    internal_domains
+  )
+)
+  {% endfor %}
+{% endif %}
+
+-- Block Firefox DoH
+policy.add(
+  policy.suffix(
+    policy.DENY, { todname('use-application-dns.net') }
+  )
+)

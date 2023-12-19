@@ -1,0 +1,31 @@
+---
+
+knot_resolver_owner: knot-resolver
+knot_resolver_group: knot-resolver
+
+knot_resolver_defaults_cache:
+  directory: /var/cache/knot-resolver
+  min_ttl: 120
+  max_ttl: 3600
+  size: 200
+  garbage_interval: 1000
+
+knot_resolver_defaults_log:
+  level: '' # info
+  target: syslog
+
+knot_resolver_defaults_prometheus:
+  enabled: true
+  namespace: 'resolver_'
+
+knot_resolver_defaults_predict:
+  enabled: true
+  window: 90
+  period: 48
+
+knot_resolver_dependencies: []
+
+knot_resolver_packages:
+  - knot-resolver
+
+...

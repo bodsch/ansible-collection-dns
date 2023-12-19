@@ -1,0 +1,9 @@
+---
+
+knot_resolver_dependencies:
+  - iproute
+
+knot_resolver_packages:
+  - knot-resolver
+  - knot-resolver-module-http
+...
