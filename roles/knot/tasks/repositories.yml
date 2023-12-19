@@ -1,0 +1,37 @@
+---
+
+- name: debain based
+  when:
+    - ansible_distribution | lower == 'debian'
+  block:
+    - name: add apt signing key (debian)
+      become: true
+      ansible.builtin.apt_key:
+        id: 8C0A90B7DE9CAC3B4A7BD5798A0EFB02C84B1E9B
+        url: https://deb.knot-dns.cz/apt.gpg
+
+    - name: install official knot repositories for debian based
+      ansible.builtin.template:
+        src: apt_knot.list.j2
+        dest: /etc/apt/sources.list.d/knot.list
+        mode: 0644
+        owner: root
+        group: root
+
+- name: ubuntu
+  when:
+    - ansible_distribution | lower == 'ubuntu'
+  block:
+    - name: add knot ppa for ubuntu {{ ansible_distribution_release }}
+      ansible.builtin.apt_repository:
+        repo: ppa:cz.nic-labs/knot-dns-latest
+        codename: "{{ ansible_distribution_release }}"
+        state: present
+        update_cache: true
+        validate_certs: false
+
+- name: update package cache
+  ansible.builtin.package:
+    update_cache: true
+
+...

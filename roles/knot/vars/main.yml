@@ -1,0 +1,177 @@
+---
+
+knot_dependencies: []
+
+knot_rundir: /run/knot
+knot_user: knot
+knot_group: knot
+
+knot_database: /var/lib/knot
+
+knot_knotc: /usr/sbin/knotc
+
+knot_defaults_config:
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#server-section
+  server:
+    rundir: "{{ knot_rundir }}"
+    user: "{{ knot_user }}:{{ knot_group }}"
+    listen:
+      - '127.0.0.1@53'
+  #   identity: [STR]
+  #   version: [STR]
+  #   nsid: [STR|HEXSTR]
+  #   pidfile: STR
+  #   udp-workers: INT
+  #   tcp-workers: INT
+  #   background-workers: INT
+  #   async-start: BOOL
+  #   tcp-idle-timeout: TIME
+  #   tcp-io-timeout: INT
+  #   tcp-remote-io-timeout: INT
+  #   tcp-max-clients: INT
+  #   tcp-reuseport: BOOL
+  #   socket-affinity: BOOL
+  #   udp-max-payload: SIZE
+  #   udp-max-payload-ipv4: SIZE
+  #   udp-max-payload-ipv6: SIZE
+  #   edns-client-subnet: BOOL
+  #   answer-rotation: BOOL
+  #   listen-xdp: STR[@INT] | ADDR[@INT] ...
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#logging-section
+  log:
+    syslog:
+      any: info
+  #    server: critical | error | warning | notice | info | debug
+  #    control: critical | error | warning | notice | info | debug
+  #    zone: critical | error | warning | notice | info | debug
+  #    any: critical | error | warning | notice | info | debug
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#database-section
+  database:
+    storage: "{{ knot_database }}"
+  #  journal-db: STR
+  #  journal-db-mode: robust | asynchronous
+  #  journal-db-max-size: SIZE
+  #  kasp-db: STR
+  #  kasp-db-max-size: SIZE
+  #  timer-db: STR
+  #  timer-db-max-size: SIZE
+  #  catalog-db: str
+  #  catalog-db-max-size: SIZE
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#server-section
+  remote: {}
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#acl-section
+  acl: {}
+  #  STR:
+  #    address: ADDR[/INT] | ADDR-ADDR ...
+  #    key: key_id ...
+  #    remote: remote_id ...
+  #    action: notify | transfer | update ...
+  #    deny: BOOL
+  #    update-type: STR ...
+  #    update-owner: key | zone | name
+  #    update-owner-match: sub-or-equal | equal | sub
+  #    update-owner-name: STR ...
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#template-section
+  template:
+    default:
+      storage: "{{ knot_database }}"
+      file: "%s.zone"
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#zone-section
+  zone: {}
+  # DOMAIN:
+  #   template: template_id
+  #   storage: STR
+  #   file: STR
+  #   master: remote_id ...
+  #   ddns-master: remote_id
+  #   notify: remote_id ...
+  #   acl: acl_id ...
+  #   semantic-checks: BOOL
+  #   zonefile-sync: TIME
+  #   zonefile-load: none | difference | difference-no-serial | whole
+  #   journal-content: none | changes | all
+  #   journal-max-usage: SIZE
+  #   journal-max-depth: INT
+  #   zone-max-size : SIZE
+  #   adjust-threads: INT
+  #   dnssec-signing: BOOL
+  #   dnssec-validation: BOOL
+  #   dnssec-policy: policy_id
+  #   serial-policy: increment | unixtime | dateserial
+  #   refresh-min-interval: TIME
+  #   refresh-max-interval: TIME
+  #   catalog-role: none | interpret
+  #   catalog-template: template_id
+  #   module: STR/STR ...
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#control-section
+  control:
+    listen: /run/knot/knot.sock
+    timeout: 5
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#statistics-section
+  statistics: {}
+  #  timer:
+  #  file:
+  #  append:
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#key-section
+  #  https://gist.github.com/amphineko/615618f8026ddd4faad52c75ea9daeb0
+  key:
+  #   STR:
+  #     hmac-md5 | hmac-sha1 | hmac-sha224 | hmac-sha256 | hmac-sha384 | hmac-sha512
+  #     algorithm: hmac-sha256
+  #     secret:
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#submission-section
+  submission: {}
+  #  STR:
+  #    parent: remote_id ...
+  #    check-interval: TIME
+  #    timeout: TIME
+
+  # https://www.knot-dns.cz/docs/3.0/singlehtml/#policy-section
+  policy: {}
+  # STR:
+  #   keystore: keystore_id
+  #   manual: BOOL
+  #   single-type-signing: BOOL
+  #   algorithm: rsasha1 | rsasha1-nsec3-sha1 | rsasha256 | rsasha512 | ecdsap256sha256 | ecdsap384sha384 | ed25519 | ed448
+  #   ksk-size: SIZE
+  #   zsk-size: SIZE
+  #   ksk-shared: BOOL
+  #   dnskey-ttl: TIME
+  #   zone-max-ttl: TIME
+  #   ksk-lifetime: TIME
+  #   zsk-lifetime: TIME
+  #   propagation-delay: TIME
+  #   rrsig-lifetime: TIME
+  #   rrsig-refresh: TIME
+  #   rrsig-pre-refresh: TIME
+  #   reproducible-signing: BOOL
+  #   nsec3: BOOL
+  #   nsec3-iterations: INT
+  #   nsec3-opt-out: BOOL
+  #   nsec3-salt-length: INT
+  #   nsec3-salt-lifetime: TIME
+  #   signing-threads: INT
+  #   ksk-submission: submission_id
+  #   ds-push: remote_id
+  #   cds-cdnskey-publish: none | delete-dnssec | rollover | always | double-ds
+  #   cds-digest-type: sha256 | sha384
+  #   offline-ksk: BOOL
+  #   unsafe-operation: none | no-check-keyset | no-update-dnskey | no-update-nsec | no-update-expired ...
+
+knot_packages:
+  - knot
+  - knot-dnsutils
+
+knot_python_packages: []
+
+...

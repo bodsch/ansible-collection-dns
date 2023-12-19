@@ -1,0 +1,34 @@
+---
+
+galaxy_info:
+  role_name: knot
+
+  author: Bodo Schulz
+  description: installs, configures knot
+
+  license: Apache
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: ArchLinux
+    - name: Debian
+      versions:
+        # 10
+        - buster
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        # 20.04
+        - focal
+        # 22.04
+        - jammy
+
+  galaxy_tags:
+    - dns
+    - knot
+
+dependencies: []
+
+
+...

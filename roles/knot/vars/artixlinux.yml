@@ -1,0 +1,13 @@
+---
+
+knot_packages:
+  - knot-openrc
+
+knot_dependencies:
+  - python-pip
+
+knot_python_packages:
+  - name: jinja2
+    version: 3.0.1
+
+...
