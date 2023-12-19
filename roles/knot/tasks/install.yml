@@ -1,0 +1,51 @@
+---
+
+- name: installing knot-dns
+  ansible.builtin.package:
+    name: "{{ knot_packages }}"
+    state: present
+
+- name: python support
+  when:
+    - knot_python_packages is defined
+    - knot_python_packages | count > 0
+  block:
+    - name: create pip requirements file
+      bodsch.core.pip_requirements:
+        name: knot
+        requirements: "{{ knot_python_packages }}"
+      register: pip_requirements
+
+    - name: fail if pip not installed
+      ansible.builtin.fail:
+        msg: python pip is not installed
+      when:
+        - not pip_requirements.pip.present
+
+    - name: install knot python packages  # noqa no-handler
+      ansible.builtin.pip:
+        state: present
+        requirements: "{{ pip_requirements.requirements_file }}"
+        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
+      register: pip_install
+      ignore_errors: true
+      no_log: true
+      when:
+        - pip_requirements.requirements_file is defined
+        - pip_requirements.changed
+
+    - name: do facts module to get latest information
+      ansible.builtin.setup:
+
+  rescue:
+    - name: remove python requirements file
+      bodsch.core.pip_requirements:
+        name: knot
+        requirements: "{{ knot_python_packages }}"
+        state: absent
+
+    - name: exit with fail
+      ansible.builtin.fail:
+        msg: Sorry, but a serious error occurred when installing the required Python packages.
+
+...

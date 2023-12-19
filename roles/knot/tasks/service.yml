@@ -1,0 +1,9 @@
+---
+
+- name: start and enable knot service
+  ansible.builtin.service:
+    name: "knot"
+    state: started
+    enabled: true
+
+...

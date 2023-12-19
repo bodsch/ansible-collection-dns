@@ -1,0 +1,186 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if knot_config %}
+  {% set _server = knot_config.server %}
+server:
+  {% if _server.identity is defined and _server.identity | string | length > 0 %}
+  identity: {{ _server.identity }}
+  {% endif %}
+  {% if _server.version is defined and _server.version | string | length > 0 %}
+  version: {{ _server.version }}
+  {% endif %}
+  {% if _server.nsid is defined and _server.nsid | string | length > 0 %}
+  nsid: {{ _server.nsid }}
+  {% endif %}
+  {% if _server.rundir is defined and _server.rundir | string | length > 0 %}
+  rundir: {{ _server.rundir }}
+  {% endif %}
+  user: {{ knot_user }}:{{ knot_group }}
+  {% if _server.pidfile is defined and _server.pidfile | string | length > 0 %}
+  pidfile: {{ _server.pidfile }}
+  {% endif %}
+  {% if _server.udp_workers is defined and _server.udp_workers | string | length > 0 %}
+  udp-workers: {{ _server.udp_workers }}
+  {% endif %}
+  {% if _server.tcp_workers is defined and _server.tcp_workers | string | length > 0 %}
+  tcp-workers: {{ _server.tcp_workers }}
+  {% endif %}
+  {% if _server.background_workers is defined and _server.background_workers | string | length > 0 %}
+  background-workers: {{ _server.background_workers }}
+  {% endif %}
+  {% if _server.async_start is defined and _server.async_start | string | length > 0 %}
+  async-start: {{ _server.async_start | bool | bodsch.core.config_bool(true_as='on', false_as='off') }}
+  {% endif %}
+  {% if _server.tcp_idle_timeout is defined and _server.tcp_idle_timeout | string | length > 0 %}
+  tcp-idle-timeout: {{ _server.tcp_idle_timeout }}
+  {% endif %}
+  {% if _server.tcp_io_timeout is defined and _server.tcp_io_timeout | string | length > 0 %}
+  tcp-io-timeout: {{ _server.tcp_io_timeout }}
+  {% endif %}
+  {% if _server.tcp_remote_io_timeout is defined and _server.tcp_remote_io_timeout | string | length > 0 %}
+  tcp-remote-io-timeout: {{ _server.tcp_remote_io_timeout }}
+  {% endif %}
+  {% if _server.tcp_max_clients is defined and _server.tcp_max_clients | string | length > 0 %}
+  tcp-max-clients: {{ _server.tcp_max_clients }}
+  {% endif %}
+  {% if _server.tcp_reuseport is defined and _server.tcp_reuseport | string | length > 0 %}
+  tcp-reuseport: {{ _server.tcp_reuseport }}
+  {% endif %}
+  {% if _server.socket_affinity is defined and _server.socket_affinity | string | length > 0 %}
+  socket-affinity: {{ _server.socket_affinity }}
+  {% endif %}
+  {% if _server.udp_max_payload is defined and _server.udp_max_payload | string | length > 0 %}
+  udp-max-payload: {{ _server.udp_max_payload }}
+  {% endif %}
+  {% if _server.udp_max_payload_ipv4 is defined and _server.udp_max_payload_ipv4 | string | length > 0 %}
+  udp-max-payload-ipv4: {{ _server.udp_max_payload_ipv4 }}
+  {% endif %}
+  {% if _server.udp_max_payload_ipv6 is defined and _server.udp_max_payload_ipv6 | string | length > 0 %}
+  udp-max-payload-ipv6: {{ _server.udp_max_payload_ipv6 }}
+  {% endif %}
+  {% if _server.edns_client_subnet is defined and _server.edns_client_subnet | string | length > 0 %}
+  edns-client-subnet: {{ _server.edns_client_subnet }}
+  {% endif %}
+  {% if _server.answer_rotation is defined and _server.answer_rotation | string | length > 0 %}
+  answer-rotation: {{ _server.answer_rotation }}
+  {% endif %}
+  {% if _server.listen %}
+    {% for listen in _server.listen %}
+  listen: {{ listen }}
+    {% endfor %}
+  {% endif %}
+  {% if _server.listen_xdp is defined and _server.listen_xdp | string | length > 0 %}
+  listen-xdp: {{ _server.listen_xdp }}
+  {% endif %}
+  {% if knot_config.log %}
+
+log:
+    {% set _valid_target = ["stdout", "stderr", "syslog"] %}
+    {% set _valid_level = ["critical", "error", "warning", "notice", "info", "debug"] %}
+    {% set _valid_keys = ["target", "server", "control", "zone", "any"] %}
+    {% for k, v in knot_config.log.items() %}
+  - target: {{ k }}
+      {% for x, y in v.items() %}
+        {% if y not in _valid_level %}
+          {% set y = "info" %}
+        {% endif %}
+        {% if x in _valid_keys %}
+    {{ x }}: {{ y }}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.key %}
+
+key:
+    {% for k, v in knot_config.key.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.database %}
+
+database:
+    {% for x,y in knot_config.database.items() %}
+  {{ x | replace('_', '-') }}: {{ y }}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.remote %}
+
+remote:
+    {% for k, v in knot_config.remote.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.acl %}
+
+acl:
+    {% for k, v in knot_config.acl.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.template %}
+
+template:
+    {% for k, v in knot_config.template.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.zone %}
+
+zone:
+    {% for k, v in knot_config.zone.items() %}
+  - domain: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.control %}
+
+control:
+    {% for x,y in knot_config.control.items() %}
+  {{ x }}: {{ y }}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.statistics %}
+
+statistics:
+    {% for x,y in knot_config.statistics.items() %}
+  {{ x }}: {{ y }}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.submission %}
+
+submission:
+    {% for k, v in knot_config.submission.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+  {% if knot_config.policy %}
+
+policy:
+    {% for k, v in knot_config.policy.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+
+{% endif %}

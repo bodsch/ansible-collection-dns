@@ -1,0 +1,8 @@
+---
+
+knot_dependencies:
+  - gpg
+  - iproute2
+  - python3-pip
+
+...
