@@ -1,0 +1,52 @@
+---
+
+- name: include OS specific configuration ({{ ansible_distribution }} ({{ ansible_os_family }}) {{ ansible_distribution_major_version }})
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      paths:
+        - "vars"
+      files:
+        # eg. debian-10 / ubuntu-20.04 / centos-8 / oraclelinux-8
+        - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+        # eg. archlinux-systemd / archlinux-openrc
+        - "{{ ansible_distribution | lower }}-{{ ansible_service_mgr | lower }}.yml"
+        # eg. debian / ubuntu / centos / oraclelinux
+        - "{{ ansible_distribution | lower }}.yml"
+        # eg. redhat / debian / archlinux
+        - "{{ ansible_os_family | lower }}.yml"
+        - default.yaml
+      skip: true
+
+- name: update package cache
+  ansible.builtin.package:
+    update_cache: true
+
+- name: install dependency
+  ansible.builtin.package:
+    name: "{{ dnsmasq_requirements }}"
+    state: present
+
+- name: get latest system information
+  ansible.builtin.setup:
+
+- name: merge dnsmasq configuration between defaults and custom
+  ansible.builtin.set_fact:
+    dnsmasq_global: "{{ dnsmasq_defaults_global | combine(dnsmasq_global, recursive=True) }}"
+    dnsmasq_interfaces: "{{ dnsmasq_defaults_interfaces | combine(dnsmasq_interfaces, recursive=True) }}"
+    dnsmasq_logging: "{{ dnsmasq_defaults_logging | combine(dnsmasq_logging, recursive=True) }}"
+    dnsmasq_addresses: "{{ dnsmasq_defaults_addresses | union(dnsmasq_addresses) }}"
+    dnsmasq_alias: "{{ dnsmasq_defaults_alias | combine(dnsmasq_alias, recursive=True) }}"
+    dnsmasq_dhcp: "{{ dnsmasq_defaults_dhcp | combine(dnsmasq_dhcp, recursive=True) }}"
+    dnsmasq_dnssec: "{{ dnsmasq_defaults_dnssec | combine(dnsmasq_dnssec, recursive=True) }}"
+    dnsmasq_domain: "{{ dnsmasq_defaults_domain | combine(dnsmasq_domain, recursive=True) }}"
+    dnsmasq_ipset: "{{ dnsmasq_defaults_ipset | combine(dnsmasq_ipset, recursive=True) }}"
+    dnsmasq_local: "{{ dnsmasq_defaults_local | combine(dnsmasq_local, recursive=True) }}"
+    dnsmasq_mx: "{{ dnsmasq_defaults_mx | combine(dnsmasq_mx, recursive=True) }}"
+    dnsmasq_nftset: "{{ dnsmasq_defaults_nftset | combine(dnsmasq_nftset, recursive=True) }}"
+    dnsmasq_pxe: "{{ dnsmasq_defaults_pxe | combine(dnsmasq_pxe, recursive=True) }}"
+    dnsmasq_server: "{{ dnsmasq_defaults_server | combine(dnsmasq_server, recursive=True) }}"
+    dnsmasq_tftp: "{{ dnsmasq_defaults_tftp | combine(dnsmasq_tftp, recursive=True) }}"
+    dnsmasq_records: "{{ dnsmasq_defaults_records | combine(dnsmasq_records, recursive=True) }}"
+
+...

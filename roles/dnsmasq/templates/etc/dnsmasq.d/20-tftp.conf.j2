@@ -1,0 +1,29 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_tftp.enable is defined and
+      dnsmasq_tftp.enable %}
+enable-tftp
+  {% if dnsmasq_tftp.tftp_root is defined and
+        dnsmasq_tftp.tftp_root | string | length > 0 %}
+tftp-root={{ dnsmasq_tftp.tftp_root }}
+  {% endif %}
+  {% if dnsmasq_tftp.tftp_no_fail is defined and
+        dnsmasq_tftp.tftp_no_fail %}
+# Do not abort if the tftp-root is unavailable
+tftp-no-fail
+  {% endif %}
+  {% if dnsmasq_tftp.tftp_secure is defined and
+        dnsmasq_tftp.tftp_secure %}
+# Make the TFTP server more secure: with this set, only files owned by
+# the user dnsmasq is running as will be send over the net.
+tftp-secure
+  {% endif %}
+  {% if dnsmasq_tftp.tftp_no_blocksize is defined and
+        dnsmasq_tftp.tftp_no_blocksize %}
+# This option stops dnsmasq from negotiating a larger blocksize for TFTP
+# transfers. It will slow things down, but may rescue some broken TFTP
+# clients.
+tftp-no-blocksize
+  {% endif %}
+{% endif %}

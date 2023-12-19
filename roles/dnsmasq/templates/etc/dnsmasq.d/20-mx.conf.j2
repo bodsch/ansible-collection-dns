@@ -1,0 +1,20 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{#
+# Change these lines if you want dnsmasq to serve MX records.
+
+# Return an MX record named "maildomain.com" with target
+# servermachine.com and preference 50
+#mx-host=maildomain.com,servermachine.com,50
+
+# Set the default target for MX records created using the localmx option.
+#mx-target=servermachine.com
+
+# Return an MX record pointing to the mx-target for all local
+# machines.
+#localmx
+
+# Return an MX record pointing to itself for all local machines.
+#selfmx
+#}

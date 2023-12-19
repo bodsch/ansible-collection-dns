@@ -1,0 +1,32 @@
+---
+
+- name: systemctl daemon-reload
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    force: true
+  when:
+    - ansible_service_mgr | lower == "systemd"
+
+- name: validate configuration
+  ansible.builtin.command:
+    cmd: dnsmasq --test
+  register: dnsmasq_test
+  changed_when: dnsmasq_test.rc != 0
+  failed_when: dnsmasq_test.rc != 0
+
+- name: restart service
+  ansible.builtin.service:
+    name: dnsmasq
+    state: restarted
+  listen: restart dnsmasq
+  when: service_default_state | default('started') == 'started'
+
+- name: reload service
+  ansible.builtin.service:
+    name: dnsmasq
+    state: reloaded
+  listen: reload dnsmasq
+  when: service_default_state | default('started') == 'started'
+
+...

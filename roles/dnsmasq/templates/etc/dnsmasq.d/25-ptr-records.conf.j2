@@ -1,0 +1,14 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_records.ptr is defined and
+      dnsmasq_records.ptr | count > 0 %}
+
+{% endif %}
+{#
+# The following line shows how to make dnsmasq serve an arbitrary PTR
+# record. This is useful for DNS-SD. (Note that the
+# domain-name expansion done for SRV records _does_not
+# occur for PTR records.)
+#ptr-record=_http._tcp.dns-sd-services,"New Employee Page._http._tcp.dns-sd-services"
+#}

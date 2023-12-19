@@ -1,0 +1,54 @@
+---
+
+- name: create configuration directory
+  ansible.builtin.file:
+    state: directory
+    path: /etc/dnsmasq.d
+    owner: root
+    group: root
+    mode: 0750
+
+- name: create configuration files
+  ansible.builtin.template:
+    src: etc/dnsmasq.d/{{ item }}.j2
+    dest: "{{ dnsmasq_config_directory }}/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: true
+  loop:
+    - 10-interfaces.conf
+    - 10-logging.conf
+    - 20-address.conf
+    - 20-alias.conf
+    - 20-dhcp.conf
+    - 20-dnssec.conf
+    - 20-domain.conf
+    - 20-ipset.conf
+    - 20-local.conf
+    - 20-mx.conf
+    - 20-nftset.conf
+    - 20-pxe.conf
+    - 20-server.conf
+    - 20-tftp.conf
+    - 25-cname-records.conf
+    - 25-ptr-records.conf
+    - 25-srv-records.conf
+    - 25-txt-records.conf
+  notify:
+    - validate configuration
+    - restart dnsmasq
+
+- name: create dnsmasq.conf
+  ansible.builtin.template:
+    src: etc/dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: true
+  notify:
+    - validate configuration
+    - restart dnsmasq
+
+...
