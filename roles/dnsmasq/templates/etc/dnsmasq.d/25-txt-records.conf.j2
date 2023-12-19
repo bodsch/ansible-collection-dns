@@ -1,0 +1,19 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_records.txt is defined and
+      dnsmasq_records.txt | count > 0 %}
+
+{% endif %}
+{#
+# Change the following lines to enable dnsmasq to serve TXT records.
+# These are used for things like SPF and zeroconf. (Note that the
+# domain-name expansion done for SRV records _does_not
+# occur for TXT records.)
+
+#Example SPF.
+#txt-record=example.com,"v=spf1 a -all"
+
+#Example zeroconf
+#txt-record=_http._tcp.example.com,name=value,paper=A4
+#}

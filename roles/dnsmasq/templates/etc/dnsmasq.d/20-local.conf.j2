@@ -1,0 +1,15 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{#
+# Add local-only domains here, queries in these domains are answered
+# from /etc/hosts or DHCP only.
+#local=/localnet/
+
+# Normally responses which come from /etc/hosts and the DHCP lease
+# file have Time-To-Live set as zero, which conventionally means
+# do not cache further. If you are happy to trade lower load on the
+# server for potentially stale date, you can set a time-to-live (in
+# seconds) here.
+#local-ttl=
+#}

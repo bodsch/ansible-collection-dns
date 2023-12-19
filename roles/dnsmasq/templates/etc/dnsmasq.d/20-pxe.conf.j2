@@ -1,0 +1,26 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{#
+# Do real PXE, rather than just booting a single file, this is an
+# alternative to dhcp-boot.
+#pxe-prompt="What system shall I netboot?"
+# or with timeout before first available action is taken:
+#pxe-prompt="Press F8 for menu.", 60
+
+# Available boot services. for PXE.
+#pxe-service=x86PC, "Boot from local disk"
+
+# Loads <tftp-root>/pxelinux.0 from dnsmasq TFTP server.
+#pxe-service=x86PC, "Install Linux", pxelinux
+
+# Loads <tftp-root>/pxelinux.0 from TFTP server at 1.2.3.4.
+# Beware this fails on old PXE ROMS.
+#pxe-service=x86PC, "Install Linux", pxelinux, 1.2.3.4
+
+# Use bootserver on network, found my multicast or broadcast.
+#pxe-service=x86PC, "Install windows from RIS server", 1
+
+# Use bootserver at a known IP address.
+#pxe-service=x86PC, "Install windows from RIS server", 1, 1.2.3.4
+#}

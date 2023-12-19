@@ -1,0 +1,30 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_logging.log_queries %}
+log-queries
+log-facility={{ dnsmasq_log_facility }}
+{% endif %}
+{% if dnsmasq_logging.log_dhcp %}
+# Log lots of extra information about DHCP transactions.
+log-dhcp
+{% endif %}
+{#
+--log-debug
+    Enable extra logging intended for debugging rather than information.
+--log-async[=<lines>]
+    Enable asynchronous logging and optionally set the limit on the number of lines which will be queued by dnsmasq when writing to the syslog is slow.
+    Dnsmasq can log asynchronously: this allows it to continue functioning without being blocked by syslog,
+    and allows syslog to use dnsmasq for DNS queries without risking deadlock. If the queue of log-lines
+    becomes full, dnsmasq will log the overflow, and the number of messages lost.
+    The default queue length is 5, a sane value would be 5-25, and a maximum limit of 100 is imposed.
+#}
+{#
+# For debugging purposes, log each DNS query as it passes through
+# dnsmasq.
+#log-queries
+
+# Log lots of extra information about DHCP transactions.
+#log-dhcp
+
+#}

@@ -1,0 +1,38 @@
+---
+
+- name: lockup for existing systemd-resolved
+  ansible.builtin.shell: |
+    set -o pipefail && systemctl show --property FragmentPath systemd-resolved | cut -d '=' -f2
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: _systemd_resolved
+  when:
+    - ansible_service_mgr | lower == "systemd"
+
+- name: stop and disable (systemd-resolved) service
+  ansible.builtin.service:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+  when:
+    - not ansible_check_mode
+    - dnsmasq_resolved_disabled | default('true') | bool
+    - ansible_service_mgr | lower == "systemd"
+    - not _systemd_resolved.stdout_lines | count == 0
+  tags:
+    - configuration
+    - dnsmasq
+    - dnsmasq-stop-disable-service
+
+- name: restart dnsmasq if needed
+  ansible.builtin.meta: flush_handlers
+
+- name: ensure dnsmasq is enabled on boot
+  become: true
+  ansible.builtin.service:
+    name: dnsmasq
+    enabled: true
+    state: started
+
+...

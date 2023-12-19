@@ -1,0 +1,19 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+[Unit]
+{% if dnsmasq_systemd.unit.after is defined and
+      dnsmasq_systemd.unit.after | count > 0 %}
+After         =
+After         = network.target {{ dnsmasq_systemd.unit.after | join(' ') }}
+{% endif %}
+{% if dnsmasq_systemd.unit.wants is defined and
+      dnsmasq_systemd.unit.wants | count > 0 %}
+Wants         =
+Wants         = nss-lookup.target {{ dnsmasq_systemd.unit.wants | join(' ') }}
+{% endif %}
+{% if dnsmasq_systemd.unit.requires is defined and
+      dnsmasq_systemd.unit.requires | count > 0 %}
+Requires      =
+Requires      = network.target {{ dnsmasq_systemd.unit.requires | join(' ') }}
+{% endif %}

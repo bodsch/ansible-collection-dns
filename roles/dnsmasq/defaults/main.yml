@@ -1,0 +1,54 @@
+---
+
+dnsmasq_systemd:
+  unit:
+    after: []
+    wants: []
+    requires: []
+
+dnsmasq_global: {}
+
+dnsmasq_interfaces:
+  listen_address: "127.0.0.1"
+  interfaces: []
+  except_interfaces: []
+  bind_only: false
+
+dnsmasq_logging:
+  log_queries: false
+  log_facility: /var/log/dnsmasq.log
+  log_dhcp: false
+
+dnsmasq_addresses: []
+
+dnsmasq_alias: {}
+
+dnsmasq_dhcp: {}
+
+dnsmasq_dnssec: {}
+
+dnsmasq_domain:
+  name: example.org
+  custom: []
+
+dnsmasq_ipset: {}
+
+dnsmasq_local: {}
+
+dnsmasq_mx: {}
+
+dnsmasq_nftset: {}
+
+dnsmasq_pxe: {}
+
+dnsmasq_server: {}
+
+dnsmasq_tftp: {}
+
+dnsmasq_records:
+  cname: []
+  ptr: []
+  srv: []
+  txt: []
+
+...
