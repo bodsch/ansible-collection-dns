@@ -1,0 +1,7 @@
+---
+
+- name: syslog-ng
+  src: https://github.com/bodsch/ansible-syslog-ng
+  version: 1.6.0
+
+...

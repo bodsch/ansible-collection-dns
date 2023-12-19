@@ -1,0 +1,28 @@
+---
+
+- name: restart kresd (systemd)
+  with_sequence: "count={{ knot_resolver_systemd_instances }}"
+  listen: "restart kresd"
+  ansible.builtin.service:
+    name: "kresd@{{ item }}.service"
+    state: restarted
+  when:
+    - ansible_service_mgr | lower == 'systemd'
+
+- name: restart kresd (openrc)
+  listen: "restart kresd"
+  ansible.builtin.service:
+    name: kresd
+    state: restarted
+  when:
+    - ansible_service_mgr | lower == 'openrc'
+
+- name: restart kres-cache-gc (openrc)
+  listen: "restart kres-cache-gc"
+  ansible.builtin.service:
+    name: kres-cache-gc
+    state: restarted
+  when:
+    - ansible_service_mgr | lower == 'openrc'
+
+...

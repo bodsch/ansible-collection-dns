@@ -1,0 +1,10 @@
+---
+
+knot_resolver_owner: knot-resolver
+knot_resolver_group: knot-resolver
+
+knot_resolver_dependencies:
+  - lua51-http
+  - lua51-cqueues
+
+...
