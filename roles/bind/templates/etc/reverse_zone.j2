@@ -1,26 +1,23 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
-{#
- #  First create a dict holding the entire zone information and create a hash
- #  from it, that it can be compared with subsequent task executions. In this
- #  way the serial will only be updated if there are some content changes.
- #}
-{% set _zone_data, _zone_hash = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
-{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, reverse_hashes, network=item.1) %}
-
+{% set _data = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
+{% set _zone_data = _data.get("reverse_zone_data", None) %}
+{% set _zone_hash = _data.get("zone_hash", None) %}
+{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, bind_zone_data, network=item.1) %}
 ; {{ ansible_managed }}
+;
 ; Reverse zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
 
 $TTL {{ _zone_data['ttl'] }}
-$ORIGIN {{ _zone_data['revip'] }}
 
 ; soa
-@ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
-  {{ _zone['serial'] }}
-  {{ _zone_data['refresh'] }}
-  {{ _zone_data['retry'] }}
-  {{ _zone_data['expire'] }}
-  {{ _zone_data['minimum'] }} )
+{{ _zone_data['revip'] }} IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
+                               {{ (_zone['serial'] | string).ljust(20) }} ; serial
+                               {{ (_zone_data['refresh'] | string).ljust(20) }} ; refresh (1 week)
+                               {{ (_zone_data['retry'] | string).ljust(20) }} ; retry (1 day)
+                               {{ (_zone_data['expire'] | string).ljust(20) }} ; expire (4 weeks)
+                               {{ (_zone_data['minimum'] | string).ljust(20) }} ; minimum (1 day)
+                               )
 ; --------------------------------------------------------------------------------------
 ; dns
 {% if _zone_data['soa_name_server'] | length > 0 %}

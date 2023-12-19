@@ -1,71 +1,27 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
-{#
- #  First create a dict holding the entire zone information and create a hash
- #  from it, that it can be compared with subsequent task executions. In this
- #  way the serial will only be updated if there are some content changes.
- #}
-{% set _zone_data, _zone_hash = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
-{% set _zone = {} | bodsch.dns.zone_serial(_zone_hash, reverse_hashes, network=item.1) %}
+{% set _data = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
+{% set _zone_data = _data.get("reverse_zone_data", None) %}
+{% set _zone_hash = _data.get("zone_hash", None) %}
+{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, bind_zone_data, network=item.1) %}
 ; {{ ansible_managed }}
+;
 ; Reverse zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
-{#}
-{% set _zone_data = {} %}
-{% set _ = _zone_data.update({'ttl': bind_zone_ttl}) %}
-{% set _ = _zone_data.update({'domain': item.0.name}) %}
-{% set _ = _zone_data.update({'mname': item.0.name_servers|default([])}) %}
-{% set _ = _zone_data.update({'aname': item.0.other_name_servers|default([])}) %}
-{% if item.0.hostmaster_email is defined %}
-{% set _ = _zone_data.update({'rname': (( item.0.hostmaster_email )) + ('' if (item.0.hostmaster_email is search('\.')) else ('.' + _zone_data['domain']))}) %}
-{% else %}
-{% set _ = _zone_data.update({'rname': 'hostmaster.' + _zone_data['domain']}) %}
-{% endif %}
-{% set _ = _zone_data.update({'refresh': bind_zone_time_to_refresh}) %}
-{% set _ = _zone_data.update({'retry': bind_zone_time_to_retry}) %}
-{% set _ = _zone_data.update({'expire': bind_zone_time_to_expire}) %}
-{% set _ = _zone_data.update({'minimum': bind_zone_minimum_ttl}) %}
-{% set _ = _zone_data.update({'hosts': item.0.hosts|default([]) | selectattr('ipv6','defined') | selectattr('ipv6','string') | selectattr('ipv6', 'search', '^'+item.1|regex_replace(':\/.*$','')) | list }) %}
-{% set _ = _zone_data.update({'revip': (item.1 | ansible.utils.ipaddr('revdns'))[-(9+(item.1|regex_replace('^.*/','')|int)//2):] }) %}
-#}
-{#
- #  Compare the zone file hash with the current zone data hash and set serial
- #  accordingly
- #}
-{#}
-{% set _zone = {'hash': _zone_data | string | hash('md5')} %}
-{% for _result in reverse_hashes_ipv6 if _result.network == item.1 %}
-{%   set _hash_serial = _result.hash.split(' ')[2:] %}
-{%   if _hash_serial and _hash_serial[0] == _zone['hash'] %}
-{%     set _ = _zone.update({'serial': _hash_serial[1]}) %}
-{%   else %}
-{%     set _ = _zone.update({'serial': timestamp.stdout}) %}
-{%   endif %}
-{% endfor %}
-#}
-{#
- #  Eventually output the zone data
- #}
-{#
-; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
-; Reverse zone file for {{ _zone_data['domain'] }}
-{{ ansible_managed | comment(decoration='; ') }}
-#}
-
+;
 ; {{ item.1 }}
 ; {{ (item.1 | ansible.utils.ipaddr('revdns'))  }}
 ; {{ (item.1 | regex_replace('^.*/','')) }}
 
-
 $TTL {{ _zone_data['ttl'] }}
-$ORIGIN {{ _zone_data['revip'] }}
 
 ; soa
-@ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
-  {{ _zone['serial'] }}
-  {{ _zone_data['refresh'] }}
-  {{ _zone_data['retry'] }}
-  {{ _zone_data['expire'] }}
-  {{ _zone_data['minimum'] }} )
+{{ _zone_data['revip'] }} IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
+                               {{ (_zone['serial'] | string).ljust(20) }} ; serial
+                               {{ (_zone_data['refresh'] | string).ljust(20) }} ; refresh (1 week)
+                               {{ (_zone_data['retry'] | string).ljust(20) }} ; retry (1 day)
+                               {{ (_zone_data['expire'] | string).ljust(20) }} ; expire (4 weeks)
+                               {{ (_zone_data['minimum'] | string).ljust(20) }} ; minimum (1 day)
+                               )
 ; --------------------------------------------------------------------------------------
 ; dns
 {% if _zone_data['soa_name_server'] | length > 0 %}
@@ -119,36 +75,3 @@ $ORIGIN {{ _zone_data['revip'] }}
     {% endif %}
   {% endfor %}
 {% endif %}
-; --------------------------------------------------------------------------------------
-{#
-
-{% if _zone_data['hosts']|length > 0 %}
-{% for host in _zone_data['hosts'] %}
-{% if host.ipv6 is defined %}
-{% if host.ipv6 == item.1 %}
-@                      IN  PTR  {{ host.name }}.{{ _zone_data['domain'] }}.
-{% else %}
-{% if host.ipv6 is string and host.ipv6.startswith(item.1|regex_replace(':\/.*$','')) %}
-{% if host.name == '@' %}
-{{ host.ipv6 | ipaddr('revdns') }}{{ (ttl | string).ljust(6) }} IN  PTR  {{ _zone_data['domain'] }}.
-{% else %}
-{{ host.ipv6 | ipaddr('revdns') }}{{ (ttl | string).ljust(6) }} IN  PTR  {{ host.name }}.{{ _zone_data['domain'] }}.
-{% endif %}
-{% else %}
-{% for ip in host.ipv6 %}
-{% if ip.startswith(item.1|regex_replace(':\/.*$','')) %}
-{{ ip | ipaddr('revdns') }}{{ (ttl | string).ljust(6) }} IN  PTR  {{ _zone_data['domain'] }}.
-{% if host.name == '@' %}
-{% else %}
-{{ ip | ipaddr('revdns') }}{{ (ttl | string).ljust(6) }} IN  PTR  {{ host.name }}.{{ _zone_data['domain'] }}.
-{% endif %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% else %}
-{{ ansible_default_ipv6.address | ipaddr('revdns') }}{{ (ttl | string).ljust(6) }} IN  PTR  {{ ansible_hostname }}.{{ _zone_data['domain'] }}.
-{% endif %}
-#}

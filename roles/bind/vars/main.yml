@@ -59,11 +59,11 @@ bind_defaults_dnssec:
 
 # SOA information
 bind_defaults_zone_soa:
-  ttl: "1W"
-  time_to_refresh: "1D"
-  time_to_retry: "1H"
-  time_to_expire: "1W"
-  minimum_ttl: "1D"
+  ttl: "86400"                 # 1 day
+  time_to_refresh: "604800"    # refresh (1 week)
+  time_to_retry: "86400"       # retry (1 day)
+  time_to_expire: "2419200"    # expire (4 weeks)
+  minimum_ttl: "86400"         # minimum (1 day)
 
 bind_defaults_query_log:
   enable: true
