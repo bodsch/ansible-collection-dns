@@ -1,0 +1,89 @@
+---
+
+# -----------------------------------------------------------------------------------------
+
+bind_statistics_channels: true
+bind_statistics_allow:
+  - any
+
+bind_zone_dir: /var/local/named-zones
+bind_zone_file_mode: '0660'
+
+bind_allow_query:
+  - any
+
+bind_listen_ipv4:
+  - any
+
+bind_listen_ipv6:
+  - any
+
+# bind_acls:
+#   - name: acl1
+#     match_list:
+#       - 10.11.0.0/16
+#
+# bind_forwarders:
+#   - '8.8.8.8'
+#   - '8.8.4.4'
+
+bind_recursion: true
+bind_dns64: true
+bind_query_log: 'data/query.log'
+bind_check_names: 'master ignore'
+bind_zone_minimum_ttl: "2D"
+bind_zone_ttl: "2W"
+bind_zone_time_to_refresh: "2D"
+bind_zone_time_to_retry: "2H"
+bind_zone_time_to_expire: "2W"
+bind_statistics_host: "{{ ansible_default_ipv4.address }}"
+
+# -----------------------------------------------------------------------------------------
+
+bind_statistics:
+  channels: true
+  allow:
+    - any
+  host: "{{ ansible_default_ipv4.address }}"
+
+bind_allow_query:
+  - any
+
+bind_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+        - "{{ ansible_default_ipv4.address }}"
+    - port: 5353
+      addresses:
+        - "127.0.1.1"
+  ipv6:
+    - port: 53
+      addresses:
+        - "{{ ansible_default_ipv4.address }}"
+
+bind_acls:
+  - name: acl1
+    match_list:
+      - 10.11.0/24
+
+bind_forwarders:
+  - '9.9.9.9'
+  - '141.1.1.1'
+
+bind_recursion: true
+bind_dns64: true
+
+bind_check_names:
+  - master
+  - ignore
+
+bind_zone_soa:
+  minimum_ttl: "32H"
+  ttl: "48H"
+  time_to_refresh: "24H"
+  time_to_retry: "2H"
+  time_to_expire: "2D"
+
+...

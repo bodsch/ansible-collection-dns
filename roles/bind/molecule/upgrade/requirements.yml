@@ -1,0 +1,4 @@
+---
+
+- name: bertvv.bind
+  src: https://github.com/bertvv/ansible-role-bind.git
