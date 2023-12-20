@@ -71,14 +71,14 @@ bind_defaults_query_log:
 bind_defaults_logging:
   enable: false
   channels:
-  - channel: general
-    file: "data/general.log"
-    versions: 3
-    size: 10M
-    print_time: true           # true | false
-    print_category: true
-    print_severity: true
-    severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+    - channel: general
+      file: "data/general.log"
+      versions: 3
+      size: 10M
+      print_time: true           # true | false
+      print_category: true
+      print_severity: true
+      severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
   # - channel: query
   #   file: "data/query.log"
   #   versions: 5
@@ -128,11 +128,10 @@ bind_defaults_logging:
       - general
     default:
       - general
-    # security:
-    #   - general
-    #   - slog
-    # dnssec:
-    #   - dnssec
-    # queries:
-    #   - query
-
+      # security:
+      #   - general
+      #   - slog
+      # dnssec:
+      #   - dnssec
+      # queries:
+      #   - query
