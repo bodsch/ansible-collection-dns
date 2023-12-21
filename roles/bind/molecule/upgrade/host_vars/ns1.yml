@@ -30,6 +30,7 @@ bind_zones:
     mail_servers:
       - name: mail001
         preference: 10
+
   # Primary server for domain acme-inc.com (specify zone type explicitly)
   - name: 'acme-inc.com'
     type: primary

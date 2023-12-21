@@ -23,7 +23,6 @@ class FilterModule(object):
             'forward_zone_data': self.forward_zone_data,
             'reverse_zone_data': self.reverse_zone_data,
             'zone_filename': self.zone_filename,
-            'append_zone_filename': self.append_zone_filename,
         }
 
     def zone_type(self, data, all_addresses):
@@ -35,28 +34,38 @@ class FilterModule(object):
         _primaries = data.get("primaries", None)
         _forwarders = data.get("forwarders", None)
 
-        # display.v(f"  - type {_type}")
-        # display.v(f"  - primaries {_primaries}")
-        # display.v(f"  - forwarders {_forwarders}")
+        # display.v(f"  - type       : {_type}")
+        # display.v(f"  - primaries  : {_primaries}")
+        # display.v(f"  - forwarders : {_forwarders}")
 
         if _type and _type in ["primary", "secondary", "forward"]:
+            # display.v(f"    type is defined and {_type}")
             result = _type
-            # display.v(f"  = {result}")
+            # display.v(f"  1 = {result}")
 
         elif not _type and _primaries:
-            primaries_in_all_addresses = len(
-                [x for x in all_addresses if x in _primaries]) > 0
+            # display.v("    not _type and _primaries")
+            # display.v(f"      - all_addresses : {all_addresses}")
+            # display.v(f"      - primaries     : {_primaries}")
+
+            primaries_in_all_addresses = [x for x in all_addresses if x in _primaries]
+            # display.v(f"      - primaries_in_all_addresses : {primaries_in_all_addresses}")
+
+            primaries_in_all_addresses = len(primaries_in_all_addresses) > 0
+            # display.v(f"        {primaries_in_all_addresses}")
+
             if primaries_in_all_addresses:
                 result = "primary"
             else:
                 result = "secondary"
-            # display.v(f"  = {result}")
+            # display.v(f"  2 = {result}")
 
         elif not _type and _forwarders:
+            # display.v(f"    not _type and _forwarders")
             result = "forward"
-            # display.v(f"  = {result}")
+            # display.v(f"  3 = {result}")
 
-        display.v(f"  = {result}")
+        # display.v(f"  = {result}")
 
         return result
 
@@ -102,8 +111,7 @@ class FilterModule(object):
                     - None or
                     - 'acme-inc.com'
         """
-        display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
-
+        # display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
         result = dict(
             hash=zone_hash,
             serial=int(time.time())
@@ -117,22 +125,18 @@ class FilterModule(object):
 
         if network:
             hashes = zone_data.get("reverse", {})
-            domain_data = [x for x in hashes for k,v in x.items() if k == network]
+            domain_data = [x for x in hashes for k, v in x.items() if k == network]
         else:
             hashes = zone_data.get("forward", {})
-            domain_data = [x for x in hashes for k,v in x.items() if k == domain]
+            domain_data = [x for x in hashes for k, v in x.items() if k == domain]
 
         if isinstance(domain_data, list) and len(domain_data) > 0:
             domain_data = domain_data[0]
-
-            # display.v(f" domain_data : {domain_data} ({type(domain_data)})")
 
             if network:
                 domain_data = domain_data.get(network)
             else:
                 domain_data = domain_data.get(domain)
-
-            # display.v(f" domain_data : {domain_data} ({type(domain_data)})")
 
         if domain_data and len(domain_data) > 0:
             _serial = domain_data.get("serial", "")
@@ -140,8 +144,7 @@ class FilterModule(object):
             if _serial and _serial != "None":
                 result.update({"serial": _serial})
 
-        display.v(f"  = {result}")
-
+        # display.v(f"  = {result}")
         return result
 
     def forward_zone_data(self, data, soa, ansible_hostname):
@@ -172,7 +175,7 @@ class FilterModule(object):
 
         if other_name_servers:
             # display.v(f" - {other_name_servers}")
-            other_name_servers = self.__append_dot(other_name_servers)
+            other_name_servers = self.__append(other_name_servers)
 
         if not mail_servers[-1:] == ".":
             self.__append(mail_servers, domain)
@@ -197,10 +200,6 @@ class FilterModule(object):
         )
 
         result_hash = self.__hash(result)
-
-        # display.v("forward_zone_data")
-        # display.v(f"  = forward_zone_data: {result}")
-        # display.v(f"  = zone_hash        : {result_hash}")
 
         return dict(
             forward_zone_data=result,
@@ -257,7 +256,7 @@ class FilterModule(object):
 
         if other_name_servers:
             # display.v(f" - {other_name_servers}")
-            other_name_servers = self.__append_dot(other_name_servers)
+            other_name_servers = self.__append(other_name_servers)
 
         reverse_ip = self.__reverse_dns(revip)
 
@@ -277,52 +276,33 @@ class FilterModule(object):
 
         result_hash = self.__hash(result)
 
-        # display.v("reverse_zone_data")
-        # display.v(f"  = reverse_zone_data: {result}")
-        # display.v(f"  = zone_hash        : {result_hash}")
-
         return dict(
             reverse_zone_data=result,
             zone_hash=result_hash
         )
 
-        #display.v(f"  = {result} - {result_hash}")
-        #return (result, result_hash)
+        # display.v(f"  = {result} - {result_hash}")
+        # return (result, result_hash)
 
     def zone_filename(self, data, zone_data):
         """
             append to evvery list element
         """
-        display.v(f"zone_filename({data}, {zone_data})")
+        # display.v(f"zone_filename({data}, {zone_data})")
         result = None
 
         zone_data = zone_data.get("zone_data", {})
 
-        item = {k: v for key, values in zone_data.items() for x in values for k, v in x.items() if k == data }
+        item = {k: v for key, values in zone_data.items() for x in values for k, v in x.items() if k == data}
 
-        display.v(f"  - {item}")
+        # display.v(f"  - {item}")
 
         if item:
             result = list(item.values())[0].get("filename")
 
-        display.v(f"= {result}")
+        # display.v(f"= {result}")
 
         return result
-
-    def append_zone_filename(self, data, zone_data):
-        """
-            append to evvery list element
-        """
-        display.v(f"zone_filename({data}, {zone_data})")
-        result = None
-
-        _data = data.copy()
-
-        for i in data:
-            display.v(f" - {i}")
-
-
-        return _data
 
     def __append(self, data, domain=None):
         """
@@ -360,18 +340,25 @@ class FilterModule(object):
     def __reverse_dns(self, data):
         """
         """
-
+        ipv6 = False
         _network = netaddr.IPNetwork(str(data))
+        _info = _network.info
         _prefix = _network.prefixlen
         _ipaddress = netaddr.IPAddress(_network)
         reverse_ip = _ipaddress.reverse_dns
+        # display.v(f"  = ip address        : {_ipaddress}")
+        # display.v(f"  = reverse_ip        : {reverse_ip}")
+        if _info['IPv6']:
+            ipv6 = True
 
-        display.v(f"  = ip address        : {_ipaddress}")
-        display.v(f"  = reverse_ip        : {reverse_ip}")
+        if ipv6:
+            reverse_ip = reverse_ip[-(9 + _prefix // 2):-1]
+        else:
+            reverse_ip = ".".join(data.replace(
+                data + '.', '').split('.')[::-1]) + ".in-addr.arpa"
 
-        reverse_ip = reverse_ip[-(9 + _prefix // 2):]
-
-        display.v(f"  = reverse_ip        : {reverse_ip}")
+        # reverse_ip = reverse_ip[-(9 + _prefix // 2):]
+        # display.v(f"  = reverse_ip        : {reverse_ip}")
 
         return reverse_ip
 

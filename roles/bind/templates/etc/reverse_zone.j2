@@ -9,9 +9,9 @@
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
 
 $TTL {{ _zone_data['ttl'] }}
-
+$ORIGIN {{ _zone_data['revip'] }}.
 ; soa
-{{ _zone_data['revip'] }} IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
+@ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
                                {{ (_zone['serial'] | string).ljust(20) }} ; serial
                                {{ (_zone_data['refresh'] | string).ljust(20) }} ; refresh (1 week)
                                {{ (_zone_data['retry'] | string).ljust(20) }} ; retry (1 day)
