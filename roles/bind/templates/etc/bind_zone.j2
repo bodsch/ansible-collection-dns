@@ -4,30 +4,26 @@
  #  from it, that it can be compared with subsequent task executions. In this
  #  way the serial will only be updated if there are some content changes.
  #}
-{# set _zone_data, _zone_hash = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_hostname) #}
 {% set _data = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_hostname) %}
-{# ; {{ _data }} #}
 {% set _zone_data = _data.get("forward_zone_data", None) %}
-{#; {{ _zone_data }} #}
 {% set _zone_hash = _data.get("zone_hash", None) %}
-{#; {{ _zone_hash }} #}
-
-{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, forward_hashes, network=item.name) %}
-
+{% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, bind_zone_data) %}
 ; {{ ansible_managed }}
+;
 ; Zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
 
-$ORIGIN {{ _zone_data['domain'] }}.
 $TTL {{ _zone_data['ttl'] }}
+$ORIGIN {{ _zone_data['domain'] }}.
 
 ; soa
 @ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (
-  {{ _zone['serial'] }}
-  {{ _zone_data['refresh'] }}
-  {{ _zone_data['retry'] }}
-  {{ _zone_data['expire'] }}
-  {{ _zone_data['minimum'] }} )
+                               {{ (_zone['serial'] | string).ljust(20) }} ; serial
+                               {{ (_zone_data['refresh'] | string).ljust(20) }} ; refresh (1 week)
+                               {{ (_zone_data['retry'] | string).ljust(20) }} ; retry (1 day)
+                               {{ (_zone_data['expire'] | string).ljust(20) }} ; expire (4 weeks)
+                               {{ (_zone_data['minimum'] | string).ljust(20) }} ; minimum (1 day)
+                               )
 ; --------------------------------------------------------------------------------------
 ; dns
 {% if _zone_data['soa_name_server'] | length > 0 %}

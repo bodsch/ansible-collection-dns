@@ -1,0 +1,22 @@
+---
+
+- name: converge
+  hosts: all
+  any_errors_fatal: false
+
+  # environment:
+  #   NETRC: ''
+  #
+  # vars:
+  #   ansible_all_ipv4_addresses: []
+  #   bind_dnssec_enable: false
+  #   bind_check_names: 'master ignore'
+  #   bind_query_log:
+  #       name: querylog
+  #       file: data/query.log
+  #       versions: 200
+  #       size: "10m"
+
+  roles:
+    # - role: bertvv.bind
+    - role: bodsch.dns.bind

@@ -2,8 +2,10 @@
 
 - name: do facts module to get latest information
   ansible.builtin.setup:
-    gather_subset:
-      - 'all'
+    # gather_subset:
+    #   - 'network'
+    #   - 'all_ipv4_addresses'
+    #   - 'all_ipv6_addresses'
 
 - name: merge bind configuration between defaults and custom
   ansible.builtin.set_fact:

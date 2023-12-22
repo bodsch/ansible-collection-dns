@@ -58,7 +58,7 @@ bind_statistics:
 # NOTE In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
 bind_dnssec:
   enable: true
-# dnssec-validation ( yes | no | auto );
+  # dnssec-validation ( yes | no | auto );
   validation: true
 
 bind_extra_include_files: []

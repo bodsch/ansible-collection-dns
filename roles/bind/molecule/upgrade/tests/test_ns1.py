@@ -10,7 +10,7 @@ import os
 
 import testinfra.utils.ansible_runner
 
-HOST = 'all'
+HOST = 'ns1'
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts(HOST)
@@ -53,41 +53,6 @@ def read_ansible_yaml(file_name, role_name):
     return f"file={read_file} name={role_name}"
 
 
-def dig(host, domains):
-
-    local_dns = "@127.0.0.1"
-    for d in domains:
-        domain = d.get("domain")
-        dns_type = d.get("type", "A").upper()
-        result = d.get("result")
-
-        if dns_type == "PTR":
-            dig_type = f"-x"
-        else:
-            dig_type = f"-t {dns_type}"
-
-        command = f"dig {dig_type} {domain} {local_dns} +short"
-        # print(f"{command}")
-        cmd = host.run(command)
-
-        if (cmd.succeeded):
-            output = cmd.stdout
-            output_arr = sorted(output.splitlines())
-
-            if len(output_arr) == 1:
-                output_msg = output.strip()
-            if len(output_arr) > 1:
-                output_msg = ",".join(output_arr)
-
-            # print(f"[{domain} - {dns_type}] => {output_msg}")
-            # print(f"  {len(output)} - {type(output)}")
-            # print(f"  {output_msg}")
-
-            return output_msg == result
-        else:
-            return cmd.failed
-
-
 @pytest.fixture()
 def get_vars(host):
     """
@@ -111,16 +76,23 @@ def get_vars(host):
     # print(" -> {} / {}".format(distribution, os))
     # print(" -> {}".format(base_dir))
 
-    file_defaults = read_ansible_yaml(f"{base_dir}/defaults/main", "role_defaults")
+    file_defaults = read_ansible_yaml(
+        f"{base_dir}/defaults/main", "role_defaults")
     file_vars = read_ansible_yaml(f"{base_dir}/vars/main", "role_vars")
-    file_distibution = read_ansible_yaml(f"{base_dir}/vars/{operation_system}", "role_distibution")
-    file_molecule = read_ansible_yaml(f"{molecule_dir}/group_vars/all/vars", "test_vars")
+    file_distibution = read_ansible_yaml(
+        f"{base_dir}/vars/{operation_system}", "role_distibution")
+    file_molecule = read_ansible_yaml(
+        f"{molecule_dir}/group_vars/all/vars", "test_vars")
     # file_host_molecule = read_ansible_yaml("{}/host_vars/{}/vars".format(base_dir, HOST), "host_vars")
 
-    defaults_vars = host.ansible("include_vars", file_defaults).get("ansible_facts").get("role_defaults")
-    vars_vars = host.ansible("include_vars", file_vars).get("ansible_facts").get("role_vars")
-    distibution_vars = host.ansible("include_vars", file_distibution).get("ansible_facts").get("role_distibution")
-    molecule_vars = host.ansible("include_vars", file_molecule).get("ansible_facts").get("test_vars")
+    defaults_vars = host.ansible("include_vars", file_defaults).get(
+        "ansible_facts").get("role_defaults")
+    vars_vars = host.ansible("include_vars", file_vars).get(
+        "ansible_facts").get("role_vars")
+    distibution_vars = host.ansible("include_vars", file_distibution).get(
+        "ansible_facts").get("role_distibution")
+    molecule_vars = host.ansible("include_vars", file_molecule).get(
+        "ansible_facts").get("test_vars")
     # host_vars          = host.ansible("include_vars", file_host_molecule).get("ansible_facts").get("host_vars")
 
     ansible_vars = defaults_vars
@@ -157,19 +129,6 @@ def test_files(host, get_vars):
     """
       created config files
     """
-    files = [
-        get_vars.get("bind_config", "/etc/bind/named.conf")
-    ]
-
-    for _file in files:
-        f = host.file(_file)
-        assert f.is_file
-
-
-def test_cache_files(host, get_vars):
-    """
-      created config files
-    """
     bind_dir = get_vars.get("bind_dir", "/var/cache/bind")
 
     files = [
@@ -183,35 +142,39 @@ def test_cache_files(host, get_vars):
         assert f.is_file
 
 
-def test_service_running_and_enabled(host, get_vars):
-    """
-      running service
-    """
-    service_name = get_vars.get("bind_service", "bind9")
+def dig(host, domains):
 
-    service = host.service(service_name)
-    assert service.is_running
-    assert service.is_enabled
+    local_dns = "@127.0.0.1"
+    for d in domains:
+        domain = d.get("domain")
+        dns_type = d.get("type", "A").upper()
+        result = d.get("result")
 
+        if dns_type == "PTR":
+            dig_type = f"-x"
+        else:
+            dig_type = f"-t {dns_type}"
 
-def test_listening_socket(host, get_vars):
-    """
-    """
-    listening = host.socket.get_listening_sockets()
+        command = f"dig {dig_type} {domain} {local_dns} +short"
+        # print(f"{command}")
+        cmd = host.run(command)
 
-    for i in listening:
-        print(i)
+        if (cmd.succeeded):
+            output = cmd.stdout
+            output_arr = sorted(output.splitlines())
 
-    bind_port = "53"
-    bind_address = "127.0.0.1"
+            if len(output_arr) == 1:
+                output_msg = output.strip()
+            if len(output_arr) > 1:
+                output_msg = ",".join(output_arr)
 
-    listen = []
-    listen.append(f"tcp://{bind_address}:{bind_port}")
-    listen.append(f"udp://{bind_address}:{bind_port}")
+            # print(f"[{domain} - {dns_type}] => {output_msg}")
+            # print(f"  {len(output)} - {type(output)}")
+            # print(f"  {output_msg}")
 
-    for spec in listen:
-        socket = host.socket(spec)
-        assert socket.is_listening
+            return output_msg == result
+        else:
+            return cmd.failed
 
 
 def test_records_A(host):

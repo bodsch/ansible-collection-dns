@@ -4,10 +4,7 @@ bind_statistics:
   channels: true
   allow:
     - any
-  host: "{{ ansible_default_ipv4.address }}"
-
-# bind_zone_dir: /var/local/named-zones
-# bind_zone_file_mode: '0660'
+  host: "127.0.0.1"
 
 bind_allow_query:
   - any
@@ -17,14 +14,14 @@ bind_listen:
     - port: 53
       addresses:
         - "127.0.0.1"
-        - "{{ ansible_default_ipv4.address }}"
-    - port: 5353
-      addresses:
-        - "127.0.1.1"
-  ipv6:
-    - port: 53
-      addresses:
-        - "{{ ansible_default_ipv4.address }}"
+        - "10.11.0.1"
+    # - port: 5353
+    #   addresses:
+    #     - "127.0.1.1"
+  # ipv6:
+  #   - port: 53
+  #     addresses:
+  #       - "{{ ansible_default_ipv6.address }}"
 
 bind_acls:
   - name: acl1
@@ -42,6 +39,70 @@ bind_check_names:
   - master
   - ignore
 
+bind_logging:
+  enable: true
+  channels:
+    - channel: general
+      file: "data/general.log"
+      versions: 3
+      size: 10M
+      print_time: true           # true | false
+      print_category: true
+      print_severity: true
+      severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+    - channel: query
+      file: "data/query.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: debug2             #
+    - channel: dnssec
+      file: "data/dnssec.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: notify
+      file: "data/notify.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: transfers
+      file: "data/transfers.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: slog
+      syslog: security             # kern | user | mail | daemon | auth | syslog | lpr |
+                                   # news | uucp | cron | authpriv | ftp |
+                                   # local0 | local1 | local2 | local3 |
+                                   # local4 | local5 | local6 | local7
+      print_time: ""               # true | false
+      severity: info               #
+  categories:
+    "xfer-out":
+      - transfers
+      - slog
+    "xfer-in":
+      - transfers
+      - slog
+    notify:
+      - notify
+    "lame-servers":
+      - general
+    config:
+      - general
+    default:
+      - general
+    security:
+      - general
+      - slog
+    dnssec:
+      - dnssec
+    queries:
+      - query
 
 bind_zone_soa:
   minimum_ttl: "32H"
@@ -51,37 +112,11 @@ bind_zone_soa:
   time_to_expire: "2D"
 
 bind_zones:
-
-  - name: 'example.com'
-    primaries:
-      - 10.11.0.4
-    networks:
-      - '192.0.2'
-    ipv6_networks:
-      - '2001:db9::/48'
-    name_servers:
-      - ns1.acme-inc.com.
-      - ns2.acme-inc.com.
-    hostmaster_email: admin
-    hosts:
-      - name: srv001
-        ip: 192.0.2.1
-        ipv6: '2001:db9::1'
-        aliases:
-          - www
-      - name: srv002
-        ip: 192.0.2.2
-        ipv6: '2001:db9::2'
-      - name: mail001
-        ip: 192.0.2.10
-        ipv6: '2001:db9::3'
-    mail_servers:
-      - name: mail001
-        preference: 10
-
   - name: 'acme-inc.com'
-    primaries:
-      - 10.11.0.4
+    type: primary
+    create_reverse_zones: true
+    #primaries:
+    #  - 10.11.0.1
     networks:
       - '10.11'
     ipv6_networks:
@@ -91,9 +126,9 @@ bind_zones:
       - ns2
     hosts:
       - name: ns1
-        ip: 10.11.0.4
+        ip: 10.11.0.1
       - name: ns2
-        ip: 10.11.0.5
+        ip: 10.11.0.2
       - name: srv001
         ip: 10.11.1.1
         ipv6: 2001:db8::1
@@ -142,3 +177,5 @@ bind_zones:
         text:
           - 'some text'
           - 'more text'
+
+...

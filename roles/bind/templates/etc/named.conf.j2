@@ -211,12 +211,38 @@ include "{{ file }}";
       bind_zones | count > 0 %}
   {% for bind_zone in bind_zones %}
     {% if bind_zone.create_forward_zones is not defined or bind_zone.create_forward_zones %}
-      {# Start: set zone type  #}
-      {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %}
-      {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=_all_addresses) %}
-      {# End: set zone type #}
+{# Start: set zone type  #}
+{# {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+{#// -- {{ bind_zone.name }} ---------------------------------------
+// type      : {{ bind_zone.type | default('') }}
+// primaries : {{ bind_zone.primaries | default([]) }}
+// forwarders: {{ bind_zone.forwarders | default([]) }}
+// ------------------------------------------------------------
+#}
+{#
+{% if bind_zone.type is defined and bind_zone.type == 'primary' %}
+{% set _type = 'primary' %}
+{% elif bind_zone.type is defined and bind_zone.type == 'secondary' %}
+{% set _type = 'secondary' %}
+{% elif bind_zone.type is defined and bind_zone.type == 'forward' %}
+{% set _type = 'forward' %}
+{% elif bind_zone.type is not defined and bind_zone.primaries is defined and (_all_addresses|intersect(bind_zone.primaries)|length > 0) %}
+{% set _type = 'primary' %}
+{% elif bind_zone.type is not defined and bind_zone.primaries is defined and not (_all_addresses|intersect(bind_zone.primaries)|length > 0) %}
+{% set _type = 'secondary' %}
+{% elif bind_zone.type is not defined and bind_zone.forwarders is defined %}
+{% set _type = 'forward' %}
+{% endif %}
+// #1: '{{ _type }}'
+// ------------------------------------------------------------
+#}
+{#       {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+      {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=host_all_addresses) %}
+{#// #2: '{{ _type }}'
+// ------------------------------------------------------------
+#}
 zone "{{ bind_zone.name }}" IN {
-      {% if _type == 'primary' %}
+      {% if (_type | string).upper() == 'PRIMARY' %}
   type master;
   file "{{ bind_zone_dir }}/{{ bind_zone.name }}";
   notify yes;
@@ -234,13 +260,13 @@ zone "{{ bind_zone.name }}" IN {
     none;
   };
         {% endif %}
-      {% elif _type == 'secondary' %}
+      {% elif (_type | string).upper() == 'SECONDARY' %}
   type slave;
   masters {
     {{ bind_zone.primaries| join(';\n') | indent(4) }};
   };
   file "{{ bind_secondary_dir }}/{{ bind_zone.name }}";
-      {% elif _type == 'forward' %}
+      {% elif (_type | string).upper() == 'FORWARD' %}
   type forward;
   forward only;
   forwarders {

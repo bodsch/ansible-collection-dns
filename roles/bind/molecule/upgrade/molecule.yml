@@ -15,7 +15,7 @@ lint: |
   flake8 .
 
 platforms:
-  - name: instance
+  - name: ns1
     image: "bodsch/ansible-${DISTRIBUTION:-debian:12}"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
@@ -38,6 +38,45 @@ platforms:
     networks:
       - name: bind
         ipv4_address: "10.11.0.1"
+
+  - name: ns2
+    image: "bodsch/ansible-${DISTRIBUTION:-debian:12}"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    tty: true
+    environment:
+      container: docker
+    groups:
+      - dns
+    networks:
+      - name: bind
+        ipv4_address: "10.11.0.2"
+
+  - name: ns3
+    image: "bodsch/ansible-${DISTRIBUTION:-debian:12}"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    tty: true
+    environment:
+      container: docker
+    groups:
+      - dns
+    networks:
+      - name: bind
+        ipv4_address: "10.11.0.3"
+
 
 provisioner:
   name: ansible

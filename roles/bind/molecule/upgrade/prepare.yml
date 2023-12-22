@@ -42,4 +42,22 @@
           - "ansible version      : {{ ansible_version.full }}"
           - "python version       : {{ ansible_python.version.major }}.{{ ansible_python.version.minor }}"
 
+- name: install bertvv.bind
+  hosts: all
+  gather_facts: true
+
+  vars:
+    ansible_all_ipv4_addresses: []
+    bind_dnssec_enable: false
+    bind_check_names: 'master ignore'
+
+  pre_tasks:
+    - name: do facts module to get latest information
+      ansible.builtin.setup:
+        gather_subset:
+          - 'all'
+
+  roles:
+    - role: bertvv.bind
+
 ...
