@@ -5,7 +5,7 @@ name: dnsmasq with various configuration
 on:
   workflow_run:
     workflows:
-      - "knot"
+      - "dnsmasq"
     types:
       - completed
 
