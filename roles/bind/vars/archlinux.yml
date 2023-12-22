@@ -2,7 +2,7 @@
 
 bind_packages:
   - python-netaddr
-  - python-dns
+  - python-dnspython
   - bind
   - bind-tools
 
