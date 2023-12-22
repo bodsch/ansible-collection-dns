@@ -10,7 +10,7 @@ import os
 
 import testinfra.utils.ansible_runner
 
-HOST = 'instance'
+HOST = 'all'
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts(HOST)
@@ -107,7 +107,10 @@ def test_directories(host, get_vars):
     pp_json(get_vars)
 
     directories = [
-        get_vars.get("dnsmasq_config_directory"),
+        get_vars.get("bind_dir"),
+        get_vars.get("bind_conf_dir"),
+        get_vars.get("bind_zone_dir"),
+        get_vars.get("bind_secondary_dir"),
     ]
 
     for dirs in directories:
@@ -120,7 +123,7 @@ def test_files(host, get_vars):
       created config files
     """
     files = [
-        get_vars.get("dnsmasq_config_file")
+        get_vars.get("bind_config", "/etc/bind/named.conf")
     ]
 
     for _file in files:
@@ -128,34 +131,11 @@ def test_files(host, get_vars):
         assert f.is_file
 
 
-# def test_user(host, get_vars):
-#     """
-#       created user
-#     """
-#     shell = '/bin/false'
-#
-#     distribution = host.system_info.distribution
-#
-#     if distribution in ['centos', 'redhat', 'ol']:
-#         shell = "/sbin/nologin"
-#     elif distribution == "arch":
-#         shell = "/usr/bin/nologin"
-#
-#     user_name = "mysql"
-#     u = host.user(user_name)
-#     g = host.group(user_name)
-#
-#     assert g.exists
-#     assert u.exists
-#     assert user_name in u.groups
-#     assert u.shell == shell
-
-
 def test_service_running_and_enabled(host, get_vars):
     """
       running service
     """
-    service_name = "dnsmasq"
+    service_name = get_vars.get("bind_service", "bind9")
 
     service = host.service(service_name)
     assert service.is_running
@@ -170,11 +150,8 @@ def test_listening_socket(host, get_vars):
     for i in listening:
         print(i)
 
-    _conf_global = get_vars.get("dnsmasq_global", {})
-    _conf_interfaces = get_vars.get("dnsmasq_interfaces", {})
-
-    bind_port = _conf_global.get("port", 53)
-    bind_address = _conf_interfaces.get("listen_address", "0.0.0.0")
+    bind_port = "53"
+    bind_address = "127.0.0.1"
 
     listen = []
     listen.append(f"tcp://{bind_address}:{bind_port}")
