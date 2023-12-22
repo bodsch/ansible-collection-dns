@@ -1,0 +1,30 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_domain.name is defined %}
+domain={{ dnsmasq_domain.name }}
+{% endif %}
+
+{% if dnsmasq_domain.custom is defined and
+      dnsmasq_domain.custom | count > 0 %}
+  {% for item in dnsmasq_domain.custom %}
+domain={{ item.get('domain') }},{{ item.get('network') | join (',') }}
+  {% endfor %}
+{% endif %}
+{#
+
+# Set the domain for dnsmasq. this is optional, but if it is set, it
+# does the following things.
+# 1) Allows DHCP hosts to have fully qualified domain names, as long
+#     as the domain part matches this setting.
+# 2) Sets the "domain" DHCP option thereby potentially setting the
+#    domain of all systems configured by DHCP
+# 3) Provides the domain part for "expand-hosts"
+#domain=thekelleys.org.uk
+
+# Set a different domain for a particular subnet
+#domain=wireless.thekelleys.org.uk,192.168.2.0/24
+
+# Same idea, but range rather then subnet
+#domain=reserved.thekelleys.org.uk,192.68.3.100,192.168.3.200
+#}

@@ -1,0 +1,21 @@
+---
+
+dnsmasq_addresses:
+  - address: 192.168.202.133
+    name: node1.test.com
+  - address: 127.0.0.1
+    name: youtubei.googleapis.com
+
+dnsmasq_interfaces:
+  listen_address: "127.0.0.1"
+
+dnsmasq_server:
+  nameservers:
+    - 192.168.0.1
+    - 46.182.19.48
+    - 9.9.9.9
+  forwarders:
+    - domain: matrix.lan
+      address: 127.0.0.1#5353
+
+...

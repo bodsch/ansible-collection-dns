@@ -1,0 +1,35 @@
+---
+
+galaxy_info:
+  role_name: knot_resolver
+  namespace: bodsch
+
+  author: Bodo Schulz
+  description: Installs, Configures and Manages knot resolver
+
+
+  license: Apache
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: ArchLinux
+    - name: Debian
+      versions:
+        # 10
+        - buster
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        # 20.04
+        - focal
+
+  galaxy_tags:
+    - dns
+    - resolver
+    - knot
+    - knotresolver
+
+dependencies: []
+
+...

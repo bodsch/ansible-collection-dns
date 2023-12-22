@@ -1,0 +1,16 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_records.cname is defined and
+      dnsmasq_records.cname | count > 0 %}
+  {% for item in dnsmasq_records.cname %}
+    {% set cnames = item.cnames | join(',') %}
+cname={{ cnames }},{{ item.target }}{{ ',' if item.ttl is defined else '' }}{{ item.ttl | default('') }}
+  {% endfor %}
+{% endif %}
+{#
+# Provide an alias for a "local" DNS name. Note that this _only_ works
+# for targets which are names from DHCP or /etc/hosts. Give host
+# "bert" another name, bertrand
+#cname=bertand,bert
+#}

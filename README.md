@@ -6,5 +6,7 @@ Documentation for the collection.
 
 | Role                                                                       | | Description |
 |:---------------------------------------------------------------------------| :---- | :---- |
-| [bodsch.dns.XX](./roles/XX/README.md)           |       |       |
-
+| [bodsch.dns.bind](./roles/bind/README.md)           |       |       |
+| [bodsch.dns.knot](./roles/knot/README.md)           |       |       |
+| [bodsch.dns.knot_resolver](./roles/knot_resolver/README.md)           |       |       |
+| [bodsch.dns.dnsmasq](./roles/dnsmasq/README.md)           |       |       |

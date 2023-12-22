@@ -1,0 +1,36 @@
+---
+
+- name: install dnsmasq
+  become: true
+  ansible.builtin.package:
+    name: "{{ dnsmasq_packages }}"
+    state: present
+
+- name: support overrides for systemd
+  when:
+    - ansible_service_mgr | lower == "systemd"
+    - dnsmasq_systemd is defined
+    - dnsmasq_systemd.unit is defined
+    - dnsmasq_systemd.unit | count > 0
+    - (
+      (dnsmasq_systemd.unit.after is defined and dnsmasq_systemd.unit.after | count > 0) or
+      (dnsmasq_systemd.unit.wants is defined and dnsmasq_systemd.unit.wants | count > 0) or
+      (dnsmasq_systemd.unit.requires is defined and dnsmasq_systemd.unit.requires | count > 0)
+      )
+  block:
+    - name: ensure dnsmasq.service.d is present
+      ansible.builtin.file:
+        dest: /etc/systemd/system/dnsmasq.service.d
+        state: directory
+        mode: 0755
+
+    - name: create overwrite.conf for systemd
+      ansible.builtin.template:
+        src: init/systemd/override.conf.j2
+        dest: "/etc/systemd/system/dnsmasq.service.d/override.conf"
+        mode: 0444
+      notify:
+        - systemctl daemon-reload
+        - restart service
+
+...

@@ -1,0 +1,33 @@
+#!/sbin/openrc-run
+
+: ${wait:=100}
+
+command="/usr/sbin/kresd"
+command_args="--noninteractive --config=$cfgfile $cachedir"
+command_background="yes"
+pidfile="/run/$RC_SVCNAME.pid"
+start_stop_daemon_args="--chdir=$cachedir --wait $wait"
+required_files="$cfgfile"
+
+depend() {
+  need net
+  before kres-cache-gc
+}
+
+start_pre() {
+  [ "$output_log" ] && checkpath -f -m 640 -o "$command_user" "$output_log"
+  checkpath -d -m 750 -o "$command_user" "$cachedir"
+  chown -R "$command_user" "$cachedir"
+
+  ebegin "check capabilities for ${command}"
+  if [ -z "$(getcap ${command})" ]
+  then
+    setcap 'cap_net_bind_service,cap_setpcap=+ep' /usr/sbin/kresd
+  fi
+}
+
+stop_post() {
+
+  ebegin "clear control sockets"
+  rm -fv /var/cache/knot-resolver/control/*
+}

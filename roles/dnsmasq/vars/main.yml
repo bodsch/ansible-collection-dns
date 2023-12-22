@@ -1,0 +1,147 @@
+---
+
+dnsmasq_requirements:
+  - iproute2
+
+dnsmasq_packages:
+  - dnsmasq
+
+dnsmasq_config_file: /etc/dnsmasq.conf
+dnsmasq_config_directory: /etc/dnsmasq.d
+
+dnsmasq_defaults_global:
+  port: 53
+  user: ""
+  group: ""
+  filterwin2k: false
+  resolv_file: ""
+  strict_order: false
+  no_hosts: false
+  no_resolv: false
+  no_poll: false
+  domain_needed: false
+  bogus_priv: false
+  cache_size: 150
+  all_servers: false
+  no_negcache: false
+  conf_file: ""
+  conf_dir: ""
+
+dnsmasq_defaults_interfaces:
+  listen_address: "127.0.0.1"
+  interfaces: []
+  except_interfaces: []
+  bind_only: false
+
+dnsmasq_defaults_logging:
+  log_queries: false
+  log_facility: /var/log/dnsmasq.log
+  log_dhcp: false
+
+dnsmasq_defaults_addresses: []
+# - address: 192.168.202.133
+#   name: node1.test.com
+
+dnsmasq_defaults_alias: {}
+
+dnsmasq_defaults_dhcp:
+  enabled: false
+  dhcp_authoritative: false
+  dhcp_boot: "pxelinux.0,{{ inventory_hostname }},{{ dnsmasq_domain }}"
+  dhcp_hosts: []
+#   - address:                       192.168.0.60
+#     lease_time:                    1h
+#     mac_address:
+#       - "11:22:33:44:55:66" # Multiple MAC addresses may be assigned
+#       # - "12:34:56:78:90:12"
+#     name:                          fred
+  dhcp_options: []
+#   - option:                        dns-server
+#     value:
+#       - 192.168.2.200
+#       - 192.168.2.201
+#   # - option:                      domain-name
+#   #   value:
+#   #     - "another.{{ dnsmasq_pri_domain_name }}"
+#   - option:                        domain-search
+#     value:
+#       - "dev.{{ dnsmasq_pri_domain_name }}"
+#       - "prod.{{ dnsmasq_pri_domain_name }}"
+#       - "test.{{ dnsmasq_pri_domain_name }}"
+#   - option:                        ntp-server
+#     value:
+#       - 192.168.2.200
+#       - 192.168.2.201
+#   - option:                        router
+#     value:
+#       - 192.168.2.1
+  dhcp_options_tagged: []
+#   - option:                        router
+#     tag:                           net1
+#     value:
+#       - 192.168.1.200
+#   - option:                        router
+#     tag:                           net2
+#     value:
+#       - 192.168.2.200
+  dhcp_range: []
+#   - start:                         192.168.1.128
+#     end:                           192.168.1.224
+#     netmask:                       255.255.255.0
+#     lease_time:                    24h # Define a specific lease time if desired..Default is 1h
+#     set:                           net1
+#   - start:                         192.168.2.128
+#     end:                           192.168.2.224
+#     netmask:                       255.255.255.0
+#     lease_time:                    24h
+#     set:                           net2
+
+dnsmasq_defaults_dnssec:
+  enabled: false
+  conf_file: ""
+  dnssec_check_unsigned: false
+
+dnsmasq_defaults_domain:
+  name: example.org
+  custom: []
+
+# dnsmasq_defaults_domain: ""
+dnsmasq_defaults_ipset: {}
+
+dnsmasq_defaults_local: {}
+
+dnsmasq_defaults_mx: {}
+
+dnsmasq_defaults_nftset: {}
+
+dnsmasq_defaults_pxe: {}
+
+dnsmasq_defaults_server:
+  nameservers: []
+  forwarders: []
+# dnsmasq_enable_forwarders: true
+# dnsmasq_nameservers:
+#   # dns2.digitalcourage.de
+#   - 46.182.19.48
+#   # dns9.quad9.net
+#   - 9.9.9.9
+# dnsmasq_conditional_forwarders: []
+# # - address:                       172.16.24.1
+# #   domain:                        etsbv.internal
+
+dnsmasq_defaults_tftp:
+  enabled: false
+  tftp_root: ""
+  tftp_no_fail: false
+  tftp_secure: false
+  tftp_no_blocksize: false
+
+dnsmasq_defaults_records:
+  cname: []
+#  - target:
+#    cnames:
+#      - cname
+  ptr: []
+  srv: []
+  txt: []
+...

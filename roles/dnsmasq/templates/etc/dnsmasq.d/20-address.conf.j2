@@ -1,0 +1,9 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_addresses is defined and
+      dnsmasq_addresses | count > 0 %}
+{%   for item in dnsmasq_addresses %}
+address=/{{ item.get('name') }}/{{ item.get('address') }}
+{%   endfor %}
+{% endif %}

@@ -1,0 +1,26 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if dnsmasq_interfaces.listen_address is defined and
+      dnsmasq_interfaces.listen_address | string | length > 0 %}
+# Or which to listen on by address (remember to include 127.0.0.1 if
+# you use this.)
+listen-address={{ dnsmasq_interfaces.listen_address }}
+{% endif %}
+{% if dnsmasq_interfaces.interfaces is defined and
+      dnsmasq_interfaces.interfaces | count > 0 %}
+
+  {% for item in dnsmasq_interfaces.interfaces %}
+interface={{ item }}
+  {% endfor %}
+{% endif %}
+{% if dnsmasq_interfaces.bind_only is defined and
+      dnsmasq_interfaces.bind_only %}
+bind-interfaces
+{% endif %}
+{% if dnsmasq_interfaces.except_interfaces is defined and
+      dnsmasq_interfaces.except_interfaces | count > 0 %}
+  {% for item in dnsmasq_interfaces.except_interfaces %}
+except-interface={{ item }}
+  {% endfor %}
+{% endif %}

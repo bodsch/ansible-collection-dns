@@ -1,0 +1,35 @@
+---
+
+- name: do facts module to get latest information
+  ansible.builtin.setup:
+
+- name: update configuration
+  ansible.builtin.template:
+    src: etc/knot/knot.conf.j2
+    dest: /etc/knot/knot.conf
+    # owner: root
+    group: "{{ knot_group }}"
+    mode: 0640
+    validate: "{{ knot_knotc }} -c %s conf-check"
+    backup: true
+  notify:
+    - knot restart
+
+- name: handle zone configs
+  bodsch.dns.knot_zone:
+    state: "{{ item.value.state | default('present') }}"
+    database_path: "{{ knot_database }}"
+    zone: "{{ item.key }}"
+    zone_ttl: "{{ item.value.ttl | default('3600') }}"
+    zone_soa: "{{ item.value.soa | default({}) }}"
+    name_servers: "{{ item.value.name_servers | default({}) }}"
+    records: "{{ item.value.records | default({}) }}"
+  loop:
+    "{{ knot_zones | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - knot reload
+  register: _knot_zone
+
+...

@@ -1,0 +1,68 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+port={{ dnsmasq_global.port }}
+
+# If you want dnsmasq to change uid and gid to something other
+# than the default, edit the following lines.
+{% if dnsmasq_global.user is defined and
+      dnsmasq_global.user | string | length > 0 %}
+user={{ dnsmasq_global.user }}
+{% endif %}
+{% if dnsmasq_global.group is defined and
+      dnsmasq_global.group | string | length > 0 %}
+group={{ dnsmasq_global.group }}
+{% endif %}
+{% if dnsmasq_global.filterwin2k is defined and
+      dnsmasq_global.filterwin2k %}
+# Uncomment this to filter useless windows-originated DNS requests
+# which can trigger dial-on-demand links needlessly.
+# Note that (amongst other things) this blocks all SRV requests,
+# so don't use it if you use eg Kerberos, SIP, XMMP or Google-talk.
+# This option only affects forwarding, SRV records originating for
+# dnsmasq (via srv-host= lines) are not suppressed by it.
+filterwin2k
+{% endif %}
+{% if dnsmasq_global.resolv_file is defined and
+      dnsmasq_global.resolv_file | string | length > 0 %}
+# Change this line if you want dns to get its upstream servers from
+# somewhere other that /etc/resolv.conf
+resolv-file={{ dnsmasq_global.resolv_file }}
+{% endif %}
+{% if dnsmasq_global.strict_order is defined and
+      dnsmasq_global.strict_order %}
+# By  default,  dnsmasq  will  send queries to any of the upstream
+# servers it knows about and tries to favour servers to are  known
+# to  be  up.  Uncommenting this forces dnsmasq to try each query
+# with  each  server  strictly  in  the  order  they   appear   in
+# /etc/resolv.conf
+strict-order
+{% endif %}
+{% if not dnsmasq_global.no_hosts %}
+no-hosts
+{% endif %}
+{% if not dnsmasq_global.no_resolv %}
+no-resolv
+{% endif %}
+{% if not dnsmasq_global.no_poll %}
+no-poll
+{% endif %}
+{% if dnsmasq_global.domain_needed %}
+domain-needed
+{% endif %}
+{% if dnsmasq_global.bogus_priv %}
+bogus-priv
+{% endif %}
+{% if dnsmasq_global.cache_size is defined and
+      dnsmasq_global.cache_size | string | length > 0 %}
+cache-size={{ dnsmasq_global.cache_size }}
+{% endif %}
+{% if dnsmasq_global.all_servers %}
+all-servers
+{% endif %}
+{% if dnsmasq_global.no_negcache %}
+no-negcache
+{% endif %}
+# Include another lot of configuration options.
+#conf-file=/etc/dnsmasq.more.conf
+conf-dir={{ dnsmasq_config_directory }}/,*.conf
