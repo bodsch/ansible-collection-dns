@@ -36,9 +36,8 @@ defaults:
 
 jobs:
   arch:
-    name: "${{ matrix.image }} / ansible: ${{ matrix.ansible-version }}"
+    name: "${{ matrix.image }}: ${{ matrix.collection_role }} (ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }})"
     runs-on: ubuntu-20.04
-    if: ${{ github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -93,9 +92,8 @@ jobs:
           DISTRIBUTION: ${{ matrix.image }}
 
   deb:
-    name: "${{ matrix.image }} / ansible: ${{ matrix.ansible-version }}"
+    name: "${{ matrix.image }}: ${{ matrix.collection_role }} (ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }})"
     runs-on: ubuntu-20.04
-    if: ${{ github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
