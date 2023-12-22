@@ -1,10 +1,12 @@
 ---
+
 - name: converge
-  hosts: all
+  hosts: instance
   any_errors_fatal: false
+  gather_facts: true
 
   environment:
     NETRC: ''
 
   roles:
-    - role: ansible-dnsmasq
+    - role: bodsch.dns.dnsmasq
