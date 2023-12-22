@@ -142,10 +142,44 @@ def test_files(host, get_vars):
         assert f.is_file
 
 
-def test_command(host):
-    """
-    """
+def dig(host, domains):
+
     local_dns = "@127.0.0.1"
+    for d in domains:
+        domain = d.get("domain")
+        dns_type = d.get("type", "A").upper()
+        result = d.get("result")
+
+        if dns_type == "PTR":
+            dig_type = f"-x"
+        else:
+            dig_type = f"-t {dns_type}"
+
+        command = f"dig {dig_type} {domain} {local_dns} +short"
+        # print(f"{command}")
+        cmd = host.run(command)
+
+        if (cmd.succeeded):
+            output = cmd.stdout
+            output_arr = sorted(output.splitlines())
+
+            if len(output_arr) == 1:
+                output_msg = output.strip()
+            if len(output_arr) > 1:
+                output_msg = ",".join(output_arr)
+
+            # print(f"[{domain} - {dns_type}] => {output_msg}")
+            # print(f"  {len(output)} - {type(output)}")
+            # print(f"  {output_msg}")
+
+            return output_msg == result
+        else:
+            return cmd.failed
+
+
+def test_records_A(host):
+    """
+    """
     domains = [
         {"domain": "ns1.acme-inc.com", "type": "A", "result": "10.11.0.1"},
         {"domain": "ns2.acme-inc.com", "type": "A", "result": "10.11.0.2"},
@@ -157,18 +191,99 @@ def test_command(host):
         {"domain": "srv010.acme-inc.com", "type": "A", "result": "10.11.0.10"},
         {"domain": "srv011.acme-inc.com", "type": "A", "result": "10.11.0.11"},
         {"domain": "srv012.acme-inc.com", "type": "A", "result": "10.11.0.12"},
-        # { "domain": "srv001.example.com"  ,                "result": "192.0.2.1" },
-        # { "domain": "srv002.example.com"  ,                "result": "192.0.2.2" },
-        # { "domain": "mail001.example.com" ,                "result": "192.0.2.10" },
-        # IPv4 Reverse lookups
-        # { "domain": "10.11.0.1"           , "type": "PTR", "result": "ns1.acme-inc.com."}
     ]
-    for d in domains:
-        domain = d.get("domain")
-        type = d.get("type", "A")
-        result = d.get("result")
 
-        cmd = host.run(f"dig -t {type} {domain} {local_dns} +short")
+    assert dig(host, domains)
 
-        print(f"[{domain}] {cmd.rc} => {cmd.stdout}")
-        assert cmd.stdout.strip() == result
+
+def test_records_PTR(host):
+    """
+    """
+    domains = [
+        # IPv4 Reverse lookups
+        {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.com."},
+        {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.com."},
+        {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.com."},
+        {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.com."},
+        {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.com."},
+        {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.com."},
+        {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.com."},
+        {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.com."},
+        {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.com."},
+        {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.com."},
+        # # IPv6 Reverse lookups
+        {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_CNAME(host):
+    """
+    """
+    domains = [
+        # IPv4 Alias lookups
+        {"domain": "www.acme-inc.com", "type": "CNAME", "result": "srv001.acme-inc.com."},
+        {"domain": "mysql.acme-inc.com", "type": "CNAME", "result": "srv002.acme-inc.com."},
+        {"domain": "smtp.acme-inc.com", "type": "CNAME", "result": "mail001.acme-inc.com."},
+        {"domain": "mail-in.acme-inc.com", "type": "CNAME", "result": "mail001.acme-inc.com."},
+        {"domain": "imap.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
+        {"domain": "mail-out.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_AAAA(host):
+    """
+    """
+    domains = [
+        # IPv6 Forward lookups
+        {"domain": "srv001.acme-inc.com", "type": "AAAA", "result": "2001:db8::1"},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_NS(host):
+    """
+    """
+    domains = [
+        # NS records lookup
+        {"domain": "acme-inc.com", "type": "NS", "result": "ns1.acme-inc.com.,ns2.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_MX(host):
+    """
+    """
+    domains = [
+        # MX records lookup
+        {"domain": "acme-inc.com", "type": "MX", "result": "10 mail001.acme-inc.com.,20 mail002.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_SRV(host):
+    """
+    """
+    domains = [
+        # Service records lookup
+        {"domain": "_ldap._tcp.acme-inc.com", "type": "SRV", "result": "0 100 88 srv010.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_TXT(host):
+    """
+    """
+    domains = [
+        # TXT records lookup
+        {"domain": "acme-inc.com", "type": "TXT", "result": '"more text","some text"'},
+    ]
+
+    assert dig(host, domains)

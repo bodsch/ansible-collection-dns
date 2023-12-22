@@ -53,6 +53,41 @@ def read_ansible_yaml(file_name, role_name):
     return f"file={read_file} name={role_name}"
 
 
+def dig(host, domains):
+
+    local_dns = "@127.0.0.1"
+    for d in domains:
+        domain = d.get("domain")
+        dns_type = d.get("type", "A").upper()
+        result = d.get("result")
+
+        if dns_type == "PTR":
+            dig_type = f"-x"
+        else:
+            dig_type = f"-t {dns_type}"
+
+        command = f"dig {dig_type} {domain} {local_dns} +short"
+        # print(f"{command}")
+        cmd = host.run(command)
+
+        if (cmd.succeeded):
+            output = cmd.stdout
+            output_arr = sorted(output.splitlines())
+
+            if len(output_arr) == 1:
+                output_msg = output.strip()
+            if len(output_arr) > 1:
+                output_msg = ",".join(output_arr)
+
+            # print(f"[{domain} - {dns_type}] => {output_msg}")
+            # print(f"  {len(output)} - {type(output)}")
+            # print(f"  {output_msg}")
+
+            return output_msg == result
+        else:
+            return cmd.failed
+
+
 @pytest.fixture()
 def get_vars(host):
     """
@@ -76,16 +111,16 @@ def get_vars(host):
     # print(" -> {} / {}".format(distribution, os))
     # print(" -> {}".format(base_dir))
 
-    file_defaults      = read_ansible_yaml(f"{base_dir}/defaults/main", "role_defaults")
-    file_vars          = read_ansible_yaml(f"{base_dir}/vars/main", "role_vars")
-    file_distibution   = read_ansible_yaml(f"{base_dir}/vars/{operation_system}", "role_distibution")
-    file_molecule      = read_ansible_yaml(f"{molecule_dir}/group_vars/all/vars", "test_vars")
+    file_defaults = read_ansible_yaml(f"{base_dir}/defaults/main", "role_defaults")
+    file_vars = read_ansible_yaml(f"{base_dir}/vars/main", "role_vars")
+    file_distibution = read_ansible_yaml(f"{base_dir}/vars/{operation_system}", "role_distibution")
+    file_molecule = read_ansible_yaml(f"{molecule_dir}/group_vars/all/vars", "test_vars")
     # file_host_molecule = read_ansible_yaml("{}/host_vars/{}/vars".format(base_dir, HOST), "host_vars")
 
-    defaults_vars      = host.ansible("include_vars", file_defaults).get("ansible_facts").get("role_defaults")
-    vars_vars          = host.ansible("include_vars", file_vars).get("ansible_facts").get("role_vars")
-    distibution_vars   = host.ansible("include_vars", file_distibution).get("ansible_facts").get("role_distibution")
-    molecule_vars      = host.ansible("include_vars", file_molecule).get("ansible_facts").get("test_vars")
+    defaults_vars = host.ansible("include_vars", file_defaults).get("ansible_facts").get("role_defaults")
+    vars_vars = host.ansible("include_vars", file_vars).get("ansible_facts").get("role_vars")
+    distibution_vars = host.ansible("include_vars", file_distibution).get("ansible_facts").get("role_distibution")
+    molecule_vars = host.ansible("include_vars", file_molecule).get("ansible_facts").get("test_vars")
     # host_vars          = host.ansible("include_vars", file_host_molecule).get("ansible_facts").get("host_vars")
 
     ansible_vars = defaults_vars
@@ -131,6 +166,23 @@ def test_files(host, get_vars):
         assert f.is_file
 
 
+def test_cache_files(host, get_vars):
+    """
+      created config files
+    """
+    bind_dir = get_vars.get("bind_dir", "/var/cache/bind")
+
+    files = [
+        f"{bind_dir}/0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
+        f"{bind_dir}/11.10.in-addr.arpa",
+        f"{bind_dir}/acme-inc.com"
+    ]
+
+    for _file in files:
+        f = host.file(_file)
+        assert f.is_file
+
+
 def test_service_running_and_enabled(host, get_vars):
     """
       running service
@@ -160,3 +212,115 @@ def test_listening_socket(host, get_vars):
     for spec in listen:
         socket = host.socket(spec)
         assert socket.is_listening
+
+
+def test_records_A(host):
+    """
+    """
+    domains = [
+        {"domain": "ns1.acme-inc.com", "type": "A", "result": "10.11.0.1"},
+        {"domain": "ns2.acme-inc.com", "type": "A", "result": "10.11.0.2"},
+        {"domain": "srv001.acme-inc.com", "type": "A", "result": "10.11.1.1"},
+        {"domain": "srv002.acme-inc.com", "type": "A", "result": "10.11.1.2"},
+        {"domain": "mail001.acme-inc.com", "type": "A", "result": "10.11.2.1"},
+        {"domain": "mail002.acme-inc.com", "type": "A", "result": "10.11.2.2"},
+        {"domain": "mail003.acme-inc.com", "type": "A", "result": "10.11.2.3"},
+        {"domain": "srv010.acme-inc.com", "type": "A", "result": "10.11.0.10"},
+        {"domain": "srv011.acme-inc.com", "type": "A", "result": "10.11.0.11"},
+        {"domain": "srv012.acme-inc.com", "type": "A", "result": "10.11.0.12"},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_PTR(host):
+    """
+    """
+    domains = [
+        # IPv4 Reverse lookups
+        {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.com."},
+        {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.com."},
+        {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.com."},
+        {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.com."},
+        {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.com."},
+        {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.com."},
+        {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.com."},
+        {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.com."},
+        {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.com."},
+        {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.com."},
+        # # IPv6 Reverse lookups
+        {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_CNAME(host):
+    """
+    """
+    domains = [
+        # IPv4 Alias lookups
+        {"domain": "www.acme-inc.com", "type": "CNAME", "result": "srv001.acme-inc.com."},
+        {"domain": "mysql.acme-inc.com", "type": "CNAME", "result": "srv002.acme-inc.com."},
+        {"domain": "smtp.acme-inc.com", "type": "CNAME", "result": "mail001.acme-inc.com."},
+        {"domain": "mail-in.acme-inc.com", "type": "CNAME", "result": "mail001.acme-inc.com."},
+        {"domain": "imap.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
+        {"domain": "mail-out.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_AAAA(host):
+    """
+    """
+    domains = [
+        # IPv6 Forward lookups
+        {"domain": "srv001.acme-inc.com", "type": "AAAA", "result": "2001:db8::1"},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_NS(host):
+    """
+    """
+    domains = [
+        # NS records lookup
+        {"domain": "acme-inc.com", "type": "NS", "result": "ns1.acme-inc.com.,ns2.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_MX(host):
+    """
+    """
+    domains = [
+        # MX records lookup
+        {"domain": "acme-inc.com", "type": "MX", "result": "10 mail001.acme-inc.com.,20 mail002.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_SRV(host):
+    """
+    """
+    domains = [
+        # Service records lookup
+        {"domain": "_ldap._tcp.acme-inc.com", "type": "SRV", "result": "0 100 88 srv010.acme-inc.com."},
+    ]
+
+    assert dig(host, domains)
+
+
+def test_records_TXT(host):
+    """
+    """
+    domains = [
+        # TXT records lookup
+        {"domain": "acme-inc.com", "type": "TXT", "result": '"more text","some text"'},
+    ]
+
+    assert dig(host, domains)

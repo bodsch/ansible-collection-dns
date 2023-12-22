@@ -28,6 +28,13 @@
       ansible.builtin.package:
         update_cache: true
 
+    - name: install dependency
+      ansible.builtin.package:
+        name:
+          - iproute2
+          - bind9-dnsutils
+        state: present
+
     - name: environment
       ansible.builtin.debug:
         msg:

@@ -37,26 +37,7 @@ platforms:
             gateway: "10.11.0.254"
     networks:
       - name: bind
-        ipv4_address: "10.11.0.4"
-
-  - name: secondary
-    image: "bodsch/ansible-${DISTRIBUTION:-debian:12}"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
-    docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
-    privileged: true
-    pre_build_image: true
-    cgroupns_mode: host
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      - /var/lib/containerd
-    tty: true
-    environment:
-      container: docker
-    groups:
-      - dns
-    networks:
-      - name: bind
-        ipv4_address: "10.11.0.5"
+        ipv4_address: "10.11.0.1"
 
 provisioner:
   name: ansible

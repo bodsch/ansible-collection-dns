@@ -7,10 +7,6 @@
 ;
 ; Reverse zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
-;
-; {{ item.1 }}
-; {{ (item.1 | ansible.utils.ipaddr('revdns'))  }}
-; {{ (item.1 | regex_replace('^.*/','')) }}
 
 $TTL {{ _zone_data['ttl'] }}
 $ORIGIN {{ _zone_data['revip'] }}.
