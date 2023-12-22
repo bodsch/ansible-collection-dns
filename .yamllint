@@ -34,3 +34,4 @@ rules:
     type: unix
   trailing-spaces: disable
   truthy: disable
+  key-duplicates: disable
