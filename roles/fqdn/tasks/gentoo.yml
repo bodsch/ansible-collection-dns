@@ -1,0 +1,9 @@
+---
+
+- name: Update conf.d
+  ansible.builtin.lineinfile:
+    dest: /etc/conf.d/hostname
+    line: "hostname={{ fqdn.short_hostname }}"
+    regexp: "hostname="
+
+...

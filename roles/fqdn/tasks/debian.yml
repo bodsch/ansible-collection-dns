@@ -1,0 +1,5 @@
+---
+- name: Debian | Install dbus
+  ansible.builtin.apt:
+    name: dbus
+    state: present

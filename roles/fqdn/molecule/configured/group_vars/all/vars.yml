@@ -1,0 +1,8 @@
+---
+
+fqdn:
+  hostname: "instance.molecule.local"
+  short_hostname: "instance"
+  ip_address: "{{ ansible_default_ipv4.address }}"
+
+...
