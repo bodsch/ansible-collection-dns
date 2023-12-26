@@ -1,0 +1,18 @@
+---
+
+resolv_domain: molecule.local
+
+resolv_search:
+  - "{{ resolv_domain }}"
+
+resolv_nameservers:
+  # - 127.0.0.1
+  - 46.38.225.230
+  - 46.38.252.230
+
+resolv_options:
+  - "timeout:2"
+  - no-inet6
+  - single-request
+
+...

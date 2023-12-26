@@ -1,0 +1,34 @@
+---
+- name: install dependencies
+  ansible.builtin.package:
+    name: "{{ resolv_dependencies }}"
+    state: present
+  when:
+    - resolv_dependencies | default([]) | count > 0
+
+- name: re-read ansible facts
+  setup:
+
+- name: detect docker environment
+  ansible.builtin.set_fact:
+    is_docker_guest: "{{
+      ansible_virtualization_role | default('host') == 'guest' and
+      ansible_virtualization_type | default('none') == 'docker' }}"
+
+- name: configure resolv.conf
+  become: true
+  ansible.builtin.template:
+    src: "etc/resolv.conf.j2"
+    dest: "/etc/resolv.conf"
+    mode: "0644"
+  when:
+    - not is_docker_guest
+
+- name: configure resolv.conf
+  become: true
+  ansible.builtin.template:
+    src: "etc/resolv.conf.j2"
+    dest: "/etc/resolv.conf.docker"
+    mode: "0644"
+  when:
+    - is_docker_guest
