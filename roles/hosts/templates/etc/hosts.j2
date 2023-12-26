@@ -1,0 +1,68 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+127.0.0.1        localhost.localdomain     localhost
+
+{% if hosts.add_default_ipv4 is defined and
+      hosts.add_default_ipv4 | string | length > 0 and
+      hosts.add_default_ipv4 %}
+  {% if ansible_default_ipv4 is defined %}
+{{ ansible_default_ipv4.address.ljust(15) }}  {{ ansible_fqdn.ljust(25) }} {{ ansible_hostname }}
+  {% endif %}
+{% endif %}
+{% if hosts.add_basic_ipv6 is defined and
+      hosts.add_basic_ipv6 | string | length > 0 and
+      hosts.add_basic_ipv6 %}
+
+# basic IPv6 entries
+::1              localhost6.localdomain6   localhost6  ip6-localhost  ip6-loopback
+fe00::0          ip6-localnet
+ff00::0          ip6-mcastprefix
+ff02::1          ip6-allnodes
+ff02::2          ip6-allrouters
+{% endif %}
+{% if hosts.add_ansible_managed_hosts is defined and
+      hosts.add_ansible_managed_hosts | string | length > 0 and
+      hosts.add_ansible_managed_hosts %}
+
+# ansible managed hosts
+  {% for group in hosts.add_ansible_managed_hosts_groups %}
+    {% for host in groups[group] | sort %}
+      {% set address = None %}
+      {% if hosts_network_interface is defined and
+            hosts_network_interface | string | length > 0 %}
+        {% set interface_config = hostvars.get(host).get('ansible_' + hosts_network_interface) %}
+        {% if interface_config is defined %}
+          {% set protocol_config = interface_config.get(hosts_ip_protocol) %}
+            {% if protocol_config is defined %}
+              {% set address = protocol_config.get('address') | default(None) %}
+            {% endif %}
+        {% endif %}
+      {% else %}
+        {% set protocol_config = hostvars.get(host).get('ansible_default_' + hosts_ip_protocol) %}
+        {% if protocol_config is defined %}
+          {% set address = protocol_config.get('address') | default(None) %}
+        {% endif %}
+      {% endif %}
+      {% if address %}
+        {% set host_fqdn = hostvars.get(host).get('ansible_fqdn') %}
+        {% set host_short = hostvars.get(host).get('ansible_hostname') %}
+{{ address.ljust(15) }}  {{ host_fqdn.ljust(25) }} {{ host_short if host_fqdn != host_short else '' }}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+{% endif %}
+{% if hosts_entries is defined and
+      hosts_entries | count > 0 %}
+
+  {% for host in hosts_entries %}
+{{ host.ip.ljust(15) }}  {{ host.name.ljust(25) }} {{ host.aliases | default([]) | join(' ') }}
+  {% endfor %}
+{% endif %}
+{% if hosts_file_snippets|length != 0 %}
+
+  {% for snippet in hosts_file_snippets %}
+    {% include snippet %}
+
+  {% endfor %}
+{% endif %}

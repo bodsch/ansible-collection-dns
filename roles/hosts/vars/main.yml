@@ -1,0 +1,16 @@
+---
+
+host_dependencies:
+  - iproute2
+
+hosts_file: /etc/hosts
+
+hosts_defaults:
+  add_default_ipv4: true
+  add_basic_ipv6: false
+  add_ansible_managed_hosts: false
+  add_ansible_managed_hosts_groups:
+    - 'all'
+  cloud_template_location: "/etc/cloud/templates/hosts.{{ ansible_os_family | lower }}.tmpl"
+
+...
