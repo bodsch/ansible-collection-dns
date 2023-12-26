@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+{% if ansible_os_family | lower == 'redhat' %}
+# for extra debug, add "-v -v" or change verbosity: in unbound.conf
+UNBOUND_ENABLE=true
+UNBOUND_OPTIONS="-c /etc/unbound/unbound.conf"
+{% endif %}

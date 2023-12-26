@@ -1,0 +1,41 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+# stub_zone
+
+{% if unbound_config_stub_zone is defined and unbound_config_stub_zone | count != 0 %}
+stub-zone:
+{% if unbound_config_stub_zone.name is defined %}
+  name: "{{ unbound_config_stub_zone.name }}"
+{% endif %}
+{% if unbound_config_stub_zone.stub_addr is defined %}
+  stub-addr: {{ unbound_config_stub_zone.stub_addr }}
+{% endif %}
+{% if unbound_config_stub_zone.stub_host is defined %}
+  stub-host: {{ unbound_config_stub_zone.stub_host }}
+{% endif %}
+
+{% endif %}
+
+{#
+# Stub zones.
+# Create entries like below, to make all queries for 'example.com' and
+# 'example.org' go to the given list of nameservers. list zero or more
+# nameservers by hostname or by ipaddress. If you set stub-prime to yes,
+# the list is treated as priming hints (default is no).
+# With stub-first yes, it attempts without the stub if it fails.
+# Consider adding domain-insecure: name and local-zone: name nodefault
+# to the server: section if the stub is a locally served zone.
+# stub-zone:
+#       name: "example.com"
+#       stub-addr: 192.0.2.68
+#       stub-prime: no
+#       stub-first: no
+#       stub-tls-upstream: no
+# stub-zone:
+#       name: "example.org"
+#       stub-host: ns.example.com.
+
+# You can now also dynamically create and delete stub-zone's using
+# unbound-control stub_add domain.com 1.2.3.4 5.6.7.8
+# unbound-control stub_remove domain.com 1.2.3.4 5.6.7.8
+#}
