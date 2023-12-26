@@ -1,0 +1,55 @@
+---
+
+- name: install unbound
+  ansible.builtin.package:
+    name: unbound
+    state: present
+
+- name: test existing root.key
+  ansible.builtin.stat:
+    path: "/var/lib/unbound/root.key"
+    get_mime: true
+  register: __unbound_rootkey_exists
+
+- name: create root.key
+  ansible.builtin.command: |
+    /usr/lib/unbound/package-helper root_trust_anchor_update
+  when:
+    - ansible_os_family | lower == 'debian'
+    - not __unbound_rootkey_exists.stat.exists
+
+- name: remove distribution config files
+  ansible.builtin.file:
+    path: "{{ unbound_conf_dir }}/unbound.conf.d/{{ item }}"
+    state: absent
+  loop:
+    - qname-minimisation.conf
+    - root-auto-trust-anchor-file.conf
+
+- name: unbound.log handling
+  when:
+    - unbound_config_server.logfile is defined
+    - unbound_config_server.logfile | length != 0
+  block:
+    - name: test existing unbound.log
+      ansible.builtin.stat:
+        path: "/{{ unbound_config_server.logfile }}"
+        get_mime: true
+      register: __unbound_logfile_exists
+
+    - name: debug
+      debug:
+        msg:
+          - "{{ __unbound_logfile_exists.stat }}"
+          - "{{ unbound_config_server.logfile }}"
+          - "{{ unbound_config_server.logfile | dirname }}"
+
+    - name: create unbound.log
+      ansible.builtin.file:
+        name: "{{ unbound_config_server.logfile }}"
+        state: touch
+        owner: "{{ unbound_user }}"
+        group: "{{ unbound_group }}"
+        mode: 0666
+      when:
+        - not __unbound_logfile_exists.stat.exists

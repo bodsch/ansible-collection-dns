@@ -1,0 +1,17 @@
+---
+
+- name: create chroot environment
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ unbound_user }}"
+    group: "{{ unbound_group }}"
+    mode: 0750
+  loop:
+    - "{{ unbound_chroot_dir }}"
+    - "{{ unbound_chroot_dir }}/var/run"
+    - "{{ unbound_chroot_dir }}/var/log"
+    - "{{ unbound_chroot_dir }}/var/lib/unbound"
+    - "{{ unbound_chroot_dir }}{{ unbound_environment_file | dirname }}"
+    - "{{ unbound_chroot_dir }}/etc/unbound"
+    - "{{ unbound_chroot_dir }}/etc/unbound/unbound.conf.d"

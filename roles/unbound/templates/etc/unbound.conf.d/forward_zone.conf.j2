@@ -1,0 +1,35 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+# forward_zone
+
+{% if unbound_config_forward_zone is defined and unbound_config_forward_zone | count != 0 %}
+forward-zone:
+{% if unbound_config_forward_zone.name is defined %}
+  name: "{{ unbound_config_forward_zone.name }}"
+{% endif %}
+{% for v in unbound_config_forward_zone.forward_addrs %}
+  forward-addr: {{ v }}
+{% endfor %}
+{% endif %}
+
+{#
+# Forward zones
+# Create entries like below, to make all queries for 'example.com' and
+# 'example.org' go to the given list of servers. These servers have to handle
+# recursion to other nameservers. List zero or more nameservers by hostname
+# or by ipaddress. Use an entry with name "." to forward all queries.
+# If you enable forward-first, it attempts without the forward if it fails.
+# forward-zone:
+#       name: "example.com"
+#       forward-addr: 192.0.2.68
+#       forward-addr: 192.0.2.73@5355  # forward to port 5355.
+#       forward-first: no
+#       forward-tls-upstream: no
+# forward-zone:
+#       name: "example.org"
+#       forward-host: fwd.example.com
+#
+# You can now also dynamically create and delete forward-zone's using
+# unbound-control forward_add domain.com 1.2.3.4 5.6.7.8
+# unbound-control forward_remove domain.com 1.2.3.4 5.6.7.8
+#}
