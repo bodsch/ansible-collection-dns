@@ -1,0 +1,61 @@
+---
+
+- name: install dependencies
+  ansible.builtin.package:
+    name: "{{ host_dependencies }}"
+    state: present
+  when:
+    - host_dependencies | default([]) | count > 0
+
+- name: re-read ansible facts
+  setup:
+
+- name: detect docker environment
+  ansible.builtin.set_fact:
+    is_docker_guest: "{{
+      ansible_virtualization_role | default('host') == 'guest' and
+      ansible_virtualization_type | default('none') == 'docker' }}"
+
+- name: merge postfix configuration between defaults and custom
+  ansible.builtin.set_fact:
+    hosts: "{{ hosts_defaults | combine(hosts, recursive=True) }}"
+
+- name: detect if cloud template present
+  become: true
+  ansible.builtin.stat:
+    path: "{{ hosts.cloud_template_location }}"
+  register: hosts_cloud_template
+
+- name: add managed block to {{ hosts_file }}
+  ansible.builtin.template:
+    src: etc/hosts.j2
+    dest: "{{ hosts_file }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: "{{ host_file_backup }}"
+  when:
+    - not is_docker_guest
+
+- name: add managed block to {{ hosts_file }}
+  ansible.builtin.template:
+    src: etc/hosts.j2
+    dest: "{{ hosts_file }}.docker"
+    owner: root
+    group: root
+    mode: 0644
+    backup: "{{ host_file_backup }}"
+  when:
+    - is_docker_guest
+
+- name: add host entries to cloud template file
+  become: true
+  ansible.builtin.template:
+    src: etc/hosts.j2
+    dest: "{{ hosts_file }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: "{{ host_file_backup }}"
+  when:
+    hosts_cloud_template.stat.exists
