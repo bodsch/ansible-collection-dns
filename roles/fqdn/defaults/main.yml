@@ -1,0 +1,6 @@
+---
+
+fqdn:
+  hostname: "{{ inventory_hostname }}"
+  short_hostname: "{{ inventory_hostname_short }}"
+  ip_address: "{{ ansible_default_ipv4.address }}"
