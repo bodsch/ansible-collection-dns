@@ -1,0 +1,64 @@
+---
+
+unbound_dependencies:
+  - dnsutils
+
+unbound_environment_file: /etc/default/unbound
+
+unbound_config_server_defaults:
+  verbosity: 3
+  statistics-interval: 240
+  use-syslog: "yes"
+  log-queries: "yes"
+  logfile: "" # /var/log/unbound.log
+  num-threads: 2
+  directory: "/etc/unbound"
+  username: "unbound"
+  interface: 0.0.0.0
+  do-ip4: 'yes'
+  do-ip6: 'no'
+  do-udp: 'yes'
+  do-tcp: 'yes'
+  access-control:
+    - '127.0.0.0/8 allow'
+  cache-min-ttl: 5
+  cache-max-negative-ttl: 60
+  root-hints: "/etc/unbound/root.hints"
+  hide-identity: 'yes'
+  hide-version: 'yes'
+  prefetch: 'yes'
+  max-udp-size: 4096
+  msg-buffer-size: 65552
+  unwanted-reply-threshold: 10000
+  ipsecmod-enabled: 'no'
+  auto-trust-anchor-file: "/var/lib/unbound/root.key"
+  qname-minimisation: 'yes'
+
+unbound_config_stub_zone_defaults: {}
+
+unbound_config_forward_zone_defaults:
+  name: "."
+  # definitely censor free & log free with DNSSEC Support:
+  forward_addrs:
+    - 84.200.69.80   # DNS Watch
+    - 84.200.70.40   # DNS Watch
+    - 77.109.148.136 # Xiala.net
+    - 77.109.148.137 # Xiala.net
+    - 91.239.100.100 # censurfridns.dk
+    - 89.233.43.71   # censurfridns.dk
+
+unbound_config_remote_control_defaults:
+  server-key-file: "{{ unbound_certs.server.key_file }}"
+  server-cert-file: "{{ unbound_certs.server.cert_file }}"
+  control-key-file: "{{ unbound_certs.control.key_file }}"
+  control-cert-file: "{{ unbound_certs.control.cert_file }}"
+
+unbound_config_cachedb_defaults: {}
+
+unbound_certs:
+  server:
+    key_file: "{{ unbound_conf_dir }}/unbound_server.key"
+    cert_file: "{{ unbound_conf_dir }}/unbound_server.pem"
+  control:
+    key_file: "{{ unbound_conf_dir }}/unbound_control.key"
+    cert_file: "{{ unbound_conf_dir }}/unbound_control.pem"

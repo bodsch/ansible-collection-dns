@@ -1,0 +1,31 @@
+---
+galaxy_info:
+
+  role_name: unbound
+
+  author: Bodo Schulz
+  description: ansible role to install unbound
+
+  license: Apache
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Debian
+      versions:
+        # 10
+        - buster
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        # 20.04
+        - focal
+
+  galaxy_tags:
+    - system
+    - dns
+    - unbound
+
+dependencies: []
+
+...

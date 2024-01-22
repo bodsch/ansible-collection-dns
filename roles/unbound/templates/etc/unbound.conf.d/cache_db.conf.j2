@@ -1,0 +1,29 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+# cachedb
+
+{% if unbound_config_cachedb is defined and unbound_config_cachedb | count != 0 %}
+cachedb:
+{% for k, v in unbound_config_cachedb.items() %}
+  {{ k }}: {{ v }}
+{% endfor %}
+{% endif -%}
+
+{#
+# CacheDB
+# Enable external backend DB as auxiliary cache.  Specify the backend name
+# (default is "testframe", which has no use other than for debugging and
+# testing) and backend-specific options.  The 'cachedb' module must be
+# included in module-config.
+# cachedb:
+#     backend: "testframe"
+#     # secret seed string to calculate hashed keys
+#     secret-seed: "default"
+#     # For "redis" backend:
+#     # redis server's IP address or host name
+#     redis-server-host: 127.0.0.1
+#     # redis server's TCP port
+#     redis-server-port: 6379
+#     # timeout (in ms) for communication with the redis server
+#     redis-timeout: 100
+#}

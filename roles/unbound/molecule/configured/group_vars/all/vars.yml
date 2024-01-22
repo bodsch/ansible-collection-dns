@@ -1,0 +1,30 @@
+---
+
+unbound_config_server:
+  access-control:
+    - '127.0.0.0/8 allow'
+    - '172.16.0.0/12 allow'
+    - '192.168.0.0/16 allow'
+    - 'fc00::/7 allow'
+    - 'fe80::/10 allow'
+  local-zone:
+    - '"doubleclick.net" redirect'
+  local-data:
+    - '"doubleclick.net A 127.0.0.1"'
+
+unbound_config_remote_control:
+  control-enable: 'yes'
+  control-interface: 127.0.0.1
+  control-port: 8953
+
+# unbound_config_cachedb:
+#   backend: "redis"
+#   # secret seed string to calculate hashed keys
+#   secret-seed: "0Wa2NkKveI7Iof7FyTSvGv3uZM6bGSyw6pMBX2jvX6"
+#   # For "redis" backend:
+#   # redis server's IP address or host name
+#   redis-server-host: 127.0.0.1
+#   # redis server's TCP port
+#   redis-server-port: 6379
+#   # timeout (in ms) for communication with the redis server
+#   redis-timeout: 100
