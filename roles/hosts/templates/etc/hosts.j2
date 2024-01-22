@@ -3,16 +3,16 @@
 
 127.0.0.1        localhost.localdomain     localhost
 
-{% if hosts.add_default_ipv4 is defined and
-      hosts.add_default_ipv4 | string | length > 0 and
-      hosts.add_default_ipv4 %}
+{% if hosts_add_default_ipv4 is defined and
+      hosts_add_default_ipv4 | string | length > 0 and
+      hosts_add_default_ipv4 %}
   {% if ansible_default_ipv4 is defined %}
 {{ ansible_default_ipv4.address.ljust(15) }}  {{ ansible_fqdn.ljust(25) }} {{ ansible_hostname }}
   {% endif %}
 {% endif %}
-{% if hosts.add_basic_ipv6 is defined and
-      hosts.add_basic_ipv6 | string | length > 0 and
-      hosts.add_basic_ipv6 %}
+{% if hosts_add_basic_ipv6 is defined and
+      hosts_add_basic_ipv6 | string | length > 0 and
+      hosts_add_basic_ipv6 %}
 
 # basic IPv6 entries
 ::1              localhost6.localdomain6   localhost6  ip6-localhost  ip6-loopback
@@ -21,12 +21,12 @@ ff00::0          ip6-mcastprefix
 ff02::1          ip6-allnodes
 ff02::2          ip6-allrouters
 {% endif %}
-{% if hosts.add_ansible_managed_hosts is defined and
-      hosts.add_ansible_managed_hosts | string | length > 0 and
-      hosts.add_ansible_managed_hosts %}
+{% if hosts_add_ansible_managed_hosts_is defined and
+      hosts_add_ansible_managed_hosts_| string | length > 0 and
+      hosts_add_ansible_managed_hosts_%}
 
 # ansible managed hosts
-  {% for group in hosts.add_ansible_managed_hosts_groups %}
+  {% for group in hosts_add_ansible_managed_hosts_groups %}
     {% for host in groups[group] | sort %}
       {% set address = None %}
       {% if hosts_network_interface is defined and

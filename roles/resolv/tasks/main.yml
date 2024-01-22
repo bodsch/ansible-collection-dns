@@ -7,7 +7,7 @@
     - resolv_dependencies | default([]) | count > 0
 
 - name: re-read ansible facts
-  setup:
+  ansible.builtin.setup:
 
 - name: detect docker environment
   ansible.builtin.set_fact:

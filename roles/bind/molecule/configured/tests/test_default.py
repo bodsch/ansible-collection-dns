@@ -62,7 +62,7 @@ def dig(host, domains):
         result = d.get("result")
 
         if dns_type == "PTR":
-            dig_type = f"-x"
+            dig_type = "-x"
         else:
             dig_type = f"-t {dns_type}"
 

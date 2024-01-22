@@ -7,7 +7,7 @@
     path: "{{ item }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
-    mode: 0770
+    mode: "0770"
   loop:
     - "{{ bind_dir }}/dynamic"
     - "{{ bind_dir }}/data"
@@ -22,7 +22,7 @@
     path: "{{ bind_secondary_dir }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
-    mode: 0770
+    mode: "0770"
   tags:
     - bind
 
@@ -33,7 +33,7 @@
     dest: "{{ bind_conf_dir }}/{{ auth_file }}"
     owner: root
     group: "{{ bind_group }}"
-    mode: 0640
+    mode: "0640"
   when:
     - bind_dns_keys is defined
     - bind_dns_keys | length > 0
@@ -52,7 +52,7 @@
     dest: "{{ bind_config }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
-    mode: 0640
+    mode: "0640"
     backup: true
     # validate: 'named-checkconf %s'
   notify:

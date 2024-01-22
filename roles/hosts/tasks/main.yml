@@ -8,7 +8,7 @@
     - host_dependencies | default([]) | count > 0
 
 - name: re-read ansible facts
-  setup:
+  ansible.builtin.setup:
 
 - name: detect docker environment
   ansible.builtin.set_fact:
@@ -16,14 +16,10 @@
       ansible_virtualization_role | default('host') == 'guest' and
       ansible_virtualization_type | default('none') == 'docker' }}"
 
-- name: merge postfix configuration between defaults and custom
-  ansible.builtin.set_fact:
-    hosts: "{{ hosts_defaults | combine(hosts, recursive=True) }}"
-
 - name: detect if cloud template present
   become: true
   ansible.builtin.stat:
-    path: "{{ hosts.cloud_template_location }}"
+    path: "{{ hosts_cloud_template_location }}"
   register: hosts_cloud_template
 
 - name: add managed block to {{ hosts_file }}

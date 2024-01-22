@@ -1,18 +1,17 @@
 ---
 
-hosts:
-  # If set to true, an entry for `ansible_hostname`, bound to the host's default IPv4 address is added added.
-  add_default_ipv4: true
-  # If set to true, basic IPv6 entries (localhost6, ip6-localnet, etc) are added.
-  add_basic_ipv6: false
-  # If set to true, an entry for every host managed by Ansible is added.
-  # Remark that this makes `hosts_add_default_ipv4` unnecessary, as it will be added as well by this setting.
-  add_ansible_managed_hosts: false
-  # Select specific groups of Ansible managed hosts to be added in the hosts file.
-  add_ansible_managed_hosts_groups:
-    - 'all'
-  # for using cloud templates
-  cloud_template_location: "/etc/cloud/templates/hosts.{{ ansible_os_family | lower }}.tmpl"
+# If set to true, an entry for `ansible_hostname`, bound to the host's default IPv4 address is added added.
+hosts_add_default_ipv4: true
+# If set to true, basic IPv6 entries (localhost6, ip6-localnet, etc) are added.
+hosts_add_basic_ipv6: false
+# If set to true, an entry for every host managed by Ansible is added.
+# Remark that this makes `hosts_add_default_ipv4` unnecessary, as it will be added as well by this setting.
+hosts_add_ansible_managed_hosts: false
+# Select specific groups of Ansible managed hosts to be added in the hosts file.
+hosts_add_ansible_managed_hosts_groups:
+  - 'all'
+# for using cloud templates
+hosts_cloud_template_location: "/etc/cloud/templates/hosts.{{ ansible_os_family | lower }}.tmpl"
 
 # IP protocol to use
 hosts_ip_protocol: 'ipv4'
@@ -26,3 +25,5 @@ hosts_entries: []
 
 # Custom host file snippets to be added
 hosts_file_snippets: []
+
+...
