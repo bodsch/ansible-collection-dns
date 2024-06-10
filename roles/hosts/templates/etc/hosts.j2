@@ -6,9 +6,7 @@
 {% if hosts_add_default_ipv4 is defined and
       hosts_add_default_ipv4 | string | length > 0 and
       hosts_add_default_ipv4 %}
-  {% if ansible_default_ipv4 is defined %}
 {{ ansible_default_ipv4.address.ljust(15) }}  {{ ansible_fqdn.ljust(25) }} {{ ansible_hostname }}
-  {% endif %}
 {% endif %}
 {% if hosts_add_basic_ipv6 is defined and
       hosts_add_basic_ipv6 | string | length > 0 and
@@ -21,9 +19,9 @@ ff00::0          ip6-mcastprefix
 ff02::1          ip6-allnodes
 ff02::2          ip6-allrouters
 {% endif %}
-{% if hosts_add_ansible_managed_hosts_is defined and
-      hosts_add_ansible_managed_hosts_| string | length > 0 and
-      hosts_add_ansible_managed_hosts_%}
+{% if hosts_add_ansible_managed_hosts_groups is defined and
+      hosts_add_ansible_managed_hosts_groups | string | length > 0 and
+      hosts_add_ansible_managed_hosts_groups %}
 
 # ansible managed hosts
   {% for group in hosts_add_ansible_managed_hosts_groups %}
@@ -32,15 +30,18 @@ ff02::2          ip6-allrouters
       {% if hosts_network_interface is defined and
             hosts_network_interface | string | length > 0 %}
         {% set interface_config = hostvars.get(host).get('ansible_' + hosts_network_interface) %}
-        {% if interface_config is defined %}
+        {% if interface_config is defined and
+              interface_config | count > 0 %}
           {% set protocol_config = interface_config.get(hosts_ip_protocol) %}
-            {% if protocol_config is defined %}
+            {% if protocol_config is defined and
+                  protocol_config | count > 0 %}
               {% set address = protocol_config.get('address') | default(None) %}
             {% endif %}
         {% endif %}
       {% else %}
         {% set protocol_config = hostvars.get(host).get('ansible_default_' + hosts_ip_protocol) %}
-        {% if protocol_config is defined %}
+        {% if protocol_config is defined and
+              protocol_config | count > 0  %}
           {% set address = protocol_config.get('address') | default(None) %}
         {% endif %}
       {% endif %}
