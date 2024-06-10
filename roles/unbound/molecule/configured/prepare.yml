@@ -6,13 +6,19 @@
 
   pre_tasks:
     - name: arch- / artixlinux
+      when:
+        - ansible_distribution | lower == 'archlinux' or
+          ansible_os_family | lower == 'artix linux'
       block:
         - name: update pacman system
-          command: |
+          ansible.builtin.command: |
             pacman --refresh --sync --sysupgrade --noconfirm
+          register: pacman
+          changed_when: pacman.rc != 0
+          failed_when: pacman.rc != 0
 
         - name: create depends service
-          copy:
+          ansible.builtin.copy:
             mode: 0755
             dest: /etc/init.d/net
             content: |
@@ -20,10 +26,6 @@
               true
           when:
             - ansible_os_family | lower == 'artix linux'
-
-      when:
-        - ansible_distribution | lower == 'archlinux' or
-          ansible_os_family | lower == 'artix linux'
 
     - name: update package cache
       package:
