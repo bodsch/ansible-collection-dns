@@ -45,7 +45,7 @@ jobs:
           - archlinux:latest
         ansible-version:
           - '8.5'
-         python:
+         python_version:
           - '3.11'
           - '3.12'
         scenario:
