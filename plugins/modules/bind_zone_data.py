@@ -146,12 +146,24 @@ class BindZoneData(object):
     def define_zone_reverse_names(self, ipv6=False):
         """
         """
+        self.module.log(msg=f"define_zone_reverse_names({ipv6})")
+
+        networks = []
+
         if not ipv6:
-            networks = [x.get("networks") for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
+            networks = [x.get("networks", []) for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
         else:
-            networks = [x.get("ipv6_networks") for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
-        # flatten list of lists
-        return [x for row in networks for x in row]
+            networks = [x.get("ipv6_networks", []) for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
+
+        self.module.log(msg=f" - {networks} (type(networks))")
+        if networks:
+            # flatten list of lists
+            networks = [x for row in networks for x in row]
+        else:
+            networks = []
+
+        self.module.log(msg=f" = {networks}")
+        return networks
 
     def define_zone_networks(self):
         """
@@ -167,27 +179,26 @@ class BindZoneData(object):
 
         result = None
 
-        _network = netaddr.IPNetwork(str(network))
-        _info = _network.info
-        _prefix = _network.prefixlen
-        _ipaddress = netaddr.IPAddress(_network)
-        self.module.log(msg=f"  ip address: {_ipaddress}")
+        try:
+            _network = netaddr.IPNetwork(str(network))
+            _info = _network.info
+            _prefix = _network.prefixlen
+            _ipaddress = netaddr.IPAddress(_network)
+            self.module.log(msg=f"  ip address: {_ipaddress}")
+        except Exception as e:
+            self.module.log(msg=f" ERROR: '{e}'")
 
         result = _ipaddress.reverse_dns
 
-        ipv6 = False
         if _info['IPv6']:
-            ipv6 = True
+            result = result[-(9 + _prefix // 2):-1]
 
         # self.module.log(msg=f"  - {_info}")
         # self.module.log(msg=f"  - {ipv6}")
-        self.module.log(msg=f" = '{result}'")
-        if not ipv6:
-            result = ".".join(network.replace(
-                network + '.', '').split('.')[::-1]) + ".in-addr.arpa"
-
-        if ipv6:
-            result = result[-(9 + _prefix // 2):-1]
+        # self.module.log(msg=f" = '{result}'")
+        # if not ipv6:
+        #     result = ".".join(network.replace(
+        #         network + '.', '').split('.')[::-1]) + ".in-addr.arpa"
 
         self.module.log(msg=f" = '{result}'")
 
