@@ -1,0 +1,10 @@
+---
+
+pacman_custom_mirrors:
+  - file: /etc/pacman.d/mirrorlist-arch
+    "ARCH MIRRORS":
+      enabled: true
+      servers:
+        - http://mirror.i3d.net/pub/archlinux/$repo/os/$arch
+
+...

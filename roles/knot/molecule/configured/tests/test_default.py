@@ -106,7 +106,7 @@ def test_listening_socket(host, get_vars):
         print(i)
 
     bind_address = "127.0.0.1"
-    bind_port = 53
+    bind_port = 5353
 
     listen = []
     listen.append(f"tcp://{bind_address}:{bind_port}")

@@ -1,0 +1,70 @@
+---
+
+knot_config:
+  server:
+    rundir: "/run/knot"
+    user: "{{ knot_user }}:{{ knot_group }}"
+    listen:
+      - '127.0.0.1@5353'
+
+  log:
+    syslog:
+      any: info
+    stderr:
+      server: notice
+      control: notice
+      zone: notice
+      any: notice
+
+  database:
+    storage: "{{ knot_database }}"
+
+  template:
+    default:
+      storage: "{{ knot_database }}"
+      file: "%s.zone"
+
+  acl:
+    update_acl:
+      address: 127.0.0.1
+      action: update
+      key: molecule
+
+  zone:
+    molecule.local:
+      # master: master
+      acl: update_acl
+      file: molecule.local.zone
+
+  key:
+    molecule:
+      algorithm: hmac-sha256
+      # base64 coded!
+      # echo 8z4cp9L0MSESNg3Gv3cHXKQPFvSfDxwt | base64 -w0
+      secret: OHo0Y3A5TDBNU0VTTmczR3YzY0hYS1FQRnZTZkR4d3QK
+
+knot_zones:
+  molecule.local:
+    ttl: 3600
+    soa:
+      primary_dns: 'dns.molecule.local'
+      hostmaster: 'hostmaster.molecule.local'
+      refresh: 6h
+      retry: 1h
+      expire: 1w
+      minimum: 1d
+    name_servers:
+      dns.molecule.local:
+        ip: '{{ ansible_default_ipv4.address }}'
+    records:
+      this.molecule.local:
+        type: 'A'
+        ip: '{{ ansible_default_ipv4.address }}'
+      docker.molecule.local:
+        type: 'A'
+        ip: 192.168.110.10
+
+      there.molecule.local:
+        type: 'CNAME'
+        target: 'this.molecule.local'
+...

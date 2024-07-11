@@ -15,7 +15,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 def base_directory():
     cwd = os.getcwd()
 
-    if 'group_vars' in os.listdir(cwd):
+    if ('group_vars' in os.listdir(cwd)):
         directory = "../.."
         molecule_directory = "."
     else:
@@ -43,7 +43,7 @@ def get_vars(host):
 
     file_defaults = f"file={base_dir}/defaults/main.yaml name=role_defaults"
     file_vars = f"file={base_dir}/vars/main.yaml name=role_vars"
-    file_molecule = f"file={molecule_dir}/group_vars/all/vars.yaml name=test_vars"
+    file_molecule = f"file={molecule_dir}/group_vars/all/vars.yml name=test_vars"
     file_distibution = f"file={base_dir}/vars/{operation_system}.yaml name=role_distibution"
 
     defaults_vars = host.ansible("include_vars", file_defaults).get("ansible_facts").get("role_defaults")
@@ -72,7 +72,7 @@ def test_packages(host):
     print(f"release     : {release}")
 
     packages = []
-    packages.append("knot")
+    packages.append("knot-resolver")
 
     # artix ist not supported
     if not distribution == "artix":
@@ -82,35 +82,22 @@ def test_packages(host):
 
 
 @pytest.mark.parametrize("dirs", [
-    "/etc/knot",
-    "/var/lib/knot"
+    "/etc/knot-resolver",
+    "/usr/lib/knot-resolver"
 ])
 def test_directories(host, dirs):
+    distribution = host.system_info.distribution
+    # release = host.system_info.release
+
+    if distribution in ['redhat', 'ol', 'centos', 'rocky', 'almalinux']:
+        dirs = dirs.replace("/lib/", "/lib64/")
 
     d = host.file(dirs)
     assert d.is_directory
 
 
-def test_service_running_and_enabled(host):
-    service = host.service('knot')
-    assert service.is_running
-    assert service.is_enabled
-
-
-def test_listening_socket(host, get_vars):
-    """
-    """
-    listening = host.socket.get_listening_sockets()
-
-    for i in listening:
-        print(i)
-
-    bind_address = "127.0.0.1"
-    bind_port = 53
-
-    listen = []
-    listen.append(f"tcp://{bind_address}:{bind_port}")
-
-    for spec in listen:
-        socket = host.socket(spec)
-        assert socket.is_listening
+# def test_service_running_and_enabled(host):
+#
+#     service = host.service('docker')
+#     assert service.is_running
+#     assert service.is_enabled

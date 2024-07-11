@@ -1,0 +1,48 @@
+---
+
+knot_config:
+  server:
+    rundir: "/run/knot"
+    user: "{{ knot_user }}:{{ knot_group }}"
+    listen:
+      - '127.0.0.1@5353'
+  log:
+    syslog:
+      any: info
+    stderr:
+      server: critical
+      any: debug
+  database:
+    storage: "{{ knot_database }}"
+  template:
+    default:
+      storage: "{{ knot_database }}"
+      file: "%s.zone"
+  zone:
+    molecule.lan: {}
+
+knot_zones:
+  molecule.lan:
+    ttl: 3600
+    soa:
+      primary_dns: 'dns.molecule.lan'
+      hostmaster: 'hostmaster.molecule.lan'
+      refresh: 6h
+      retry: 1h
+      expire: 1w
+      minimum: 1d
+    name_servers:
+      dns.molecule.lan:
+        ip: '{{ ansible_default_ipv4.address }}'
+    records:
+      this.molecule.lan:
+        type: 'A'
+        ip: '{{ ansible_default_ipv4.address }}'
+      docker.molecule.lan:
+        type: 'A'
+        ip: 192.168.110.10
+
+      there.molecule.lan:
+        type: 'CNAME'
+        target: 'this.molecule.lan'
+...
