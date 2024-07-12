@@ -9,7 +9,7 @@
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
 
 $TTL {{ _zone_data['ttl'] }}
-$ORIGIN {{ _zone_data['revip'] }}.
+$ORIGIN {{ _zone_data['revip'] }}
 
 ; soa
 @ IN SOA {{ _zone_data['soa_name_server'] | first }} {{ _zone_data['hostmaster_email'] }} (

@@ -67,10 +67,10 @@ def dig(host, domains):
             dig_type = f"-t {dns_type}"
 
         command = f"dig {dig_type} {domain} {local_dns} +short"
-        # print(f"{command}")
+        print(f"{command}")
         cmd = host.run(command)
 
-        if (cmd.succeeded):
+        if cmd.succeeded:
             output = cmd.stdout
             output_arr = sorted(output.splitlines())
 
@@ -79,9 +79,9 @@ def dig(host, domains):
             if len(output_arr) > 1:
                 output_msg = ",".join(output_arr)
 
-            # print(f"[{domain} - {dns_type}] => {output_msg}")
-            # print(f"  {len(output)} - {type(output)}")
-            # print(f"  {output_msg}")
+            print(f"[{domain} - {dns_type}] => {output_msg}")
+            print(f"  {len(output)} - {type(output)}")
+            print(f"  {output_msg}")
 
             return output_msg == result
         else:
@@ -174,7 +174,7 @@ def test_cache_files(host, get_vars):
 
     files = [
         f"{bind_dir}/0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
-        f"{bind_dir}/11.10.in-addr.arpa",
+        f"{bind_dir}/0.11.10.in-addr.arpa",
         f"{bind_dir}/acme-inc.com"
     ]
 

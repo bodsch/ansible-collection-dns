@@ -35,12 +35,12 @@ class BindZoneData(object):
         reverse_zones = self.define_zone_reverse_names()
         reverse_zones += self.define_zone_reverse_names(ipv6=True)
 
-        self.module.log(msg=f" forward_zones: '{forward_zones}'")
-        self.module.log(msg=f" reverse_zones: '{reverse_zones}'")
+        # self.module.log(msg=f" forward_zones: '{forward_zones}'")
+        # self.module.log(msg=f" reverse_zones: '{reverse_zones}'")
 
         forward_data = self.forward_zone_data(forward_zones)
         reverse_data = self.reverse_zone_data(reverse_zones)
-        reverse_data = self.reverse_zone_data(reverse_zones)
+        # reverse_data = self.reverse_zone_data(reverse_zones)
 
         result = dict(
             zone_data=dict(
@@ -54,10 +54,10 @@ class BindZoneData(object):
     def forward_zone_data(self, forward_zones):
         """
         """
-        self.module.log(msg=f"forward_zone_data({forward_zones})")
+        # self.module.log(msg=f"forward_zone_data({forward_zones})")
         result = []
         for name in forward_zones:
-            self.module.log(msg=f" - '{name}'")
+            # self.module.log(msg=f" - '{name}'")
 
             res = {}
             res[name] = {}
@@ -73,7 +73,7 @@ class BindZoneData(object):
 
             result.append(res)
 
-        self.module.log(msg=f" = '{result}'")
+        # self.module.log(msg=f" = '{result}'")
 
         return result
 
@@ -81,9 +81,11 @@ class BindZoneData(object):
         """
         """
         self.module.log(msg=f"reverse_zone_data({reverse_zones})")
+
         result = []
         for name in reverse_zones:
             self.module.log(msg=f" - '{name}'")
+
             filename = self.reverse_zone_names(name)
 
             res = {}
@@ -101,7 +103,7 @@ class BindZoneData(object):
 
             result.append(res)
 
-        self.module.log(msg=f" = '{result}'")
+        # self.module.log(msg=f" = '{result}'")
 
         return result
 
@@ -136,6 +138,8 @@ class BindZoneData(object):
                         hash = arr[2]
                         serial = arr[3]
 
+        self.module.log(msg=f"= {line}, {hash}, {serial}")
+
         return (line, hash, serial)
 
     def define_zone_forward_names(self):
@@ -146,7 +150,7 @@ class BindZoneData(object):
     def define_zone_reverse_names(self, ipv6=False):
         """
         """
-        self.module.log(msg=f"define_zone_reverse_names({ipv6})")
+        # self.module.log(msg=f"define_zone_reverse_names({ipv6})")
 
         networks = []
 
@@ -155,14 +159,14 @@ class BindZoneData(object):
         else:
             networks = [x.get("ipv6_networks", []) for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
 
-        self.module.log(msg=f" - {networks} (type(networks))")
+        # self.module.log(msg=f" - {networks} (type(networks))")
         if networks:
             # flatten list of lists
             networks = [x for row in networks for x in row]
         else:
             networks = []
 
-        self.module.log(msg=f" = {networks}")
+        # self.module.log(msg=f" = {networks}")
         return networks
 
     def define_zone_networks(self):
@@ -184,7 +188,7 @@ class BindZoneData(object):
             _info = _network.info
             _prefix = _network.prefixlen
             _ipaddress = netaddr.IPAddress(_network)
-            self.module.log(msg=f"  ip address: {_ipaddress}")
+            # self.module.log(msg=f"  ip address: {_ipaddress}")
         except Exception as e:
             self.module.log(msg=f" ERROR: '{e}'")
 
@@ -192,13 +196,9 @@ class BindZoneData(object):
 
         if _info['IPv6']:
             result = result[-(9 + _prefix // 2):-1]
-
-        # self.module.log(msg=f"  - {_info}")
-        # self.module.log(msg=f"  - {ipv6}")
-        # self.module.log(msg=f" = '{result}'")
-        # if not ipv6:
-        #     result = ".".join(network.replace(
-        #         network + '.', '').split('.')[::-1]) + ".in-addr.arpa"
+        else:
+            result = ".".join(network.replace(network + '.', '').split('.')[::-1])
+            result += ".in-addr.arpa"
 
         self.module.log(msg=f" = '{result}'")
 
