@@ -98,3 +98,14 @@ def get_vars(host):
     result = templar.template(ansible_vars, fail_on_undefined=False)
 
     return result
+
+
+def test_files(host):
+    """
+    """
+    files = []
+    files.append("/etc/hostname")
+
+    for _file in files:
+        f = host.file(_file)
+        assert f.is_file
