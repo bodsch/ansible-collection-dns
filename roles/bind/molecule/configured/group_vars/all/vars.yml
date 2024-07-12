@@ -15,9 +15,9 @@ bind_listen:
       addresses:
         - "127.0.0.1"
         - "10.11.0.1"
-    # - port: 5353
-    #   addresses:
-    #     - "127.0.1.1"
+    - port: 5353
+      addresses:
+        - "127.0.1.1"
   # ipv6:
   #   - port: 53
   #     addresses:
@@ -111,71 +111,71 @@ bind_zone_soa:
   time_to_retry: "2H"
   time_to_expire: "2D"
 
-# bind_zones:
-#   - name: 'acme-inc.com'
-#     type: primary
-#     create_reverse_zones: true
-#     #primaries:
-#     #  - 10.11.0.1
-#     networks:
-#       - '10.11.0.0/24'
-#     ipv6_networks:
-#       - '2001:db8::/48'
-#     name_servers:
-#       - ns1
-#       - ns2
-#     hosts:
-#       - name: ns1
-#         ip: 10.11.0.1
-#       - name: ns2
-#         ip: 10.11.0.2
-#       - name: srv001
-#         ip: 10.11.1.1
-#         ipv6: 2001:db8::1
-#         aliases:
-#           - www
-#       - name: srv002
-#         ip: 10.11.1.2
-#         ipv6: 2001:db8::2
-#         aliases:
-#           - mysql
-#       - name: mail001
-#         ip: 10.11.2.1
-#         ipv6: 2001:db8::d:1
-#         aliases:
-#           - smtp
-#           - mail-in
-#       - name: mail002
-#         ip: 10.11.2.2
-#         ipv6: 2001:db8::d:2
-#       - name: mail003
-#         ip: 10.11.2.3
-#         ipv6: 2001:db8::d:3
-#         aliases:
-#           - imap
-#           - mail-out
-#       - name: srv010
-#         ip: 10.11.0.10
-#       - name: srv011
-#         ip: 10.11.0.11
-#       - name: srv012
-#         ip: 10.11.0.12
-#     mail_servers:
-#       - name: mail001
-#         preference: 10
-#       - name: mail002
-#         preference: 20
-#     services:
-#       - name: _ldap._tcp
-#         weight: 100
-#         port: 88
-#         target: srv010
-#     text:
-#       - name: _kerberos
-#         text: KERBEROS.ACME-INC.COM
-#       - name: '@'
-#         text:
-#           - 'some text'
-#           - 'more text'
-#
+bind_zones:
+  - name: 'acme-inc.com'
+    type: primary
+    create_reverse_zones: true
+    #primaries:
+    #  - 10.11.0.1
+    networks:
+      - '10.11.0'
+    ipv6_networks:
+      - '2001:db8::/48'
+    name_servers:
+      - ns1
+      - ns2
+    hosts:
+      - name: ns1
+        ip: 10.11.0.1
+      - name: ns2
+        ip: 10.11.0.2
+      - name: srv001
+        ip: 10.11.1.1
+        ipv6: 2001:db8::1
+        aliases:
+          - www
+      - name: srv002
+        ip: 10.11.1.2
+        ipv6: 2001:db8::2
+        aliases:
+          - mysql
+      - name: mail001
+        ip: 10.11.2.1
+        ipv6: 2001:db8::d:1
+        aliases:
+          - smtp
+          - mail-in
+      - name: mail002
+        ip: 10.11.2.2
+        ipv6: 2001:db8::d:2
+      - name: mail003
+        ip: 10.11.2.3
+        ipv6: 2001:db8::d:3
+        aliases:
+          - imap
+          - mail-out
+      - name: srv010
+        ip: 10.11.0.10
+      - name: srv011
+        ip: 10.11.0.11
+      - name: srv012
+        ip: 10.11.0.12
+    mail_servers:
+      - name: mail001
+        preference: 10
+      - name: mail002
+        preference: 20
+    services:
+      - name: _ldap._tcp
+        weight: 100
+        port: 88
+        target: srv010
+    text:
+      - name: _kerberos
+        text: KERBEROS.ACME-INC.COM
+      - name: '@'
+        text:
+          - 'some text'
+          - 'more text'
+
 ...
