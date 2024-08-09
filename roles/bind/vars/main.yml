@@ -56,7 +56,7 @@ bind_defaults_statistics:
 # DNSSEC configuration
 bind_defaults_dnssec:
   enable: true
-  validation: true
+  validation: auto
 
 # SOA information
 bind_defaults_zone_soa:

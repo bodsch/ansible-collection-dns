@@ -26,9 +26,9 @@ options {
       {% endif %}
     {% endfor %}
   {% endif %}
-
   {% if bind_listen.ipv6 is defined and
         bind_listen.ipv6 | bodsch.core.type == "list" %}
+
     {% for listener in bind_listen.ipv6 %}
       {% if listener.port is defined and listener.addresses is defined %}
   listen-on-v6 port {{ listener.port | default('53') }} {
@@ -47,18 +47,18 @@ options {
   allow-query {
     {{ bind_allow_query | join(';\n') | indent(4) }};
   };
-
 {% if bind_acls is defined and
       bind_acls | count > 0 %}
+
   allow-transfer  {
     {% for acl in bind_acls %}
     "{{ acl.name }}";
     {% endfor %}
   };
 {% endif %}
-
 {% if bind_check_names is defined and
       bind_check_names | string | length > 0 %}
+
   {% set _check_names = bind_check_names %}
   {% if bind_check_names | bodsch.core.type == "list" %}
     {% set _check_names = bind_check_names | join(' ') %}
@@ -70,13 +70,14 @@ options {
   {% if bind_recursion is defined and
         bind_recursion | string | length > 0 and
         bind_recursion | bool %}
+
   allow-recursion {
     {{ bind_allow_recursion | join(';\n') | indent(4) }};
   };
   {% endif %}
-
   {% if bind_forwarders is defined and
         bind_forwarders | count > 0 %}
+
   forwarders {
     {{ bind_forwarders | join(';\n') | indent(4) }};
   };
@@ -84,15 +85,16 @@ options {
   {% if bind_forward_only is defined and
         bind_forward_only | string | length > 0 and
         bind_forward_only | bool %}
+
   forward only;
   {% endif %}
 
   rrset-order {
     order {{ bind_rrset_order }};
   };
-
 {% if bind_dnssec is defined and
       bind_dnssec | bodsch.core.type == "dict" %}
+
   {% if bind_dnssec.enable is defined and
         bind_dnssec.enable | string | length > 0 and
         bind_version.full_version is version('9.18.0', '<') %}
@@ -100,7 +102,6 @@ options {
   {% else %}
   /*
     NOTE: In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
-
     dnssec-enable {{ bind_dnssec.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
   */
   {% endif %}
@@ -115,7 +116,6 @@ options {
     {% endif %}
   {% endif %}
 {% endif %}
-
   /* Path to ISC DLV key */
   bindkeys-file "{{ bind_bindkeys_file }}";
 
@@ -123,16 +123,16 @@ options {
 
   pid-file "{{ bind_pid_file }}";
   session-keyfile "{{ bind_session_keyfile }}";
-
 {% if bind_logging is defined and
       bind_logging | bodsch.core.type == "dict" %}
+
   {% if bind_logging.enable is defined and
         bind_logging.enable | string | length > 0 %}
   querylog {{ bind_logging.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
   {% endif %}
 {% endif %}
-
 {% if bind_dns64 %}
+
   dns64 64:ff9b::/96 {
     clients {
       {{ bind_dns64_clients | join(';\n') | indent(6) }};

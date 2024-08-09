@@ -38,8 +38,16 @@ bind_allow_query:
 # A key-value list mapping server-IPs to TSIG keys for signing requests
 bind_key_mapping: {}
 
-# Determines whether recursion should be allowed. Typically, an authoritative
-# name server should have recursion turned OFF.
+# Determines whether recursion should be allowed.
+# - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
+# - If you are building a RECURSIVE (caching) DNS server, you need to enable
+#   recursion.
+# - If your recursive DNS server has a public IP address, you MUST enable access
+#   control to limit queries to your legitimate users. Failing to do so will
+#   cause your server to become part of large scale DNS amplification
+#   attacks. Implementing BCP38 within your network would greatly
+#   reduce such attack surface
+# Typically, an authoritative name server should have recursion turned OFF.
 bind_recursion: false
 bind_allow_recursion:
   - "any"
