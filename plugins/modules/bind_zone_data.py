@@ -80,11 +80,11 @@ class BindZoneData(object):
     def reverse_zone_data(self, reverse_zones):
         """
         """
-        self.module.log(msg=f"reverse_zone_data({reverse_zones})")
+        # self.module.log(msg=f"reverse_zone_data({reverse_zones})")
 
         result = []
         for name in reverse_zones:
-            self.module.log(msg=f" - '{name}'")
+            # self.module.log(msg=f" - '{name}'")
 
             filename = self.reverse_zone_names(name)
 
@@ -109,14 +109,14 @@ class BindZoneData(object):
 
     def read_zone_file(self, zone_file):
 
-        self.module.log(msg=f"read_zone_file({zone_file})")
+        # self.module.log(msg=f"read_zone_file({zone_file})")
 
         line = None
         hash = None
         serial = None
         _file_name = os.path.join(self.zone_directory, zone_file)
 
-        self.module.log(msg=f"'{_file_name}'")
+        # self.module.log(msg=f"'{_file_name}'")
 
         if os.path.exists(self.zone_directory) and os.path.exists(_file_name):
             with open(os.path.join(self.zone_directory, _file_name), "r") as f:
@@ -138,7 +138,7 @@ class BindZoneData(object):
                         hash = arr[2]
                         serial = arr[3]
 
-        self.module.log(msg=f"= {line}, {hash}, {serial}")
+        # self.module.log(msg=f"= line: {line}, hash: {hash}, serial: {serial}")
 
         return (line, hash, serial)
 
@@ -155,9 +155,17 @@ class BindZoneData(object):
         networks = []
 
         if not ipv6:
-            networks = [x.get("networks", []) for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
+            networks = [
+                x.get("networks", [])
+                for x in self.zone_data
+                if x.get("state", "present") and x.get("create_reverse_zones", True)
+                ]
         else:
-            networks = [x.get("ipv6_networks", []) for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
+            networks = [
+                x.get("ipv6_networks", [])
+                for x in self.zone_data
+                if x.get("state", "present") and x.get("create_reverse_zones", True)
+                ]
 
         # self.module.log(msg=f" - {networks} (type(networks))")
         if networks:
@@ -179,28 +187,46 @@ class BindZoneData(object):
     def reverse_zone_names(self, network):
         """
         """
-        self.module.log(msg=f"reverse_zone_names({network})")
+        # self.module.log(msg=f"reverse_zone_names({network})")
 
-        result = None
+        # ----------------------------------------------------
+        from ansible_collections.bodsch.dns.plugins.module_utils.network_type import is_valid_ipv4
 
-        try:
-            _network = netaddr.IPNetwork(str(network))
-            _info = _network.info
-            _prefix = _network.prefixlen
-            _ipaddress = netaddr.IPAddress(_network)
-            # self.module.log(msg=f"  ip address: {_ipaddress}")
-        except Exception as e:
-            self.module.log(msg=f" ERROR: '{e}'")
+        reverse_ip = None
 
-        result = _ipaddress.reverse_dns
+        if is_valid_ipv4(network):
+            reverse_ip = ".".join(network.replace(network + '.', '').split('.')[::-1])
 
-        if _info['IPv6']:
-            result = result[-(9 + _prefix // 2):-1]
+            result = f"{reverse_ip}.in-addr.arpa"
+
         else:
-            result = ".".join(network.replace(network + '.', '').split('.')[::-1])
-            result += ".in-addr.arpa"
+            try:
+                _offset = None
+                if network.count("/") == 1:
+                    _prefix = network.split("/")[1]
+                    _offset = int(9 + int(_prefix) // 2)
+                    # self.module.log(msg=f" - {_prefix} - {_offset}")
 
-        self.module.log(msg=f" = '{result}'")
+                _network = netaddr.IPNetwork(str(network))
+                _prefix = _network.prefixlen
+                _ipaddress = netaddr.IPAddress(_network)
+                reverse_ip = _ipaddress.reverse_dns
+
+                if _offset:
+                    result = reverse_ip[-_offset:]
+
+                if result[-1] == ".":
+                    result = result[:-1]
+
+            except Exception as e:
+                self.module.log(msg=f" =>  ERROR: {e}")
+                pass
+
+        if not result:
+            self.module.log(msg=f" PROBLEM: {network} is neither a valid IPv4 nor a valid IPv6 network.")
+
+
+        # self.module.log(msg=f" = '{result}'")
 
         return result
 

@@ -79,12 +79,12 @@ class BindZoneHash(object):
 
     def read_zone_file(self, zone_file):
 
-        self.module.log(msg=f"read_zone_file({zone_file})")
+        # self.module.log(msg=f"read_zone_file({zone_file})")
 
         line = None
         _file_name = os.path.join(self.zone_directory, zone_file)
 
-        self.module.log(msg=f"'{_file_name}'")
+        # self.module.log(msg=f"'{_file_name}'")
 
         if os.path.exists(self.zone_directory) and os.path.exists(_file_name):
             with open(os.path.join(self.zone_directory, _file_name), "r") as f:
@@ -92,7 +92,7 @@ class BindZoneHash(object):
                 zone_data = f.readlines()
                 # zone_data = [next(f) for _ in range(14)]
 
-                self.module.log(msg=f" - '{zone_data}'")
+                # self.module.log(msg=f" - '{zone_data}'")
 
                 pattern = re.compile(
                     r'; Hash:.*(?P<hash>[0-9A-Za-z]{64}) (?P<timestamp>[0-9]+)', re.MULTILINE)
