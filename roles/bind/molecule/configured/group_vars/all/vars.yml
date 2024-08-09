@@ -206,20 +206,20 @@ bind_zones:
         aliases:
           - replication-live-server-01
 
-  - name: matrix.local
-    type: primary
-    create_reverse_zones: true  # Skip creation of reverse zones
-    primaries:
-      - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
-    name_servers:
-      - 'dns'
-    networks:
-      - '192.168.111'
-    ipv6_networks:
-      - '2001:0db8:85a3::8a2e:0370:7334/48'
-    hosts:
-      - name: '@'
-        name_servers: 'dns.cm.local.'
-        ip: "{{ ansible_default_ipv4.address }}"
+  # - name: matrix.local
+  #   type: primary
+  #   create_reverse_zones: true  # Skip creation of reverse zones
+  #   primaries:
+  #     - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
+  #   name_servers:
+  #     - 'dns'
+  #   networks:
+  #     - '192.168.111'
+  #   ipv6_networks:
+  #     - '2001:0db8:85a3::8a2e:0370:7334/48'
+  #   hosts:
+  #     - name: '@'
+  #       name_servers: 'dns.cm.local.'
+  #       ip: "{{ ansible_default_ipv4.address }}"
 
 ...

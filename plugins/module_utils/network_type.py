@@ -9,23 +9,30 @@ from __future__ import (absolute_import, print_function)
 
 import re
 import netaddr
+import logging
+
 # from dns.resolver import Resolver
 # import dns.exception
 
 __metaclass__ = type
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 def reverse_dns(data):
     """
     """
+    # logging.info(f"__reverse_dns({data})")
+
+    reverse_ip = None
+    result = None
+
     # display.v(f"__reverse_dns({data})")
     if is_valid_ipv4(data):
         reverse_ip = ".".join(data.replace(data + '.', '').split('.')[::-1])
         result = f"{reverse_ip}.in-addr.arpa"
 
-        return reverse_ip
-
-    elif is_valid_ipv6(data):
+    else:
         try:
             _offset = None
             if data.count("/") == 1:
@@ -44,11 +51,19 @@ def reverse_dns(data):
             if result[-1] == ".":
                 result = result[:-1]
 
+            # logging.info(f" - {reverse_ip}")
+            # logging.info(f" - {result}")
+
+            # return result
+
         except Exception:
             # display.v(f" ERROR: {e}")
             pass
-    else:
-        result = None
+
+    if not result:
+        logging.error(f" PROBLEM: {data} is neither a valid IPv4 nor a valid IPv6 network.")
+
+    logging.info(f" = {result}")
 
     return result
 

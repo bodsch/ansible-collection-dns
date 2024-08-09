@@ -225,7 +225,6 @@ class BindZoneData(object):
         if not result:
             self.module.log(msg=f" PROBLEM: {network} is neither a valid IPv4 nor a valid IPv6 network.")
 
-
         # self.module.log(msg=f" = '{result}'")
 
         return result

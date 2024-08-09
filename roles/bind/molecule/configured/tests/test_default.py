@@ -56,7 +56,9 @@ def read_ansible_yaml(file_name, role_name):
 def dig(host, domains):
 
     local_dns = "@127.0.0.1"
+
     for d in domains:
+        output_msg = ""
         domain = d.get("domain")
         dns_type = d.get("type", "A").upper()
         result = d.get("result")
@@ -175,7 +177,9 @@ def test_cache_files(host, get_vars):
     files = [
         f"{bind_dir}/0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
         f"{bind_dir}/0.11.10.in-addr.arpa",
-        f"{bind_dir}/acme-inc.com"
+        f"{bind_dir}/acme-inc.com",
+        f"{bind_dir}/124.168.192.in-addr.arpa",
+        f"{bind_dir}/cm.local",
     ]
 
     for _file in files:
@@ -228,6 +232,8 @@ def test_records_A(host):
         {"domain": "srv010.acme-inc.com", "type": "A", "result": "10.11.0.10"},
         {"domain": "srv011.acme-inc.com", "type": "A", "result": "10.11.0.11"},
         {"domain": "srv012.acme-inc.com", "type": "A", "result": "10.11.0.12"},
+        #
+        {"domain": "cms.cm.local", "type": "A", "result": "192.168.124.21"},
     ]
 
     assert dig(host, domains)
@@ -250,6 +256,8 @@ def test_records_PTR(host):
         {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.com."},
         # # IPv6 Reverse lookups
         {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.com."},
+        #
+        {"domain": "192.168.124.21", "type": "PTR", "result": "cms.cm.local"},
     ]
 
     assert dig(host, domains)
@@ -266,6 +274,8 @@ def test_records_CNAME(host):
         {"domain": "mail-in.acme-inc.com", "type": "CNAME", "result": "mail001.acme-inc.com."},
         {"domain": "imap.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
         {"domain": "mail-out.acme-inc.com", "type": "CNAME", "result": "mail003.acme-inc.com."},
+        #
+        {"domain": "cms.cm.local", "type": "CNAME", "result": "192.168.124.21"},
     ]
 
     assert dig(host, domains)
@@ -288,6 +298,7 @@ def test_records_NS(host):
     domains = [
         # NS records lookup
         {"domain": "acme-inc.com", "type": "NS", "result": "ns1.acme-inc.com.,ns2.acme-inc.com."},
+        {"domain": "cm.local", "type": "NS", "result": "dns.cm.local."},
     ]
 
     assert dig(host, domains)

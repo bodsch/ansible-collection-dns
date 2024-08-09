@@ -279,13 +279,12 @@ class FilterModule(object):
 
         result_hash = self.__hash(result)
 
+        # display.v(f"  = {result} - {result_hash}")
+
         return dict(
             reverse_zone_data=result,
             zone_hash=result_hash
         )
-
-        # display.v(f"  = {result} - {result_hash}")
-        # return (result, result_hash)
 
     def zone_filename(self, data, zone_data):
         """
