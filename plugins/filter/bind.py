@@ -13,10 +13,28 @@ import time
 
 display = Display()
 
+# ---------------------------------------------------------------------------------------
+
+DOCUMENTATION = """
+name: bind
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+description: TBD
+short_description: TBD
+"""
+
+EXAMPLES = """
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
 
 class FilterModule(object):
     """
-        Ansible file jinja2 tests
     """
 
     def filters(self):

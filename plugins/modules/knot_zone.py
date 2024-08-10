@@ -20,6 +20,72 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
+DOCUMENTATION = """
+module: knot_zone
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+short_description: TBD
+description: TBD
+
+options:
+  state:
+    description:
+      - Whether to install (C(present)), or remove (C(absent)) a package.
+    default: present
+    required: true
+
+  zone:
+    description: []
+    required: true
+    type: str
+  zone_ttl:
+    description: []
+    required: true
+    type: int
+  zone_soa:
+    description: []
+    required: true
+    type: dict
+  name_servers:
+    description: []
+    required: true
+    type: dict
+  records:
+    description: []
+    required: true
+    type: dict
+  debug:
+    description: []
+    required: false
+    type: bool
+    default: false
+  database_path:
+    description: []
+    required: true
+    type: str
+  owner:
+    description: []
+    required: false
+    type: str
+  group:
+    description: []
+    required: false
+    type: str
+  mode:
+    description: []
+    required: false
+    type: str
+    default: 0666
+
+"""
+
+EXAMPLES = r"""
+"""
+
+RETURN = """
+"""
+
 # ---------------------------------------------------------------------------------------
 
 

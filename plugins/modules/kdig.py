@@ -22,6 +22,45 @@ ANSIBLE_METADATA = {
 
 # ---------------------------------------------------------------------------------------
 
+DOCUMENTATION = """
+module: kdig
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+short_description: TBD
+description: TBD
+
+options:
+  root_dns:
+    description: []
+    required: false
+    default: k.root-servers.net
+    type: str
+  key_signing_key:
+    description: []
+    required: false
+    default: 257
+    type: int
+  trust_keyfile:
+    description: []
+    required: false
+    default: /etc/trusted-key.key
+    type: str
+  parameters:
+    description: []
+    required: false
+    type: list
+
+"""
+
+EXAMPLES = r"""
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
 
 class Kdig(object):
     """

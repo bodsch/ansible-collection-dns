@@ -8,6 +8,46 @@ import re
 
 from ansible.module_utils.basic import AnsibleModule
 
+# ---------------------------------------------------------------------------------------
+
+DOCUMENTATION = """
+module: bind_version
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+short_description: return the version of installed bind
+description: return the version of installed bind
+
+options:
+  validate_version:
+    description: check against the installed version.
+    type: str
+    required: false
+
+"""
+
+EXAMPLES = r"""
+- name: detect bind version
+  become: true
+  bodsch.dns.bind_version:
+  register: bind_version
+  check_mode: false
+  ignore_errors: true
+
+- name: detect bind version
+  become: true
+  bodsch.dns.bind_version:
+    validate_version: '9.18.0'
+  register: bind_version
+  check_mode: false
+  ignore_errors: true
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
 
 class BindVersion(object):
     """

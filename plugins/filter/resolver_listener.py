@@ -1,15 +1,45 @@
+# -*- coding: utf-8 -*-
+# Copyright 2023-2024 Bodo Schulz <bodo@boone-schulz.de>
+
+# BSD 2-clause (see LICENSE or https://opensource.org/licenses/BSD-2-Clause)
+
+"""
+filter plugin file for knot_resolver filters: resolver_listener
+"""
+
+
 # python 3 headers, required if submitting to Ansible
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.utils.display import Display
 
+# ---------------------------------------------------------------------------------------
+
+DOCUMENTATION = """
+name: resolver_listener
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+description: TBD
+short_description: TBD
+
+"""
+
+EXAMPLES = """
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
+
 display = Display()
 
 
 class FilterModule(object):
     """
-        Ansible file jinja2 tests
     """
 
     def filters(self):
@@ -18,6 +48,8 @@ class FilterModule(object):
         }
 
     def listener(self, data):
+        """
+        """
         result = ""
         # count = len(data)
         # display.v("found: {} entries in {} {}".format(count, data, type(data)))

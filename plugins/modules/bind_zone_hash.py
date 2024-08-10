@@ -10,6 +10,54 @@ import netaddr
 
 from ansible.module_utils.basic import AnsibleModule
 
+# ---------------------------------------------------------------------------------------
+
+DOCUMENTATION = """
+module: bind_zone_hash
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+short_description: TBD
+description: TBD
+
+options:
+  zone_directory:
+    description: []
+    type: str
+    required: true
+  zone_file:
+    description: []
+    type: str
+    required: false
+  zone_data:
+    description: []
+    type: raw
+    required: true
+  reverse_zone:
+    description: []
+    type: bool
+    required: false
+    default: false
+  networks:
+    description: []
+    type: raw
+    required: false
+  ipv6:
+    description: []
+    type: bool
+    required: false
+    default: false
+
+"""
+
+EXAMPLES = r"""
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
 
 class BindZoneHash(object):
     """

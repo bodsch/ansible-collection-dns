@@ -10,6 +10,35 @@ import netaddr
 
 from ansible.module_utils.basic import AnsibleModule
 
+# ---------------------------------------------------------------------------------------
+
+DOCUMENTATION = """
+module: bind_zone_data
+version_added: 0.9.0
+author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+
+short_description: TBD
+description: TBD
+
+options:
+  zone_directory:
+    description: []
+    type: str
+    required: true
+  zone_data:
+    description: []
+    type: raw
+    required: true
+"""
+
+EXAMPLES = r"""
+"""
+
+RETURN = """
+"""
+
+# ---------------------------------------------------------------------------------------
+
 
 class BindZoneData(object):
     """
@@ -159,13 +188,13 @@ class BindZoneData(object):
                 x.get("networks", [])
                 for x in self.zone_data
                 if x.get("state", "present") and x.get("create_reverse_zones", True)
-                ]
+            ]
         else:
             networks = [
                 x.get("ipv6_networks", [])
                 for x in self.zone_data
                 if x.get("state", "present") and x.get("create_reverse_zones", True)
-                ]
+            ]
 
         # self.module.log(msg=f" - {networks} (type(networks))")
         if networks:
