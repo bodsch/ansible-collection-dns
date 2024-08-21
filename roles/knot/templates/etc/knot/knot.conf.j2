@@ -183,10 +183,10 @@ policy:
     {% endfor %}
   {% endif %}
 
-{% if knot_config.mod-synthrecord %}
+{% if knot_config.mod_synthrecord %}
 
 mod-synthrecord:
-    {% for k, v in knot_config.mod-synthrecord.items() %}
+    {% for k, v in knot_config.mod_synthrecord.items() %}
   - id: {{ k }}
       {% for x,y in v.items() %}
     {{ x }}: {{ y }}
