@@ -76,6 +76,17 @@ knot_defaults_config:
   #    update-owner-match: sub-or-equal | equal | sub
   #    update-owner-name: STR ...
 
+  # https://www.knot-dns.cz/docs/3.1/html/modules.html#synthrecord-automatic-forward-reverse-records
+  mod_synthrecord: {}
+  # mod_synthrecord:
+  #   STR
+  #   type: forward | reverse
+  #   prefix: STR
+  #   origin: DNAME
+  #   ttl: INT
+  #   network: ADDR[/INT] | ADDR-ADDR ...
+  #   reverse-short: BOOL 
+  
   # https://www.knot-dns.cz/docs/3.0/singlehtml/#template-section
   template:
     default:
