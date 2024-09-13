@@ -5,18 +5,52 @@
     name: unbound
     state: present
 
-- name: test existing root.key
-  ansible.builtin.stat:
-    path: "/var/lib/unbound/root.key"
-    get_mime: true
-  register: __unbound_rootkey_exists
-
-- name: create root.key  # noqa no-changed-when
-  ansible.builtin.command: |
-    /usr/lib/unbound/package-helper root_trust_anchor_update
+- name: unbound root.key
   when:
     - ansible_os_family | lower == 'debian'
-    - not __unbound_rootkey_exists.stat.exists
+  block:
+    - name: test existing root.key
+      ansible.builtin.stat:
+        path: "/var/lib/unbound/root.key"
+        get_mime: true
+      register: __unbound_rootkey_exists
+
+    - name: detect unbound helper
+      ansible.builtin.stat:
+        path: "/usr/lib/unbound/package-helper"
+        get_mime: false
+      register: _package_helper
+
+    - name: detect unbound helper
+      ansible.builtin.stat:
+        path: "/usr/libexec/unbound-helper"
+        get_mime: false
+      register: _unbound_helper
+
+    - name: define helper
+      ansible.builtin.set_fact:
+        unbound_helper: "{{ _package_helper | bodsch.dns.unbound_helper(_unbound_helper) }}"
+
+    - name: create root.key  # noqa no-changed-when
+      ansible.builtin.command: |
+        {{ unbound_helper }} root_trust_anchor_update
+      when:
+        - not __unbound_rootkey_exists.stat.exists
+
+- name: update unbound server confg
+  when:
+    - ansible_os_family | lower == 'archlinux'
+  block:
+    - name: update dictionary
+      set_fact:
+        unbound_config_server: "{{ unbound_config_server | combine ( {'auto-trust-anchor-file': '/etc/unbound/trusted-key.key'} ) }}"
+
+- name: fix rights for auto-trust-anchor-file
+  ansible.builtin.file:
+    path: "{{ unbound_config_server['auto-trust-anchor-file'] }}"
+    owner: "{{ unbound_user }}"
+    group: "{{ unbound_group }}"
+    mode: "0660"
 
 - name: remove distribution config files
   ansible.builtin.file:

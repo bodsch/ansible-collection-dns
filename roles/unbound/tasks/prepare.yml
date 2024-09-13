@@ -24,11 +24,3 @@
   ansible.builtin.package:
     name: "{{ unbound_dependencies }}"
     state: present
-
-- name: merge unbound config between defaults and custom for server.conf
-  ansible.builtin.set_fact:
-    unbound_config_server: "{{ unbound_config_server_defaults | combine(unbound_config_server, recursive=True) }}"
-    unbound_config_remote_control: "{{ unbound_config_remote_control_defaults | combine(unbound_config_remote_control, recursive=True) }}"
-    unbound_config_cachedb: "{{ unbound_config_cachedb_defaults | combine(unbound_config_cachedb, recursive=True) }}"
-    unbound_config_forward_zone: "{{ unbound_config_forward_zone_defaults | combine(unbound_config_forward_zone, recursive=True) }}"
-    unbound_config_stub_zone: "{{ unbound_config_stub_zone_defaults | combine(unbound_config_stub_zone, recursive=True) }}"

@@ -6,11 +6,11 @@ unbound_dependencies:
 unbound_environment_file: /etc/default/unbound
 
 unbound_config_server_defaults:
-  verbosity: 3
+  verbosity: 2
   statistics-interval: 240
   use-syslog: "yes"
   log-queries: "yes"
-  logfile: "" # /var/log/unbound.log
+  logfile: "" # /var/log/unbound.log"
   num-threads: 2
   directory: "/etc/unbound"
   username: "unbound"
@@ -31,7 +31,9 @@ unbound_config_server_defaults:
   msg-buffer-size: 65552
   unwanted-reply-threshold: 10000
   ipsecmod-enabled: 'no'
-  auto-trust-anchor-file: "/var/lib/unbound/root.key"
+  # trust-anchor-signaling: 'yes'
+  # trust-anchor-file: ""
+  auto-trust-anchor-file: "/etc/unbound/root.key"
   qname-minimisation: 'yes'
 
 unbound_config_stub_zone_defaults: {}
