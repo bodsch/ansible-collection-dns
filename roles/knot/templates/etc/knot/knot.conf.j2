@@ -130,6 +130,17 @@ acl:
   {% endif %}
   {% if knot_config.template %}
 
+{% if knot_config.mod_synthrecord %}
+
+mod-synthrecord:
+    {% for k, v in knot_config.mod_synthrecord.items() %}
+  - id: {{ k }}
+      {% for x,y in v.items() %}
+    {{ x }}: {{ y }}
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+
 template:
     {% for k, v in knot_config.template.items() %}
   - id: {{ k }}
