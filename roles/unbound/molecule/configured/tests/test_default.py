@@ -150,5 +150,5 @@ def test_open_port(host, ports):
     for i in host.socket.get_listening_sockets():
         print(i)
 
-    application = host.socket("tcp://%s" % (ports))
+    application = host.socket(f"tcp://{ports}")
     assert application.is_listening

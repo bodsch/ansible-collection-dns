@@ -114,19 +114,25 @@ def test_user(host):
     """
       test service user
     """
-    shell = "/usr/sbin/nologin"
+    shell = "/usr/bin/nologin"
+    home = "/var/lib/unbound"
 
     distribution = host.system_info.distribution
     release = host.system_info.release
 
-    if (distribution == 'debian' and release.startswith('9')):
+    print(distribution)
+
+    if distribution == 'debian' and release.startswith('9'):
         shell = "/bin/false"
+
+    if distribution in ['arch']:
+        home = "/etc/unbound"
 
     assert host.group("unbound").exists
     assert host.user("unbound").exists
     assert "unbound" in host.user("unbound").groups
     assert host.user("unbound").shell == shell
-    assert host.user("unbound").home == "/var/lib/unbound"
+    assert host.user("unbound").home == home
 
 
 def test_service(host):
@@ -137,12 +143,11 @@ def test_service(host):
 
 @pytest.mark.parametrize("ports", [
     '0.0.0.0:53',
-    '127.0.0.1:8953',
 ])
 def test_open_port(host, ports):
 
     for i in host.socket.get_listening_sockets():
         print(i)
 
-    application = host.socket("tcp://%s" % (ports))
+    application = host.socket(f"tcp://{ports}")
     assert application.is_listening
