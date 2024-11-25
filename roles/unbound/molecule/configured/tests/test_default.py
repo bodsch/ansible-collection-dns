@@ -114,19 +114,25 @@ def test_user(host):
     """
       test service user
     """
-    shell = "/usr/sbin/nologin"
+    shell = "/usr/bin/nologin"
+    home = "/var/lib/unbound"
 
     distribution = host.system_info.distribution
     release = host.system_info.release
 
-    if (distribution == 'debian' and release.startswith('9')):
+    print(distribution)
+
+    if distribution == 'debian' and release.startswith('9'):
         shell = "/bin/false"
+
+    if distribution in ['arch']:
+        home = "/etc/unbound"
 
     assert host.group("unbound").exists
     assert host.user("unbound").exists
     assert "unbound" in host.user("unbound").groups
     assert host.user("unbound").shell == shell
-    assert host.user("unbound").home == "/var/lib/unbound"
+    assert host.user("unbound").home == home
 
 
 def test_service(host):

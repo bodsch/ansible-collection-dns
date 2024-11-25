@@ -6,7 +6,7 @@
     state: directory
     owner: "{{ unbound_user }}"
     group: "{{ unbound_group }}"
-    mode: 0750
+    mode: "0750"
   loop:
     - "{{ unbound_chroot_dir }}"
     - "{{ unbound_chroot_dir }}/var/run"
