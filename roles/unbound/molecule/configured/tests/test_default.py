@@ -114,7 +114,7 @@ def test_user(host):
     """
       test service user
     """
-    shell = "/usr/bin/nologin"
+    shell = "/usr/sbin/nologin"
     home = "/var/lib/unbound"
 
     distribution = host.system_info.distribution
