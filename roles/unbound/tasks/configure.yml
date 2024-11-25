@@ -16,10 +16,11 @@
   args:
     creates: "{{ unbound_certs.server.key_file }}"
 
-- name:  force update with cert
+- name: force update with cert
   ansible.builtin.command: |
-    unbound-anchor -F -C /etc/unbound/unbound.conf
+    unbound-anchor -v -F -C /etc/unbound/unbound.conf
   register: anchor
+  ignore_errors: true
   changed_when: anchor.rc != 0
   failed_when: anchor.rc != 0
 
@@ -32,9 +33,9 @@
     validate: sh -n %s
   notify: restart unbound
 
-- name: do chgrp unbound_group all keys
+- name: fix rights for unbound keys
   ansible.builtin.file:
-    mode: "0660"
+    mode: "0664"
     owner: "{{ unbound_user }}"
     group: "{{ unbound_group }}"
     path: "{{ item }}"
@@ -62,7 +63,7 @@
     state: directory
     owner: "{{ unbound_user }}"
     group: "{{ unbound_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: create server.conf
   ansible.builtin.template:

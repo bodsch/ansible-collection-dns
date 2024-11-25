@@ -40,6 +40,12 @@
       ansible.builtin.package:
         update_cache: true
 
+    - name: install dependencies
+      ansible.builtin.package:
+        name:
+          - iproute2
+        state: present
+
     - debug:
         msg:
           - "os family            : {{ ansible_distribution }} ({{ ansible_os_family }})"

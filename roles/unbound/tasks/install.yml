@@ -37,6 +37,10 @@
       when:
         - not __unbound_rootkey_exists.stat.exists
 
+- name: merge unbound config between defaults and custom for server.conf
+  ansible.builtin.set_fact:
+    unbound_config_server: "{{ unbound_config_server_defaults | combine(unbound_config_server, recursive=True) }}"
+
 - name: update unbound server confg
   when:
     - ansible_os_family | lower == 'archlinux'
@@ -45,12 +49,14 @@
       set_fact:
         unbound_config_server: "{{ unbound_config_server | combine ( {'auto-trust-anchor-file': '/etc/unbound/trusted-key.key'} ) }}"
 
-- name: fix rights for auto-trust-anchor-file
-  ansible.builtin.file:
-    path: "{{ unbound_config_server['auto-trust-anchor-file'] }}"
-    owner: "{{ unbound_user }}"
-    group: "{{ unbound_group }}"
-    mode: "0660"
+    - name: fix rights for auto-trust-anchor-file
+      ansible.builtin.file:
+        path: "{{ unbound_config_server['auto-trust-anchor-file'] }}"
+        owner: "{{ unbound_user }}"
+        group: "{{ unbound_group }}"
+        mode: "0660"
+      when:
+        - unbound_config_server['auto-trust-anchor-file'] is defined
 
 - name: remove distribution config files
   ansible.builtin.file:
@@ -77,6 +83,6 @@
         state: touch
         owner: "{{ unbound_user }}"
         group: "{{ unbound_group }}"
-        mode: 0666
+        mode: "0666"
       when:
         - not __unbound_logfile_exists.stat.exists

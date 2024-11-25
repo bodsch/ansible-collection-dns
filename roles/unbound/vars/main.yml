@@ -33,7 +33,7 @@ unbound_config_server_defaults:
   ipsecmod-enabled: 'no'
   # trust-anchor-signaling: 'yes'
   # trust-anchor-file: ""
-  auto-trust-anchor-file: "/etc/unbound/root.key"
+  auto-trust-anchor-file: "/var/lib/unbound/root.key"
   qname-minimisation: 'yes'
 
 unbound_config_stub_zone_defaults: {}

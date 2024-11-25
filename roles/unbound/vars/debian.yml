@@ -3,6 +3,7 @@
 unbound_dependencies:
   - dnsutils
   # - iproute2
+  - unbound-anchor
 
 unbound_environment_file: /etc/default/unbound
 

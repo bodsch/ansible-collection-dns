@@ -1,12 +1,27 @@
 ---
 
-- name: disable systemd-resolved
-  ansible.builtin.service:
-    name: systemd-resolved
-    state: stopped
-    enabled: false
+- name: systemd
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_service_mgr == "systemd"
+  block:
+    - name: populate service facts
+      ansible.builtin.service_facts:
+      register: systemd_facts
+      no_log: true
+
+    - name: set systemd unit name
+      ansible.builtin.set_fact:
+        systemd_resolved_unit_file: "{{ ansible_facts.services | bodsch.core.get_service('systemd-resolved') }}"
+
+    - name: disable systemd-resolved
+      ansible.builtin.service:
+        name: systemd-resolved
+        state: stopped
+        enabled: false
+      ignore_errors: true
+      when:
+        - systemd_resolved_unit_file is defined
+        - systemd_resolved_unit_file | string | length > 0
 
 - name: enable unbound service
   ansible.builtin.service:
