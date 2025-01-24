@@ -2,7 +2,7 @@
 
 . hooks/molecule.rc
 
-set -x
+# set -x
 
 if [ -z "${COLLECTION_DIR}" ]
 then

@@ -1,5 +1,5 @@
 
-# Ansible Role:  `bind`
+# Ansible Role:  `bodsch.dns.bind`
 
 Ansible role to install and configure bind on various linux systems.
 
