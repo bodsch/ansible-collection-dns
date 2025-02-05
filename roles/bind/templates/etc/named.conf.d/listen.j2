@@ -1,0 +1,25 @@
+{% if bind_listen is defined and
+      bind_listen | bodsch.core.type == "dict" %}
+
+  {% if bind_listen.ipv4 is defined and
+        bind_listen.ipv4 | bodsch.core.type == "list" %}
+    {% for listener in bind_listen.ipv4 %}
+      {% if listener.port is defined and listener.addresses is defined %}
+  listen-on port {{ listener.port | default('53') }} {
+    {{ listener.addresses | join(';\n') | indent(4) }};
+  };
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {% if bind_listen.ipv6 is defined and
+        bind_listen.ipv6 | bodsch.core.type == "list" %}
+
+    {% for listener in bind_listen.ipv6 %}
+      {% if listener.port is defined and listener.addresses is defined %}
+  listen-on-v6 port {{ listener.port | default('53') }} {
+    {{ listener.addresses | join(';\n') | indent(4) }};
+  };
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endif %}

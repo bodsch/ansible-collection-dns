@@ -1,0 +1,24 @@
+{% if bind_dnssec is defined and
+      bind_dnssec | bodsch.core.type == "dict" %}
+
+  {% if bind_dnssec.enable is defined and
+        bind_dnssec.enable | string | length > 0 and
+        bind_version.full_version is version('9.18.0', '<') %}
+  dnssec-enable {{ bind_dnssec.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% else %}
+  /*
+    NOTE: In version 9.16.0 the dnssec-enable option was made obsolete and in 9.18.0 the option was entirely removed.
+    dnssec-enable {{ bind_dnssec.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  */
+  {% endif %}
+  {% if bind_dnssec.validation is defined and
+        bind_dnssec.validation | string | length > 0 %}
+    {% if bind_dnssec.validation | bodsch.core.type == "string" and
+          bind_dnssec.validation == "auto" %}
+  dnssec-validation {{ bind_dnssec_validation }};
+    {% endif %}
+    {% if bind_dnssec.validation | bodsch.core.type == "bool" %}
+  dnssec-validation {{ bind_dnssec.validation | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+    {% endif %}
+  {% endif %}
+{% endif %}

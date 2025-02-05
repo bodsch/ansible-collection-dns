@@ -1,0 +1,8 @@
+{% if bind_logging is defined and
+      bind_logging | bodsch.core.type == "dict" %}
+  {% if bind_logging.enable is defined and
+        bind_logging.enable | string | length > 0 %}
+
+  querylog {{ bind_logging.enable | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% endif %}
+{% endif %}

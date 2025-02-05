@@ -114,7 +114,8 @@ bind_zone_soa:
 bind_zones:
   - name: 'acme-inc.com'
     type: primary
-    create_reverse_zones: true
+    # create_forward_zones: true
+    # create_reverse_zones: true
     #primaries:
     #  - 10.11.0.1
     networks:
@@ -180,6 +181,7 @@ bind_zones:
 
   - name: cm.local
     type: primary
+    # create_forward_zones: false
     create_reverse_zones: true  # Skip creation of reverse zones
     primaries:
       - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
