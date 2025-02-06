@@ -28,10 +28,10 @@ options {
 {% include('named.conf.d/forwarders.j2') %}
 {% include('named.conf.d/dnssec.j2') %}
 {% include('named.conf.d/querylog.j2') %}
-{% include('named.conf.d/includes.j2') %}
 {% include('named.conf.d/dns64.j2') %}
 };
 // -------------------------------------------------------------------
+{% include('named.conf.d/includes.j2') %}
 {% include('named.conf.d/statistics.j2') %}
 {% include('named.conf.d/logging.j2') %}
 {% include('named.conf.d/zones.j2') %}
