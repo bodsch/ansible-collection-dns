@@ -18,6 +18,9 @@ license:
 license_file: ''
 
 tags:
+  - infrastructure
+  - linux
+  - tools
   - system
   - dns
 

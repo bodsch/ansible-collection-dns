@@ -1,6 +1,6 @@
 ---
 
-host_dependencies:
+hosts_dependencies:
   - iproute2
 
 hosts_file: /etc/hosts

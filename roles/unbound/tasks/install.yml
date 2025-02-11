@@ -46,8 +46,8 @@
     - ansible_os_family | lower == 'archlinux'
   block:
     - name: update dictionary
-      set_fact:
-        unbound_config_server: "{{ unbound_config_server | combine ( {'auto-trust-anchor-file': '/etc/unbound/trusted-key.key'} ) }}"
+      ansible.builtin.set_fact:
+        unbound_config_server: "{{ unbound_config_server | combine({'auto-trust-anchor-file': '/etc/unbound/trusted-key.key'}) }}"
 
     - name: fix rights for auto-trust-anchor-file
       ansible.builtin.file:

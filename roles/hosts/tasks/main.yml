@@ -2,10 +2,10 @@
 
 - name: install dependencies
   ansible.builtin.package:
-    name: "{{ host_dependencies }}"
+    name: "{{ hosts_dependencies }}"
     state: present
   when:
-    - host_dependencies | default([]) | count > 0
+    - hosts_dependencies | default([]) | count > 0
 
 - name: re-read ansible facts
   ansible.builtin.setup:
@@ -29,7 +29,7 @@
     owner: root
     group: root
     mode: "0644"
-    backup: "{{ host_file_backup }}"
+    backup: "{{ hosts_file_backup }}"
   when:
     - not is_docker_guest
 
@@ -40,7 +40,7 @@
     owner: root
     group: root
     mode: "0644"
-    backup: "{{ host_file_backup }}"
+    backup: "{{ hosts_file_backup }}"
   when:
     - is_docker_guest
 
@@ -52,6 +52,6 @@
     owner: root
     group: root
     mode: "0644"
-    backup: "{{ host_file_backup }}"
+    backup: "{{ hosts_file_backup }}"
   when:
     hosts_cloud_template.stat.exists

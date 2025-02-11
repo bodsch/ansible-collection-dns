@@ -18,7 +18,7 @@ hosts_ip_protocol: 'ipv4'
 
 hosts_network_interface: "{{ ansible_default_ipv4.interface }}"
 
-host_file_backup: false
+hosts_file_backup: false
 
 # Custom hosts entries to be added
 hosts_entries: []

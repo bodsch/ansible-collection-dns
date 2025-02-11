@@ -4,7 +4,7 @@
   ansible.builtin.template:
     src: kresd.conf.j2
     dest: /etc/knot-resolver/kresd.conf
-    mode: 0o664
+    mode: "0664"
     backup: true
   notify:
     - restart kresd
