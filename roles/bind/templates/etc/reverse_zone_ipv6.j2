@@ -7,8 +7,6 @@
 ;
 ; Reverse zone file for {{ _zone_data['domain'] }}
 ; Hash: {{ _zone['hash'] }} {{ _zone['serial'] }}
-;
-; {{ _zone_data }}
 
 $TTL {{ _zone_data['ttl'] }}
 $ORIGIN {{ _zone_data['revip'] }}

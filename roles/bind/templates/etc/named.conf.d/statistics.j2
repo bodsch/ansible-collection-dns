@@ -1,0 +1,12 @@
+{% if bind_statistics is defined and
+      bind_statistics | bodsch.core.type == "dict" %}
+  {% if bind_statistics.channels is defined and
+        bind_statistics.channels | string | length > 0 %}
+
+statistics-channels {
+  inet {{ bind_statistics.host }} port {{ bind_statistics.port }} allow {
+    {{ bind_statistics.allow| join(';\n') | indent(4) }};
+  };
+};
+  {% endif %}
+{% endif %}

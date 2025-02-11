@@ -1,0 +1,9 @@
+{% if bind_check_names is defined and
+      bind_check_names | string | length > 0 %}
+
+  {% set _check_names = bind_check_names %}
+  {% if bind_check_names | bodsch.core.type == "list" %}
+    {% set _check_names = bind_check_names | join(' ') %}
+  {% endif %}
+  check-names  {{ _check_names }};
+{% endif %}

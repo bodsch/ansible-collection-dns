@@ -1,0 +1,9 @@
+{% if bind_acls is defined and
+      bind_acls | count > 0 %}
+
+  allow-transfer  {
+    {% for acl in bind_acls %}
+    "{{ acl.name }}";
+    {% endfor %}
+  };
+{% endif %}

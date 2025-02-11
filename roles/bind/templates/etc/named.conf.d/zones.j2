@@ -1,0 +1,157 @@
+{% if bind_zones is defined and
+      bind_zones | default([]) | bodsch.core.type == "list" and
+      bind_zones | count > 0 %}
+
+  {% for bind_zone in bind_zones %}
+    {% if bind_zone.create_forward_zones | default('true') | bool %}
+{# Start: set zone type  #}
+{# {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+{#// -- {{ bind_zone.name }} ---------------------------------------
+// type      : {{ bind_zone.type | default('') }}
+// primaries : {{ bind_zone.primaries | default([]) }}
+// forwarders: {{ bind_zone.forwarders | default([]) }}
+// ------------------------------------------------------------
+#}
+{#
+{% if bind_zone.type is defined and bind_zone.type == 'primary' %}
+{% set _type = 'primary' %}
+{% elif bind_zone.type is defined and bind_zone.type == 'secondary' %}
+{% set _type = 'secondary' %}
+{% elif bind_zone.type is defined and bind_zone.type == 'forward' %}
+{% set _type = 'forward' %}
+{% elif bind_zone.type is not defined and bind_zone.primaries is defined and (_all_addresses|intersect(bind_zone.primaries)|length > 0) %}
+{% set _type = 'primary' %}
+{% elif bind_zone.type is not defined and bind_zone.primaries is defined and not (_all_addresses|intersect(bind_zone.primaries)|length > 0) %}
+{% set _type = 'secondary' %}
+{% elif bind_zone.type is not defined and bind_zone.forwarders is defined %}
+{% set _type = 'forward' %}
+{% endif %}
+// #1: '{{ _type }}'
+// ------------------------------------------------------------
+#}
+{#       {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+      {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=host_all_addresses) %}
+{#// #2: '{{ _type }}'
+// ------------------------------------------------------------
+#}
+zone "{{ bind_zone.name }}" IN {
+      {% if (_type | string).upper() == 'PRIMARY' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ bind_zone.name }}";
+  notify yes;
+        {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+        {% endif %}
+        {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+        {% else %}
+  allow-update {
+    none;
+  };
+        {% endif %}
+      {% elif (_type | string).upper() == 'SECONDARY' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ bind_zone.name }}";
+      {% elif (_type | string).upper() == 'FORWARD' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+      {% endif %}
+};
+    {% endif %}
+
+    {% if bind_zone.networks is defined %}
+      {% if bind_zone.create_reverse_zones | default('true') | bool %}
+        {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.networks) %}
+        {% for network in bind_zone.networks %}
+
+zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa" IN {
+          {% if (_type | string).upper() == 'PRIMARY' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa";
+  notify yes;
+            {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+            {% endif %}
+            {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+            {% else %}
+  allow-update {
+    none;
+  };
+            {% endif %}
+          {% elif (_type | string).upper() == 'SECONDARY' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa";
+          {% elif _type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+          {% endif %}
+};
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+
+    {% if bind_zone.ipv6_networks is defined %}
+      {% if bind_zone.create_reverse_zones | default('true') | bool %}
+        {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.ipv6_networks) %}
+        {% for network in bind_zone.ipv6_networks %}
+
+zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):] }}" IN {
+          {% if (_type | string).upper() == 'PRIMARY' %}
+  type master;
+  file "{{ bind_zone_dir }}/{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):-1] }}";
+  notify yes;
+            {% if bind_zone.also_notify is defined %}
+  also-notify  {
+    {{ bind_zone.also_notify| join(';\n') | indent(4) }};
+  };
+            {% endif %}
+            {% if bind_zone.allow_update is defined %}
+  allow-update {
+    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+  };
+            {% else %}
+  allow-update {
+    none;
+  };
+            {% endif %}
+          {% elif (_type | string).upper() == 'SECONDARY' %}
+  type slave;
+  masters {
+    {{ bind_zone.primaries| join(';\n') | indent(4) }};
+  };
+  file "{{ bind_secondary_dir }}/{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):-1] }}";
+          {% elif _type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+    {{ bind_zone.forwarders| join(';\n') | indent(4) }};
+  };
+          {% endif %}
+};
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+
+  {% endfor %}
+{% endif %}

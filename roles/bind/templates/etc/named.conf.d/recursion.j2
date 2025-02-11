@@ -1,0 +1,10 @@
+
+  recursion {{ bind_recursion | bodsch.core.config_bool(true_as='yes', false_as='no') }};
+  {% if bind_recursion is defined and
+        bind_recursion | string | length > 0 and
+        bind_recursion | bool %}
+
+  allow-recursion {
+    {{ bind_allow_recursion | join(';\n') | indent(4) }};
+  };
+  {% endif %}

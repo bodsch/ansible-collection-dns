@@ -3,7 +3,7 @@
 . hooks/molecule.rc
 
 # set -x
-set -e
+# set -e
 
 TOX_TEST="${1}"
 
@@ -15,6 +15,11 @@ then
     echo ""
 
     pushd "roles/${COLLECTION_ROLE}" > /dev/null
+
+    if [ -e collections.yml ]
+    then
+      ansible_collection
+    fi
 
     tox "${TOX_OPTS}" -- molecule ${TOX_TEST} --scenario-name ${COLLECTION_SCENARIO}
 
@@ -30,6 +35,11 @@ else
     echo ""
 
     pushd roles/${role} > /dev/null
+
+    if [ -e collections.yml ]
+    then
+      ansible_collection
+    fi
 
     if [ "${TOX_TEST}" = "lint" ]
     then

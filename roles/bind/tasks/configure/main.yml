@@ -44,7 +44,7 @@
   become: true
   ansible.builtin.template:
     src: etc/auth_transfer.j2
-    dest: "{{ bind_conf_dir }}/{{ auth_file }}"
+    dest: "{{ bind_auth_file }}"
     owner: root
     group: "{{ bind_group }}"
     mode: "0640"
@@ -70,7 +70,6 @@
     backup: true
     validate: 'named-checkconf %s'
   notify:
-    # - validate configuration
     - reload bind
 
 ...

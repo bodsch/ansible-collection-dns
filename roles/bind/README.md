@@ -193,8 +193,14 @@ bind_logging:
 ```yaml
 bind_zones:
   - name: 'example.com'
-    primaries:
-      - 10.11.0.4
+    # default: primary [primary, secondary, forward]
+    # type: 
+    create_forward_zones: true
+    # Skip creation of reverse zones
+    create_reverse_zones: false
+    # fpr type: secondary
+    #primaries:
+    #  - 10.11.0.4
     networks:
       - '192.0.2'
     ipv6_networks:

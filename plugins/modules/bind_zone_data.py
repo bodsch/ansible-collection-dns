@@ -83,48 +83,46 @@ class BindZoneData(object):
     def forward_zone_data(self, forward_zones):
         """
         """
-        # self.module.log(msg=f"forward_zone_data({forward_zones})")
+        self.module.log(msg=f"forward_zone_data({forward_zones})")
         result = []
         for name in forward_zones:
-            # self.module.log(msg=f" - '{name}'")
+            self.module.log(msg=f" - '{name}'")
 
             res = {}
             res[name] = {}
 
-            line, hash, serial = self.read_zone_file(name)
+            hash, serial = self.read_zone_file(name)
 
             res[name] = dict(
                 filename=str(name),
-                # hash=line,
                 sha256=str(hash),
                 serial=str(serial)
             )
 
             result.append(res)
 
-        # self.module.log(msg=f" = '{result}'")
+        self.module.log(msg=f" = '{result}'")
 
         return result
 
     def reverse_zone_data(self, reverse_zones):
         """
         """
-        # self.module.log(msg=f"reverse_zone_data({reverse_zones})")
+        self.module.log(msg=f"reverse_zone_data({reverse_zones})")
 
         result = []
         for name in reverse_zones:
-            # self.module.log(msg=f" - '{name}'")
+            self.module.log(msg=f" - '{name}'")
 
             filename = self.reverse_zone_names(name)
 
             res = {}
             res[name] = {}
 
-            line, hash, serial = self.read_zone_file(filename)
+            hash, serial = self.read_zone_file(filename)
 
             res[name] = dict(
                 filename=str(filename),
-                # hash=line,
                 sha256=str(hash),
                 serial=str(serial),
                 network=str(name)
@@ -132,27 +130,30 @@ class BindZoneData(object):
 
             result.append(res)
 
-        # self.module.log(msg=f" = '{result}'")
+        self.module.log(msg=f" = '{result}'")
 
         return result
 
     def read_zone_file(self, zone_file):
-
+        """
+        """
         # self.module.log(msg=f"read_zone_file({zone_file})")
-
-        line = None
+        # line = None
         hash = None
         serial = None
         _file_name = os.path.join(self.zone_directory, zone_file)
 
-        # self.module.log(msg=f"'{_file_name}'")
+        # self.module.log(msg=f"   zone_directory: '{self.zone_directory}'")
+        # self.module.log(msg=f"   zone_file     : '{zone_file}'")
+        # self.module.log(msg=f"   file_name     : '{_file_name}'")
+        # self.module.log(msg=f"                 : '{os.path.join(self.zone_directory, _file_name)}'")
 
-        if os.path.exists(self.zone_directory) and os.path.exists(_file_name):
-            with open(os.path.join(self.zone_directory, _file_name), "r") as f:
-                zone_data = f.readlines()
+        if os.path.exists(_file_name):
+            with open(_file_name, "r") as f:
+                # zone_data = f.readlines()
                 # read first 4 lines from file
-                # zone_data = [next(f) for _ in range(14)]
-
+                zone_data = [next(f) for _ in range(5)]
+                # self.module.log(msg=f"                 : {zone_data}")
                 pattern = re.compile(
                     r'; Hash:.*(?P<hash>[0-9A-Za-z]{64}) (?P<timestamp>[0-9]+)', re.MULTILINE)
 
@@ -167,9 +168,9 @@ class BindZoneData(object):
                         hash = arr[2]
                         serial = arr[3]
 
-        # self.module.log(msg=f"= line: {line}, hash: {hash}, serial: {serial}")
+        self.module.log(msg=f"= hash: {hash}, serial: {serial}")
 
-        return (line, hash, serial)
+        return (hash, serial)
 
     def define_zone_forward_names(self):
         """

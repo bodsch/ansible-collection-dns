@@ -1,0 +1,17 @@
+  {% if bind_forwarders is defined and
+        bind_forwarders | count > 0 %}
+
+  forwarders {
+    {{ bind_forwarders | join(';\n') | indent(4) }};
+  };
+  {% endif %}
+  {% if bind_forward_only is defined and
+        bind_forward_only | string | length > 0 and
+        bind_forward_only | bool %}
+
+  forward only;
+  {% endif %}
+
+  rrset-order {
+    order {{ bind_rrset_order }};
+  };

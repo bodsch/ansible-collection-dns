@@ -19,101 +19,6 @@
   register: bind_zone_data
   tags: bind
 
-# - name: bind_zone_datarun_once: true
-#   debug:
-#     msg: "{{ bind_zone_data | default([]) }}"
-#
-# - name: bind_zones
-#   debug:
-#     msg: "{{ bind_zones | default([]) }}"
-#
-# - name: append zone filename to zone data
-#   ansible.builtin.set_fact:
-#     bind_zones: "{{ bind_zones | bodsch.dns.append_zone_filename(bind_zone_data) }}"
-#
-# - name: bind_zones
-#   debug:
-#     msg: "{{ bind_zones | default([]) }}"
-
-# - name: Read forward zone hashes
-#   bodsch.dns.bind_zone_hash:
-#     zone_directory: "{{ bind_zone_dir }}"
-#     zone_data: "{{ bind_zones }}"
-#   changed_when: false
-#   check_mode: false
-#   register: forward_hashes
-#   tags: bind
-#
-# - name: Read reverse ipv4 zone hashes
-#   bodsch.dns.bind_zone_hash:
-#     zone_directory: "{{ bind_zone_dir }}"
-#     zone_data: "{{ bind_zones }}"
-#     reverse_zone: true
-#   changed_when: false
-#   check_mode: false
-#   register: reverse_hashes
-#   tags: bind
-#
-# - name: Read reverse ipv6 zone hashes
-#   bodsch.dns.bind_zone_hash:
-#     zone_directory: "{{ bind_zone_dir }}"
-#     zone_data: "{{ bind_zones }}"
-#     reverse_zone: true
-#     ipv6: true
-#   changed_when: false
-#   check_mode: false
-#   register: reverse_hashes_ipv6
-#   tags: bind
-#
-# - name: forward_hashes
-#   debug:
-#     msg: "{{ forward_hashes | default([]) }}"
-#
-# - name: reverse_hashes
-#   debug:
-#     msg: "{{ reverse_hashes | default([]) }}"
-#
-# - name: reverse_hashes_ipv6
-#   debug:
-#     msg: "{{ reverse_hashes_ipv6 | default([]) }}"
-
-# ---------------------------------------------------------------------------------------------------
-
-# - name: define zone information
-#   ansible.builtin.set_fact:run_once: true
-#     bind_zone_data: "{{ item | bodsch.dns.zone_data(bind_zone_soa, ansible_hostname) }}"
-#   tags: bind
-#   loop: "{{ bind_zones }}"
-#   loop_control:
-#     label: "{{ item.name }}"
-#   when:
-#     - bind_zones is defined
-#     - bind_zones | count > 0
-#
-# - name: d
-#   debug:
-#     msg: "{{ bind_zone_data | default({}) }}"
-
-# ---------------------------------------------------------------------------------------------------
-
-# - name: forward lookup zone file
-#   run_once: true
-#   debug:
-#     msg:
-#       - "{{ (item.name | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) }}"
-#       - "{{ (item.state | default('present') == 'present') }}"
-#       - "{{ (item.create_reverse_zones is not defined or item.create_reverse_zones) }}"
-#       - "{{ (
-#                 (item.type is defined and item.type == 'primary') or
-#                 (item.type is not defined and item.primaries is defined and
-#                 (host_all_addresses | intersect(item.primaries) | length > 0))
-#             )
-#         }}"
-#       - "{{ (host_all_addresses | intersect(item.primaries)) }}"
-#   loop: "{{ bind_zones }}"
-#   loop_control:
-#     label: "{{ item.name }}"
-
 - name: Create forward lookup zone file
   become: true
   ansible.builtin.template:
@@ -123,14 +28,14 @@
     group: "{{ bind_group }}"
     mode: "{{ bind_zone_file_mode }}"
     backup: true
-    # validate: 'named-checkzone -d {{ item.name }} %s'
+    validate: 'named-checkzone -d {{ item.name }} %s'
   loop: "{{ bind_zones }}"
   loop_control:
     label: "{{ item.name }}"
   when: >
     (item.name | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_forward_zones is not defined or item.create_forward_zones) and
+    (item.create_forward_zones | default('true') | bool) and
     ((item.type is defined and item.type == 'primary') or
     (item.type is not defined and item.primaries is defined and
     (host_all_addresses | intersect(item.primaries) | length > 0)))
@@ -164,7 +69,6 @@
   ansible.builtin.template:
     src: etc/reverse_zone.j2
     dest: "{{ bind_zone_dir }}/{{ item.1 | bodsch.dns.zone_filename(bind_zone_data) }}"
-    # dest: "{{ bind_zone_dir }}/{{ ('.'.join(item.1.replace(item.1 + '.', '').split('.')[::-1])) }}.in-addr.arpa"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "{{ bind_zone_file_mode }}"
@@ -180,7 +84,7 @@
   when: >
     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_reverse_zones is not defined or item.create_reverse_zones) and
+    (item.create_reverse_zones | default('true') | bool) and
     (
         (item[0].type is defined and item[0].type == 'primary') or
         (item[0].type is not defined and item[0].primaries is defined and
@@ -215,7 +119,6 @@
   ansible.builtin.template:
     src: etc/reverse_zone_ipv6.j2
     dest: "{{ bind_zone_dir }}/{{ item.1 | bodsch.dns.zone_filename(bind_zone_data) }}"
-    # dest: "{{ bind_zone_dir }}/{{ (item.1 | ansible.utils.ipaddr('revdns'))[-(9+(item.1|regex_replace('^.*/','')|int)//2):-1] }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "{{ bind_zone_file_mode }}"
@@ -232,7 +135,7 @@
   when: >
     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_reverse_zones is not defined or item.create_reverse_zones) and
+    (item.create_reverse_zones | default('true') | bool) and
     ((item[0].type is defined and item[0].type == 'primary') or
     (item[0].type is not defined and item[0].primaries is defined and
     (host_all_addresses | intersect(item[0].primaries) | length > 0)))
