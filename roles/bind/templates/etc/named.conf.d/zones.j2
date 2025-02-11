@@ -3,7 +3,7 @@
       bind_zones | count > 0 %}
 
   {% for bind_zone in bind_zones %}
-    {% if bind_zone.create_forward_zones is not defined or bind_zone.create_forward_zones %}
+    {% if bind_zone.create_forward_zones | default('true') | bool %}
 {# Start: set zone type  #}
 {# {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
 {#// -- {{ bind_zone.name }} ---------------------------------------
@@ -70,7 +70,7 @@ zone "{{ bind_zone.name }}" IN {
     {% endif %}
 
     {% if bind_zone.networks is defined %}
-      {% if bind_zone.create_reverse_zones is not defined or bind_zone.create_reverse_zones %}
+      {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.networks) %}
         {% for network in bind_zone.networks %}
 
@@ -112,7 +112,7 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
     {% endif %}
 
     {% if bind_zone.ipv6_networks is defined %}
-      {% if bind_zone.create_reverse_zones is not defined or bind_zone.create_reverse_zones %}
+      {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.ipv6_networks) %}
         {% for network in bind_zone.ipv6_networks %}
 

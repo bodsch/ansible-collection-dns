@@ -22,31 +22,4 @@
       full_version: "{{ bind_version.full_version }}"
       version: "{{ bind_version.version }}"
 
-# - name: support overrides for systemd
-#   when:
-#     - ansible_service_mgr | lower == "systemd"
-#     - bind_systemd is defined
-#     - bind_systemd.unit is defined
-#     - bind_systemd.unit | count > 0
-#     - (
-#       (bind_systemd.unit.after is defined and bind_systemd.unit.after | count > 0) or
-#       (bind_systemd.unit.wants is defined and bind_systemd.unit.wants | count > 0) or
-#       (bind_systemd.unit.requires is defined and bind_systemd.unit.requires | count > 0)
-#       )
-#   block:
-#     - name: ensure bind.service.d is present
-#       ansible.builtin.file:
-#         dest: /etc/systemd/system/bind.service.d
-#         state: directory
-#         mode: 0755
-#
-#     - name: create overwrite.conf for systemd
-#       ansible.builtin.template:
-#         src: init/systemd/override.conf.j2
-#         dest: "/etc/systemd/system/bind.service.d/override.conf"
-#         mode: 0444
-#       notify:
-#         - systemctl daemon-reload
-#         - restart service
-
 ...

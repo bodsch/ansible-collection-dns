@@ -3,7 +3,7 @@
 namespace: bodsch
 name: dns
 
-version: 0.12.0
+version: 0.13.0
 
 readme: README.md
 
@@ -22,6 +22,8 @@ tags:
   - dns
 
 dependencies:
+  community.general: ">=10.3.0"
+  ansible.utils: "*"
   bodsch.core: ">=1.1.2"
 
 repository: https://github.com/bodsch/ansible-collection-dns

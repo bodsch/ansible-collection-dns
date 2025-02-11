@@ -35,7 +35,7 @@
   when: >
     (item.name | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_forward_zones | default('false') | bool) and
+    (item.create_forward_zones | default('true') | bool) and
     ((item.type is defined and item.type == 'primary') or
     (item.type is not defined and item.primaries is defined and
     (host_all_addresses | intersect(item.primaries) | length > 0)))
@@ -69,7 +69,6 @@
   ansible.builtin.template:
     src: etc/reverse_zone.j2
     dest: "{{ bind_zone_dir }}/{{ item.1 | bodsch.dns.zone_filename(bind_zone_data) }}"
-    # dest: "{{ bind_zone_dir }}/{{ ('.'.join(item.1.replace(item.1 + '.', '').split('.')[::-1])) }}.in-addr.arpa"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "{{ bind_zone_file_mode }}"
@@ -85,7 +84,7 @@
   when: >
     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_reverse_zones is not defined or item.create_reverse_zones) and
+    (item.create_reverse_zones | default('true') | bool) and
     (
         (item[0].type is defined and item[0].type == 'primary') or
         (item[0].type is not defined and item[0].primaries is defined and
@@ -120,7 +119,6 @@
   ansible.builtin.template:
     src: etc/reverse_zone_ipv6.j2
     dest: "{{ bind_zone_dir }}/{{ item.1 | bodsch.dns.zone_filename(bind_zone_data) }}"
-    # dest: "{{ bind_zone_dir }}/{{ (item.1 | ansible.utils.ipaddr('revdns'))[-(9+(item.1|regex_replace('^.*/','')|int)//2):-1] }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "{{ bind_zone_file_mode }}"
@@ -137,7 +135,7 @@
   when: >
     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
     (item.state | default('present') == 'present') and
-    (item.create_reverse_zones is not defined or item.create_reverse_zones) and
+    (item.create_reverse_zones | default('true') | bool) and
     ((item[0].type is defined and item[0].type == 'primary') or
     (item[0].type is not defined and item[0].primaries is defined and
     (host_all_addresses | intersect(item[0].primaries) | length > 0)))

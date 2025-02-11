@@ -180,9 +180,9 @@ bind_zones:
           - 'more text'
 
   - name: cm.local
-    type: primary
-    create_forward_zones: true
-    create_reverse_zones: true  # Skip creation of reverse zones
+    # type: primary               # default: primary [primary, secondary, forward]
+    # create_forward_zones: true
+    # create_reverse_zones: true  # Skip creation of reverse zones
     primaries:
       - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
     name_servers:
