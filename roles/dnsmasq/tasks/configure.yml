@@ -6,7 +6,7 @@
     path: /etc/dnsmasq.d
     owner: root
     group: root
-    mode: 0750
+    mode: "0750"
 
 - name: create configuration files
   ansible.builtin.template:
@@ -14,7 +14,7 @@
     dest: "{{ dnsmasq_config_directory }}/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: true
   loop:
     - 10-interfaces.conf
@@ -45,7 +45,7 @@
     dest: /etc/dnsmasq.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: true
   notify:
     - validate configuration

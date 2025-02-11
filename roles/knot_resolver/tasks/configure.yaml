@@ -17,7 +17,7 @@
       ansible.builtin.template:
         src: init/openrc/conf.d/kres-cache-gc.j2
         dest: /etc/conf.d/kres-cache-gc
-        mode: 0640
+        mode: "0640"
       notify:
         - restart kres-cache-gc
 
@@ -25,7 +25,7 @@
       ansible.builtin.template:
         src: init/openrc/conf.d/kresd.j2
         dest: /etc/conf.d/kresd
-        mode: 0640
+        mode: "0640"
       notify:
         - restart kresd
 

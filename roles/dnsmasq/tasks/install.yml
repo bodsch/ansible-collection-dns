@@ -22,13 +22,13 @@
       ansible.builtin.file:
         dest: /etc/systemd/system/dnsmasq.service.d
         state: directory
-        mode: 0755
+        mode: "0755"
 
     - name: create overwrite.conf for systemd
       ansible.builtin.template:
         src: init/systemd/override.conf.j2
         dest: "/etc/systemd/system/dnsmasq.service.d/override.conf"
-        mode: 0444
+        mode: "0444"
       notify:
         - systemctl daemon-reload
         - restart service

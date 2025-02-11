@@ -13,18 +13,18 @@
       ansible.builtin.template:
         src: init/openrc/init.d/kres-cache-gc.j2
         dest: /etc/init.d/kres-cache-gc
-        mode: 0755
+        mode: "0755"
 
     - name: create kresd  init script
       ansible.builtin.template:
         src: init/openrc/init.d/kresd.j2
         dest: /etc/init.d/kresd
-        mode: 0755
+        mode: "0755"
 
 - name: update trusted-key
   bodsch.dns.kdig:
     root_dns: "k.root-servers.net"
-    key_signing_key: 257
+    key_signing_key: "257"
     trust_keyfile: /etc/trusted-key.key
   notify:
     - restart kresd

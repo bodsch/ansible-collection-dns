@@ -28,7 +28,7 @@
     dest: "{{ hosts_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: "{{ host_file_backup }}"
   when:
     - not is_docker_guest
@@ -39,7 +39,7 @@
     dest: "{{ hosts_file }}.docker"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: "{{ host_file_backup }}"
   when:
     - is_docker_guest
@@ -51,7 +51,7 @@
     dest: "{{ hosts_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     backup: "{{ host_file_backup }}"
   when:
     hosts_cloud_template.stat.exists
