@@ -175,7 +175,7 @@ class BindZoneData(object):
     def define_zone_forward_names(self):
         """
         """
-        return [x.get("name") for x in self.zone_data if x.get("state", "present") and x.get("create_reverse_zones", True)]
+        return [x.get("name") for x in self.zone_data if x.get("state", "present") and x.get("create_forward_zones", True)]
 
     def define_zone_reverse_names(self, ipv6=False):
         """
