@@ -1,0 +1,38 @@
+---
+
+# - name: define pdns version
+#   when:
+#     - pdns_package_version | length > 0
+#   block:
+#   - name: Prefix the PowerDNS version with the correct separator on Debian
+#     set_fact:
+#       _pdns_package_version: "={{ pdns_package_version }}"
+#     when: ansible_os_family == 'Debian'
+
+- name: install pdns
+  become: true
+  package:
+    name: "{{ pdns_packages }}"
+    state: present
+
+# - name: Install PowerDNS debug symbols
+#   package:
+#     name: "{{ pdns_debug_symbols_package_name }}{{ _pdns_package_version | default('') }}"
+#     state: present
+#   when:
+#     - pdns_install_debug_symbols_package
+
+- name: detect pdns version
+  become: true
+  bodsch.dns.pdns_version:
+  register: pdns_version
+  check_mode: false
+  ignore_errors: true
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: pdns
+    facts:
+      full_version: "{{ pdns_version.full_version }}"
+      version: "{{ pdns_version.version }}"
+

@@ -1,0 +1,27 @@
+---
+
+- name: systemctl daemon-reload
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    force: true
+  when:
+    - ansible_service_mgr | lower == "systemd"
+
+- name: reload pdns
+  become: true
+  ansible.builtin.service:
+    name: "{{ pdns_service }}"
+    state: reloaded
+  when:
+    - not running_in_check_mode
+
+- name: restart pdns
+  become: true
+  ansible.builtin.service:
+    name: "{{ pdns_service }}"
+    state: restarted
+  when:
+    - not running_in_check_mode
+
+...

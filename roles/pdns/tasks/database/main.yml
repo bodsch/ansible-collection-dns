@@ -1,0 +1,41 @@
+---
+
+- name: d
+  debug:
+    msg:
+      - "{{ pdns_backends_packages | default({}) }}"
+      - "{{ pdns_backends.gsqlite3 | default({}) }}"
+      - "{{ pdns_backends.gsqlite3 | default({}) | count }}"
+
+- name: install pdns backends
+  ansible.builtin.package:
+    name: "{{ pdns_backends_packages[item.key.split(':')[0]] }}{{ _pdns_package_version | default('') }}"
+    state: present
+  when:
+    - ansible_os_family | lower == 'debian'
+    - pdns_backends_packages[item.key.split(':')[0]] is defined
+  with_dict: "{{ pdns_backends }}"
+
+# - name: Install and configure MySQL database
+#   ansible.builtin.include_tasks: database/mysql.yml
+#   when: "pdns_mysql_databases_credentials | length > 0"
+#   tags:
+#     - db
+#     - mysql
+
+- name: sqlite database
+  ansible.builtin.include_tasks: database/sqlite3.yml
+  when:
+    - pdns_backends is defined
+    - pdns_backends.gsqlite3 is defined
+    # - pdns_backends.qsqlite3 | default({}) | count > 0
+  tags:
+    - db
+    - sqlite
+
+# - name: Install and configure LMDB database
+#   ansible.builtin.include_tasks: database/lmdb.yml
+#   when: "pdns_lmdb_databases_locations | length > 0"
+#   tags:
+#     - db
+#     - lmdb

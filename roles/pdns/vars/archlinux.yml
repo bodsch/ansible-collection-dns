@@ -1,0 +1,26 @@
+---
+
+pdns_packages:
+  - powerdns
+
+# The directory where the PowerDNS configuration is located
+pdns_config_dir: '/etc/powerdns'
+
+pdns_backends_packages: {}
+
+pdns_lib_dir: /var/lib/powerdns
+
+# # The name of the PowerDNS package
+# default_pdns_package_name: "powerdns"
+#
+# # List of PowerDNS Backends packages. Arch ships all backends in the main package
+# default_pdns_backends_packages: {}
+#
+#
+# # Packages to install for MySQL support
+# pdns_mysql_packages:
+#   - python-pymysql
+#   - mariadb-clients
+
+pdns_owner: powerdns
+pdns_group: powerdns

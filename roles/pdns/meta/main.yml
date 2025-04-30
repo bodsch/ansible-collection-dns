@@ -1,0 +1,29 @@
+---
+
+galaxy_info:
+  role_name: pdns
+
+  author: Bodo Schulz
+  description: nsible role for install and configure  PowerDNS Authoritative DNS Server
+
+  license: Apache
+  min_ansible_version: "2.12"
+
+  platforms:
+    - name: ArchLinux
+    - name: Debian
+      versions:
+        # 11
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        # 20.04
+        - focal
+
+  galaxy_tags:
+    - system
+    - dns
+    - pdns
+    - powerdns
+    - auth
