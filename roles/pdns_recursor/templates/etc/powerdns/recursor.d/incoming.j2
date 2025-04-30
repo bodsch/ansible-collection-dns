@@ -1,0 +1,79 @@
+
+{#
+######### SECTION incoming #########
+incoming:
+##### If set, only allow these comma separated netmasks to recurse
+#   allow_from:
+#   - 127.0.0.0/8
+#   - 10.0.0.0/8
+#   - 100.64.0.0/10
+#   - 169.254.0.0/16
+#   - 192.168.0.0/16
+#   - 172.16.0.0/12
+#   - ::1/128
+#   - fc00::/7
+#   - fe80::/10
+##### If set, load allowed netmasks from this file
+#   allow_from_file: ''
+##### Allow 'no recursion desired (RD=0)' queries.
+#   allow_no_rd: false
+##### If set, NOTIFY requests for these zones will be allowed
+#   allow_notify_for: []
+##### If set, load NOTIFY-allowed zones from this file
+#   allow_notify_for_file: ''
+##### If set, NOTIFY requests from these comma separated netmasks will be allowed
+#   allow_notify_from: []
+##### If set, load NOTIFY-allowed netmasks from this file
+#   allow_notify_from_file: ''
+##### The load factor used when PowerDNS is distributing queries to worker threads
+#   distribution_load_factor: 0.0
+##### Size in bytes of the internal buffer of the pipe used by the distributor to pass incoming queries to a worker thread
+#   distribution_pipe_buffer_size: 0
+##### Launch this number of distributor threads, distributing queries to other threads
+#   distributor_threads: 0
+##### List of netmasks (proxy IP in case of proxy-protocol presence, client IP otherwise) for which EDNS padding will be enabled in responses, provided that 'edns-padding-mode' applies
+#   edns_padding_from: []
+##### Whether to add EDNS padding to all responses ('always') or only to responses for queries containing the EDNS padding option ('padded-queries-only', the default). In both modes, padding will only be added to responses for queries coming from 'setting-edns-padding-from' sources
+#   edns_padding_mode: padded-queries-only
+##### Packetcache tag associated to responses sent with EDNS padding, to prevent sending these to clients for which padding is not enabled.
+#   edns_padding_tag: 7830
+##### If EDNS Options should be extracted before calling the gettag() hook
+#   gettag_needs_edns_options: false
+##### IP addresses to listen on, separated by spaces or commas. Also accepts ports.
+#   listen:
+#   - 127.0.0.1
+##### Maximum number of requests handled concurrently per TCP connection
+#   max_concurrent_requests_per_tcp_connection: 10
+##### Maximum number of simultaneous TCP clients
+#   max_tcp_clients: 1024
+##### If set, maximum number of TCP sessions per client (IP address)
+#   max_tcp_per_client: 0
+##### If set, maximum number of TCP queries in a TCP connection
+#   max_tcp_queries_per_connection: 0
+##### Maximum number of UDP queries processed per recvmsg() round, before returning back to normal processing
+#   max_udp_queries_per_round: 10000
+##### Enable binding to non-local addresses by using FREEBIND / BINDANY socket options
+#   non_local_bind: false
+##### If PowerDNS itself should distribute queries over threads
+#   pdns_distributes_queries: false
+##### port to listen on
+#   port: 53
+##### A Proxy Protocol header should not be used for these listen addresses.
+#   proxy_protocol_exceptions: []
+##### A Proxy Protocol header is required from these subnets
+#   proxy_protocol_from: []
+##### The maximum size of a proxy protocol payload, including the TLV values
+#   proxy_protocol_maximum_size: 512
+##### Sequence of ProxyMapping
+#   proxymappings: []
+##### Enable SO_REUSEPORT allowing multiple recursors processes to listen to 1 address
+#   reuseport: true
+##### Enable TCP Fast Open support on the listening sockets, using the supplied numerical value as the queue size
+#   tcp_fast_open: 0
+##### Timeout in seconds when talking to TCP clients
+#   tcp_timeout: 2
+##### Maximum UDP response size before we truncate
+#   udp_truncation_threshold: 1232
+##### Pass along received EDNS Client Subnet information
+#   use_incoming_edns_subnet: false
+#}

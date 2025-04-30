@@ -1,51 +1,83 @@
 ---
 
-default_pdns_rec_package_name: "pdns-recursor"
+pdns_recursor_requirements: []
+pdns_recursor_packages: []
 
-pdns_rec_powerdns_repo_master:
-  apt_repo_origin: "repo.powerdns.com"
-  apt_repo: "deb [arch=amd64] https://repo.powerdns.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}-rec-master main"
-  gpg_key: "https://repo.powerdns.com/CBC8B383-pub.asc"
-  gpg_key_id: "D47975F8DAE32700A563E64FFF389421CBC8B383"
-  yum_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-master"
-  yum_debug_symbols_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-master/debug"
-  name: "powerdns-rec-master"
+# The directory where the PowerDNS configuration is located
+pdns_recursor_config_dir: '/etc/powerdns'
 
-pdns_rec_powerdns_repo_46:
-  apt_repo_origin: "repo.powerdns.com"
-  apt_repo: "deb [arch=amd64] https://repo.powerdns.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}-rec-46 main"
-  gpg_key: "https://repo.powerdns.com/FD380FBB-pub.asc"
-  gpg_key_id: "9FAAA5577E8FCF62093D036C1B0C6205FD380FBB"
-  yum_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-46"
-  yum_debug_symbols_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-46/debug"
-  name: "powerdns-rec-46"
+pdns_recursor_owner: pdns-recursor
+pdns_recursor_group: pdns-recursor
 
-pdns_rec_powerdns_repo_47:
-  apt_repo_origin: "repo.powerdns.com"
-  apt_repo: "deb [arch=amd64] https://repo.powerdns.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}-rec-47 main"
-  gpg_key: "https://repo.powerdns.com/FD380FBB-pub.asc"
-  gpg_key_id: "9FAAA5577E8FCF62093D036C1B0C6205FD380FBB"
-  yum_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-47"
-  yum_debug_symbols_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-47/debug"
-  name: "powerdns-rec-47"
+pdns_recursor_defaults_carbon: {}
+pdns_recursor_defaults_dnssec: {}
+pdns_recursor_defaults_ecs: {}
+pdns_recursor_defaults_incoming: {}
+pdns_recursor_defaults_logging:
+  common_errors: false
+  disable_syslog: true
+  dnstap_framestream_servers: []
+  dnstap_nod_framestream_servers: []
+  facility: ''
+  loglevel: 2
+  outgoing_protobuf_servers: []
+  protobuf_servers: []
+  protobuf_use_kernel_timestamp: false
+  quiet: false
+  rpz_changes: false
+  statistics_interval: 1800
+  structured_logging: true
+  structured_logging_backend: default
+  timestamp: true
+  trace: no
+pdns_recursor_defaults_nod: {}
+pdns_recursor_defaults_outgoing: {}
+pdns_recursor_defaults_packetcache: {}
+pdns_recursor_defaults_recordcache: {}
+pdns_recursor_defaults_recursor:
+  config_dir: /etc/powerdns
+  cpu_map: []
+  daemon: false
+  forward_zones: []
+  forward_zones_file: ''
+  forward_zones_recurse: []
+  forwarding_catalog_zones: []
+  include_dir: ''
+  lua_config_file: ''
+  lua_dns_script: ''
+  setgid: pdns-recursor
+  setuid: pdns-recursor
+  stack_cache_size: 100
+  stack_size: 200000
+  stats_api_disabled_list: []
+  stats_carbon_disabled_list: []
+  stats_rec_control_disabled_list: []
+  stats_ringbuffer_entries: 10000
+  stats_snmp_disabled_list: []
+  system_resolver_interval: 0
+  system_resolver_self_resolve_check: true
+  system_resolver_ttl: 0
+  tcp_threads: 1
+  threads: 2
+pdns_recursor_defaults_snmp: {}
+pdns_recursor_defaults_webservice: {}
 
-pdns_rec_powerdns_repo_48:
-  apt_repo_origin: "repo.powerdns.com"
-  apt_repo: "deb [arch=amd64] https://repo.powerdns.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}-rec-48 main"
-  gpg_key: "https://repo.powerdns.com/FD380FBB-pub.asc"
-  gpg_key_id: "9FAAA5577E8FCF62093D036C1B0C6205FD380FBB"
-  yum_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-48"
-  yum_debug_symbols_repo_baseurl: "https://repo.powerdns.com/centos/$basearch/$releasever/rec-48/debug"
-  name: "powerdns-rec-48"
+pdns_recursor_defaults_lua:
+  config_file: ""
+  dns_script: ""
 
+# -------------
 
-default_pdns_rec_service_overrides: >-
-  {{  { 'User'  : pdns_rec_user
-      , 'Group' : pdns_rec_group
-      } if _pdns_rec_version is version('4.3', operator='ge')
-        else {}
-  }}
+# default_pdns_recursor_package_name: "pdns-recursor"
+#
 
-# Default value intended to be used during check mode, when proper version
-# detection does not run.
-_pdns_rec_version: "{{ pdns_rec_package_version if pdns_rec_package_version != '' else 0 }}"
+# default_pdns_recursor_service_overrides: >-
+#   {{  { 'User'  : pdns_recursor_user
+#       , 'Group' : pdns_recursor_group
+#       } if _pdns_recursor_version is version('4.3', operator='ge')
+#         else {}
+#   }}
+#
+# # Default value intended to be used during check mode, when proper version
+# # detection does not run.
+# _pdns_recursor_version: "{{ pdns_recursor_package_version if pdns_recursor_package_version != '' else 0 }}"

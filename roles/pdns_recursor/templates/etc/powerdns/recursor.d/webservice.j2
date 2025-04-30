@@ -1,0 +1,27 @@
+
+webservice:
+  {{ pdns_recursor_webservice | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{#
+######### SECTION webservice #########
+webservice:
+##### IP Address of webserver to listen on
+#   address: 127.0.0.1
+##### Webserver access is only allowed from these subnets
+#   allow_from:
+#   - 127.0.0.1
+#   - ::1
+##### Directory where REST API stores config and zones
+#   api_dir: ''
+##### Static pre-shared authentication key for access to the REST API
+#   api_key: ''
+##### Whether to hash passwords and api keys supplied in plaintext, to prevent keeping the plaintext version in memory at runtime
+#   hash_plaintext_credentials: false
+##### Amount of logging in the webserver (none, normal, detailed)
+#   loglevel: normal
+##### Password required for accessing the webserver
+#   password: ''
+##### Port of webserver to listen on
+#   port: 8082
+##### Start a webserver (for REST API)
+#   webserver: false
+#}

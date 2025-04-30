@@ -1,0 +1,19 @@
+
+carbon:
+  {{ pdns_recursor_carbon | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+
+{#
+######### SECTION carbon #########
+carbon:
+##### If set overwrites the instance name default
+#   instance: recursor
+##### Number of seconds between carbon (graphite) updates
+#   interval: 30
+##### If set overwrites the first part of the carbon string
+#   ns: pdns
+##### If set, overrides our reported hostname for carbon stats
+#   ourname: ''
+##### If set, send metrics in carbon (graphite) format to this server IP address
+#   server: []
+
+#}

@@ -1,0 +1,13 @@
+---
+
+pdns_recursor_packages:
+  - powerdns-recursor
+
+pdns_recursor_service:
+  name: pdns-recursor
+  # pdns-recursor@.service
+
+pdns_recursor_owner: pdns-recursor
+pdns_recursor_group: pdns-recursor
+
+...

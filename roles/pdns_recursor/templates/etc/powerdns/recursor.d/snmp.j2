@@ -1,0 +1,11 @@
+
+snmp:
+  {{ pdns_recursor_snmp | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{#
+######### SECTION snmp #########
+snmp:
+##### If set, register as an SNMP agent
+#   agent: false
+##### If set and snmp-agent is set, the socket to use to register to the SNMP daemon
+#   daemon_socket: ''
+#}

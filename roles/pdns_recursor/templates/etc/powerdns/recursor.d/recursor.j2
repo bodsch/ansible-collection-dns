@@ -1,0 +1,815 @@
+
+recursor:
+  {{ pdns_recursor_recursor | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{#
+######### SECTION recursor #########
+recursor:
+##### Allow queries for trustanchor.server CH TXT and negativetrustanchor.server CH TXT
+#   allow_trust_anchor_query: false
+##### Sequence of AllowedAdditionalQType
+#   allowed_additional_qtypes: []
+##### Answer ANY queries with tc=1, shunting to TCP
+#   any_to_tcp: false
+##### Zones for which we have authoritative data, comma separated domain=file pairs
+#   auth_zones: []
+##### switch to chroot jail
+#   chroot: ''
+##### Location of configuration directory (recursor.conf or recursor.yml)
+#   config_dir: /etc/powerdns
+##### Name of this virtual configuration - will rename the binary image
+#   config_name: ''
+##### Thread to CPU mapping, space separated thread-id=cpu1,cpu2..cpuN pairs
+#   cpu_map: ''
+##### Operate as a daemon
+#   daemon: false
+##### internal use only
+#   devonly_regression_test_mode: false
+##### DNS64 prefix
+#   dns64_prefix: ''
+##### Path to 'hosts' file
+#   etc_hosts_file: /etc/hosts
+##### If set, event traces are collected and send out via protobuf logging (1), logfile (2) or both(3)
+#   event_trace_enabled: 0
+##### If we should serve up contents from /etc/hosts
+#   export_etc_hosts: false
+##### Also serve up the contents of /etc/hosts with this suffix
+#   export_etc_hosts_search_suffix: ''
+##### If set, send an EDNS Extended Error extension on resolution failures, like DNSSEC validation errors
+#   extended_resolution_errors: true
+##### Zones for which we forward queries, comma separated domain=ip pairs
+#   forward_zones: []
+##### File with (+)domain=ip pairs for forwarding
+#   forward_zones_file: ''
+##### Zones for which we forward queries with recursion bit, comma separated domain=ip pairs
+#   forward_zones_recurse: []
+##### Sequence of ForwardingCatalogZone
+#   forwarding_catalog_zones: []
+##### If set, load root hints from this file
+#   hint_file: ''
+##### Configuration settings to ignore if they are unknown
+#   ignore_unknown_settings: []
+##### Include settings files from this directory.
+#   include_dir: ''
+##### Number of latency values to calculate the qa-latency average
+#   latency_statistic_size: 10000
+##### More powerful configuration options
+#   lua_config_file: ''
+##### Filename containing an optional Lua script that will be used to modify dns answers
+#   lua_dns_script: ''
+##### More powerful configuration options
+#   lua_global_include_dir: ''
+##### Number of seconds between calls to the lua user defined maintenance() function
+#   lua_maintenance_interval: 1
+##### maximum number of queries that can be chained to an outgoing request, 0 is no limit
+#   max_chain_length: 0
+##### Maximum number CNAME records followed
+#   max_cnames_followed: 10
+##### Maximum number of $GENERATE steps when loading a zone from a file
+#   max_generate_steps: 0
+##### Maximum nested $INCLUDE depth when loading a zone from a file
+#   max_include_depth: 20
+##### Maximum number of simultaneous Mtasker threads
+#   max_mthreads: 2048
+##### Maximum number of internal recursion calls per query, 0 for unlimited
+#   max_recursion_depth: 16
+##### Maximum total wall-clock time per query in milliseconds, 0 for unlimited
+#   max_total_msec: 7000
+##### The minimum TTL
+#   minimum_ttl_override: 1
+##### When an NXDOMAIN exists in cache for a name with fewer labels than the qname, send NXDOMAIN without doing a lookup (see RFC 8020)
+#   nothing_below_nxdomain: dnssec
+##### Path to the Public Suffix List file, if any
+#   public_suffix_list_file: ''
+##### RFC9156 max minimize count
+#   qname_max_minimize_count: 10
+##### Use Query Name Minimization
+#   qname_minimization: true
+##### RFC9156 minimize one label parameter
+#   qname_minimize_one_label: 4
+##### If set, believe that an NXDOMAIN from the root means the TLD does not exist
+#   root_nx_trust: true
+##### Sequence of RPZ entries
+#   rpzs: []
+##### Save parent NS set to be used if child NS set fails
+#   save_parent_ns_set: true
+##### Domain name from which to query security update notifications
+#   security_poll_suffix: secpoll.powerdns.com.
+##### If we should be authoritative for RFC 1918 private IP space
+#   serve_rfc1918: true
+##### If we should be authoritative for RFC 6303 private IP space
+#   serve_rfc6303: true
+##### Returned when queried for 'id.server' TXT or NSID, defaults to hostname, set custom or 'disabled'
+#   server_id: '*runtime determined*'
+##### If set, change group id to this gid for more security
+#   setgid: ''
+##### If set, change user id to this uid for more security
+#   setuid: ''
+##### Where the controlsocket will live, /var/run/pdns-recursor when unset and not chrooted
+#   socket_dir: ''
+##### Group of socket
+#   socket_group: ''
+##### Permissions for socket
+#   socket_mode: ''
+##### Owner of socket
+#   socket_owner: ''
+##### Sequence of sort lists
+#   sortlists: []
+##### If non-zero, assume spoofing after this many near misses
+#   spoof_nearmiss_max: 1
+##### Size of the stack cache, per mthread
+#   stack_cache_size: 100
+##### stack size per mthread
+#   stack_size: 200000
+##### List of statistics that are disabled when retrieving the complete list of statistics via the API
+#   stats_api_disabled_list:
+#   - cache-bytes
+#   - packetcache-bytes
+#   - special-memory-usage
+#   - ecs-v4-response-bits-1
+#   - ecs-v4-response-bits-2
+#   - ecs-v4-response-bits-3
+#   - ecs-v4-response-bits-4
+#   - ecs-v4-response-bits-5
+#   - ecs-v4-response-bits-6
+#   - ecs-v4-response-bits-7
+#   - ecs-v4-response-bits-8
+#   - ecs-v4-response-bits-9
+#   - ecs-v4-response-bits-10
+#   - ecs-v4-response-bits-11
+#   - ecs-v4-response-bits-12
+#   - ecs-v4-response-bits-13
+#   - ecs-v4-response-bits-14
+#   - ecs-v4-response-bits-15
+#   - ecs-v4-response-bits-16
+#   - ecs-v4-response-bits-17
+#   - ecs-v4-response-bits-18
+#   - ecs-v4-response-bits-19
+#   - ecs-v4-response-bits-20
+#   - ecs-v4-response-bits-21
+#   - ecs-v4-response-bits-22
+#   - ecs-v4-response-bits-23
+#   - ecs-v4-response-bits-24
+#   - ecs-v4-response-bits-25
+#   - ecs-v4-response-bits-26
+#   - ecs-v4-response-bits-27
+#   - ecs-v4-response-bits-28
+#   - ecs-v4-response-bits-29
+#   - ecs-v4-response-bits-30
+#   - ecs-v4-response-bits-31
+#   - ecs-v4-response-bits-32
+#   - ecs-v6-response-bits-1
+#   - ecs-v6-response-bits-2
+#   - ecs-v6-response-bits-3
+#   - ecs-v6-response-bits-4
+#   - ecs-v6-response-bits-5
+#   - ecs-v6-response-bits-6
+#   - ecs-v6-response-bits-7
+#   - ecs-v6-response-bits-8
+#   - ecs-v6-response-bits-9
+#   - ecs-v6-response-bits-10
+#   - ecs-v6-response-bits-11
+#   - ecs-v6-response-bits-12
+#   - ecs-v6-response-bits-13
+#   - ecs-v6-response-bits-14
+#   - ecs-v6-response-bits-15
+#   - ecs-v6-response-bits-16
+#   - ecs-v6-response-bits-17
+#   - ecs-v6-response-bits-18
+#   - ecs-v6-response-bits-19
+#   - ecs-v6-response-bits-20
+#   - ecs-v6-response-bits-21
+#   - ecs-v6-response-bits-22
+#   - ecs-v6-response-bits-23
+#   - ecs-v6-response-bits-24
+#   - ecs-v6-response-bits-25
+#   - ecs-v6-response-bits-26
+#   - ecs-v6-response-bits-27
+#   - ecs-v6-response-bits-28
+#   - ecs-v6-response-bits-29
+#   - ecs-v6-response-bits-30
+#   - ecs-v6-response-bits-31
+#   - ecs-v6-response-bits-32
+#   - ecs-v6-response-bits-33
+#   - ecs-v6-response-bits-34
+#   - ecs-v6-response-bits-35
+#   - ecs-v6-response-bits-36
+#   - ecs-v6-response-bits-37
+#   - ecs-v6-response-bits-38
+#   - ecs-v6-response-bits-39
+#   - ecs-v6-response-bits-40
+#   - ecs-v6-response-bits-41
+#   - ecs-v6-response-bits-42
+#   - ecs-v6-response-bits-43
+#   - ecs-v6-response-bits-44
+#   - ecs-v6-response-bits-45
+#   - ecs-v6-response-bits-46
+#   - ecs-v6-response-bits-47
+#   - ecs-v6-response-bits-48
+#   - ecs-v6-response-bits-49
+#   - ecs-v6-response-bits-50
+#   - ecs-v6-response-bits-51
+#   - ecs-v6-response-bits-52
+#   - ecs-v6-response-bits-53
+#   - ecs-v6-response-bits-54
+#   - ecs-v6-response-bits-55
+#   - ecs-v6-response-bits-56
+#   - ecs-v6-response-bits-57
+#   - ecs-v6-response-bits-58
+#   - ecs-v6-response-bits-59
+#   - ecs-v6-response-bits-60
+#   - ecs-v6-response-bits-61
+#   - ecs-v6-response-bits-62
+#   - ecs-v6-response-bits-63
+#   - ecs-v6-response-bits-64
+#   - ecs-v6-response-bits-65
+#   - ecs-v6-response-bits-66
+#   - ecs-v6-response-bits-67
+#   - ecs-v6-response-bits-68
+#   - ecs-v6-response-bits-69
+#   - ecs-v6-response-bits-70
+#   - ecs-v6-response-bits-71
+#   - ecs-v6-response-bits-72
+#   - ecs-v6-response-bits-73
+#   - ecs-v6-response-bits-74
+#   - ecs-v6-response-bits-75
+#   - ecs-v6-response-bits-76
+#   - ecs-v6-response-bits-77
+#   - ecs-v6-response-bits-78
+#   - ecs-v6-response-bits-79
+#   - ecs-v6-response-bits-80
+#   - ecs-v6-response-bits-81
+#   - ecs-v6-response-bits-82
+#   - ecs-v6-response-bits-83
+#   - ecs-v6-response-bits-84
+#   - ecs-v6-response-bits-85
+#   - ecs-v6-response-bits-86
+#   - ecs-v6-response-bits-87
+#   - ecs-v6-response-bits-88
+#   - ecs-v6-response-bits-89
+#   - ecs-v6-response-bits-90
+#   - ecs-v6-response-bits-91
+#   - ecs-v6-response-bits-92
+#   - ecs-v6-response-bits-93
+#   - ecs-v6-response-bits-94
+#   - ecs-v6-response-bits-95
+#   - ecs-v6-response-bits-96
+#   - ecs-v6-response-bits-97
+#   - ecs-v6-response-bits-98
+#   - ecs-v6-response-bits-99
+#   - ecs-v6-response-bits-100
+#   - ecs-v6-response-bits-101
+#   - ecs-v6-response-bits-102
+#   - ecs-v6-response-bits-103
+#   - ecs-v6-response-bits-104
+#   - ecs-v6-response-bits-105
+#   - ecs-v6-response-bits-106
+#   - ecs-v6-response-bits-107
+#   - ecs-v6-response-bits-108
+#   - ecs-v6-response-bits-109
+#   - ecs-v6-response-bits-110
+#   - ecs-v6-response-bits-111
+#   - ecs-v6-response-bits-112
+#   - ecs-v6-response-bits-113
+#   - ecs-v6-response-bits-114
+#   - ecs-v6-response-bits-115
+#   - ecs-v6-response-bits-116
+#   - ecs-v6-response-bits-117
+#   - ecs-v6-response-bits-118
+#   - ecs-v6-response-bits-119
+#   - ecs-v6-response-bits-120
+#   - ecs-v6-response-bits-121
+#   - ecs-v6-response-bits-122
+#   - ecs-v6-response-bits-123
+#   - ecs-v6-response-bits-124
+#   - ecs-v6-response-bits-125
+#   - ecs-v6-response-bits-126
+#   - ecs-v6-response-bits-127
+#   - ecs-v6-response-bits-128
+##### List of statistics that are prevented from being exported via Carbon
+#   stats_carbon_disabled_list:
+#   - cache-bytes
+#   - packetcache-bytes
+#   - special-memory-usage
+#   - ecs-v4-response-bits-1
+#   - ecs-v4-response-bits-2
+#   - ecs-v4-response-bits-3
+#   - ecs-v4-response-bits-4
+#   - ecs-v4-response-bits-5
+#   - ecs-v4-response-bits-6
+#   - ecs-v4-response-bits-7
+#   - ecs-v4-response-bits-8
+#   - ecs-v4-response-bits-9
+#   - ecs-v4-response-bits-10
+#   - ecs-v4-response-bits-11
+#   - ecs-v4-response-bits-12
+#   - ecs-v4-response-bits-13
+#   - ecs-v4-response-bits-14
+#   - ecs-v4-response-bits-15
+#   - ecs-v4-response-bits-16
+#   - ecs-v4-response-bits-17
+#   - ecs-v4-response-bits-18
+#   - ecs-v4-response-bits-19
+#   - ecs-v4-response-bits-20
+#   - ecs-v4-response-bits-21
+#   - ecs-v4-response-bits-22
+#   - ecs-v4-response-bits-23
+#   - ecs-v4-response-bits-24
+#   - ecs-v4-response-bits-25
+#   - ecs-v4-response-bits-26
+#   - ecs-v4-response-bits-27
+#   - ecs-v4-response-bits-28
+#   - ecs-v4-response-bits-29
+#   - ecs-v4-response-bits-30
+#   - ecs-v4-response-bits-31
+#   - ecs-v4-response-bits-32
+#   - ecs-v6-response-bits-1
+#   - ecs-v6-response-bits-2
+#   - ecs-v6-response-bits-3
+#   - ecs-v6-response-bits-4
+#   - ecs-v6-response-bits-5
+#   - ecs-v6-response-bits-6
+#   - ecs-v6-response-bits-7
+#   - ecs-v6-response-bits-8
+#   - ecs-v6-response-bits-9
+#   - ecs-v6-response-bits-10
+#   - ecs-v6-response-bits-11
+#   - ecs-v6-response-bits-12
+#   - ecs-v6-response-bits-13
+#   - ecs-v6-response-bits-14
+#   - ecs-v6-response-bits-15
+#   - ecs-v6-response-bits-16
+#   - ecs-v6-response-bits-17
+#   - ecs-v6-response-bits-18
+#   - ecs-v6-response-bits-19
+#   - ecs-v6-response-bits-20
+#   - ecs-v6-response-bits-21
+#   - ecs-v6-response-bits-22
+#   - ecs-v6-response-bits-23
+#   - ecs-v6-response-bits-24
+#   - ecs-v6-response-bits-25
+#   - ecs-v6-response-bits-26
+#   - ecs-v6-response-bits-27
+#   - ecs-v6-response-bits-28
+#   - ecs-v6-response-bits-29
+#   - ecs-v6-response-bits-30
+#   - ecs-v6-response-bits-31
+#   - ecs-v6-response-bits-32
+#   - ecs-v6-response-bits-33
+#   - ecs-v6-response-bits-34
+#   - ecs-v6-response-bits-35
+#   - ecs-v6-response-bits-36
+#   - ecs-v6-response-bits-37
+#   - ecs-v6-response-bits-38
+#   - ecs-v6-response-bits-39
+#   - ecs-v6-response-bits-40
+#   - ecs-v6-response-bits-41
+#   - ecs-v6-response-bits-42
+#   - ecs-v6-response-bits-43
+#   - ecs-v6-response-bits-44
+#   - ecs-v6-response-bits-45
+#   - ecs-v6-response-bits-46
+#   - ecs-v6-response-bits-47
+#   - ecs-v6-response-bits-48
+#   - ecs-v6-response-bits-49
+#   - ecs-v6-response-bits-50
+#   - ecs-v6-response-bits-51
+#   - ecs-v6-response-bits-52
+#   - ecs-v6-response-bits-53
+#   - ecs-v6-response-bits-54
+#   - ecs-v6-response-bits-55
+#   - ecs-v6-response-bits-56
+#   - ecs-v6-response-bits-57
+#   - ecs-v6-response-bits-58
+#   - ecs-v6-response-bits-59
+#   - ecs-v6-response-bits-60
+#   - ecs-v6-response-bits-61
+#   - ecs-v6-response-bits-62
+#   - ecs-v6-response-bits-63
+#   - ecs-v6-response-bits-64
+#   - ecs-v6-response-bits-65
+#   - ecs-v6-response-bits-66
+#   - ecs-v6-response-bits-67
+#   - ecs-v6-response-bits-68
+#   - ecs-v6-response-bits-69
+#   - ecs-v6-response-bits-70
+#   - ecs-v6-response-bits-71
+#   - ecs-v6-response-bits-72
+#   - ecs-v6-response-bits-73
+#   - ecs-v6-response-bits-74
+#   - ecs-v6-response-bits-75
+#   - ecs-v6-response-bits-76
+#   - ecs-v6-response-bits-77
+#   - ecs-v6-response-bits-78
+#   - ecs-v6-response-bits-79
+#   - ecs-v6-response-bits-80
+#   - ecs-v6-response-bits-81
+#   - ecs-v6-response-bits-82
+#   - ecs-v6-response-bits-83
+#   - ecs-v6-response-bits-84
+#   - ecs-v6-response-bits-85
+#   - ecs-v6-response-bits-86
+#   - ecs-v6-response-bits-87
+#   - ecs-v6-response-bits-88
+#   - ecs-v6-response-bits-89
+#   - ecs-v6-response-bits-90
+#   - ecs-v6-response-bits-91
+#   - ecs-v6-response-bits-92
+#   - ecs-v6-response-bits-93
+#   - ecs-v6-response-bits-94
+#   - ecs-v6-response-bits-95
+#   - ecs-v6-response-bits-96
+#   - ecs-v6-response-bits-97
+#   - ecs-v6-response-bits-98
+#   - ecs-v6-response-bits-99
+#   - ecs-v6-response-bits-100
+#   - ecs-v6-response-bits-101
+#   - ecs-v6-response-bits-102
+#   - ecs-v6-response-bits-103
+#   - ecs-v6-response-bits-104
+#   - ecs-v6-response-bits-105
+#   - ecs-v6-response-bits-106
+#   - ecs-v6-response-bits-107
+#   - ecs-v6-response-bits-108
+#   - ecs-v6-response-bits-109
+#   - ecs-v6-response-bits-110
+#   - ecs-v6-response-bits-111
+#   - ecs-v6-response-bits-112
+#   - ecs-v6-response-bits-113
+#   - ecs-v6-response-bits-114
+#   - ecs-v6-response-bits-115
+#   - ecs-v6-response-bits-116
+#   - ecs-v6-response-bits-117
+#   - ecs-v6-response-bits-118
+#   - ecs-v6-response-bits-119
+#   - ecs-v6-response-bits-120
+#   - ecs-v6-response-bits-121
+#   - ecs-v6-response-bits-122
+#   - ecs-v6-response-bits-123
+#   - ecs-v6-response-bits-124
+#   - ecs-v6-response-bits-125
+#   - ecs-v6-response-bits-126
+#   - ecs-v6-response-bits-127
+#   - ecs-v6-response-bits-128
+#   - cumul-clientanswers
+#   - cumul-authanswers
+#   - policy-hits
+#   - proxy-mapping-total
+#   - remote-logger-count
+##### List of statistics that are prevented from being exported via rec_control get-all
+#   stats_rec_control_disabled_list:
+#   - cache-bytes
+#   - packetcache-bytes
+#   - special-memory-usage
+#   - ecs-v4-response-bits-1
+#   - ecs-v4-response-bits-2
+#   - ecs-v4-response-bits-3
+#   - ecs-v4-response-bits-4
+#   - ecs-v4-response-bits-5
+#   - ecs-v4-response-bits-6
+#   - ecs-v4-response-bits-7
+#   - ecs-v4-response-bits-8
+#   - ecs-v4-response-bits-9
+#   - ecs-v4-response-bits-10
+#   - ecs-v4-response-bits-11
+#   - ecs-v4-response-bits-12
+#   - ecs-v4-response-bits-13
+#   - ecs-v4-response-bits-14
+#   - ecs-v4-response-bits-15
+#   - ecs-v4-response-bits-16
+#   - ecs-v4-response-bits-17
+#   - ecs-v4-response-bits-18
+#   - ecs-v4-response-bits-19
+#   - ecs-v4-response-bits-20
+#   - ecs-v4-response-bits-21
+#   - ecs-v4-response-bits-22
+#   - ecs-v4-response-bits-23
+#   - ecs-v4-response-bits-24
+#   - ecs-v4-response-bits-25
+#   - ecs-v4-response-bits-26
+#   - ecs-v4-response-bits-27
+#   - ecs-v4-response-bits-28
+#   - ecs-v4-response-bits-29
+#   - ecs-v4-response-bits-30
+#   - ecs-v4-response-bits-31
+#   - ecs-v4-response-bits-32
+#   - ecs-v6-response-bits-1
+#   - ecs-v6-response-bits-2
+#   - ecs-v6-response-bits-3
+#   - ecs-v6-response-bits-4
+#   - ecs-v6-response-bits-5
+#   - ecs-v6-response-bits-6
+#   - ecs-v6-response-bits-7
+#   - ecs-v6-response-bits-8
+#   - ecs-v6-response-bits-9
+#   - ecs-v6-response-bits-10
+#   - ecs-v6-response-bits-11
+#   - ecs-v6-response-bits-12
+#   - ecs-v6-response-bits-13
+#   - ecs-v6-response-bits-14
+#   - ecs-v6-response-bits-15
+#   - ecs-v6-response-bits-16
+#   - ecs-v6-response-bits-17
+#   - ecs-v6-response-bits-18
+#   - ecs-v6-response-bits-19
+#   - ecs-v6-response-bits-20
+#   - ecs-v6-response-bits-21
+#   - ecs-v6-response-bits-22
+#   - ecs-v6-response-bits-23
+#   - ecs-v6-response-bits-24
+#   - ecs-v6-response-bits-25
+#   - ecs-v6-response-bits-26
+#   - ecs-v6-response-bits-27
+#   - ecs-v6-response-bits-28
+#   - ecs-v6-response-bits-29
+#   - ecs-v6-response-bits-30
+#   - ecs-v6-response-bits-31
+#   - ecs-v6-response-bits-32
+#   - ecs-v6-response-bits-33
+#   - ecs-v6-response-bits-34
+#   - ecs-v6-response-bits-35
+#   - ecs-v6-response-bits-36
+#   - ecs-v6-response-bits-37
+#   - ecs-v6-response-bits-38
+#   - ecs-v6-response-bits-39
+#   - ecs-v6-response-bits-40
+#   - ecs-v6-response-bits-41
+#   - ecs-v6-response-bits-42
+#   - ecs-v6-response-bits-43
+#   - ecs-v6-response-bits-44
+#   - ecs-v6-response-bits-45
+#   - ecs-v6-response-bits-46
+#   - ecs-v6-response-bits-47
+#   - ecs-v6-response-bits-48
+#   - ecs-v6-response-bits-49
+#   - ecs-v6-response-bits-50
+#   - ecs-v6-response-bits-51
+#   - ecs-v6-response-bits-52
+#   - ecs-v6-response-bits-53
+#   - ecs-v6-response-bits-54
+#   - ecs-v6-response-bits-55
+#   - ecs-v6-response-bits-56
+#   - ecs-v6-response-bits-57
+#   - ecs-v6-response-bits-58
+#   - ecs-v6-response-bits-59
+#   - ecs-v6-response-bits-60
+#   - ecs-v6-response-bits-61
+#   - ecs-v6-response-bits-62
+#   - ecs-v6-response-bits-63
+#   - ecs-v6-response-bits-64
+#   - ecs-v6-response-bits-65
+#   - ecs-v6-response-bits-66
+#   - ecs-v6-response-bits-67
+#   - ecs-v6-response-bits-68
+#   - ecs-v6-response-bits-69
+#   - ecs-v6-response-bits-70
+#   - ecs-v6-response-bits-71
+#   - ecs-v6-response-bits-72
+#   - ecs-v6-response-bits-73
+#   - ecs-v6-response-bits-74
+#   - ecs-v6-response-bits-75
+#   - ecs-v6-response-bits-76
+#   - ecs-v6-response-bits-77
+#   - ecs-v6-response-bits-78
+#   - ecs-v6-response-bits-79
+#   - ecs-v6-response-bits-80
+#   - ecs-v6-response-bits-81
+#   - ecs-v6-response-bits-82
+#   - ecs-v6-response-bits-83
+#   - ecs-v6-response-bits-84
+#   - ecs-v6-response-bits-85
+#   - ecs-v6-response-bits-86
+#   - ecs-v6-response-bits-87
+#   - ecs-v6-response-bits-88
+#   - ecs-v6-response-bits-89
+#   - ecs-v6-response-bits-90
+#   - ecs-v6-response-bits-91
+#   - ecs-v6-response-bits-92
+#   - ecs-v6-response-bits-93
+#   - ecs-v6-response-bits-94
+#   - ecs-v6-response-bits-95
+#   - ecs-v6-response-bits-96
+#   - ecs-v6-response-bits-97
+#   - ecs-v6-response-bits-98
+#   - ecs-v6-response-bits-99
+#   - ecs-v6-response-bits-100
+#   - ecs-v6-response-bits-101
+#   - ecs-v6-response-bits-102
+#   - ecs-v6-response-bits-103
+#   - ecs-v6-response-bits-104
+#   - ecs-v6-response-bits-105
+#   - ecs-v6-response-bits-106
+#   - ecs-v6-response-bits-107
+#   - ecs-v6-response-bits-108
+#   - ecs-v6-response-bits-109
+#   - ecs-v6-response-bits-110
+#   - ecs-v6-response-bits-111
+#   - ecs-v6-response-bits-112
+#   - ecs-v6-response-bits-113
+#   - ecs-v6-response-bits-114
+#   - ecs-v6-response-bits-115
+#   - ecs-v6-response-bits-116
+#   - ecs-v6-response-bits-117
+#   - ecs-v6-response-bits-118
+#   - ecs-v6-response-bits-119
+#   - ecs-v6-response-bits-120
+#   - ecs-v6-response-bits-121
+#   - ecs-v6-response-bits-122
+#   - ecs-v6-response-bits-123
+#   - ecs-v6-response-bits-124
+#   - ecs-v6-response-bits-125
+#   - ecs-v6-response-bits-126
+#   - ecs-v6-response-bits-127
+#   - ecs-v6-response-bits-128
+#   - cumul-clientanswers
+#   - cumul-authanswers
+#   - policy-hits
+#   - proxy-mapping-total
+#   - remote-logger-count
+##### maximum number of packets to store statistics for
+#   stats_ringbuffer_entries: 10000
+##### List of statistics that are prevented from being exported via SNMP
+#   stats_snmp_disabled_list:
+#   - cache-bytes
+#   - packetcache-bytes
+#   - special-memory-usage
+#   - ecs-v4-response-bits-1
+#   - ecs-v4-response-bits-2
+#   - ecs-v4-response-bits-3
+#   - ecs-v4-response-bits-4
+#   - ecs-v4-response-bits-5
+#   - ecs-v4-response-bits-6
+#   - ecs-v4-response-bits-7
+#   - ecs-v4-response-bits-8
+#   - ecs-v4-response-bits-9
+#   - ecs-v4-response-bits-10
+#   - ecs-v4-response-bits-11
+#   - ecs-v4-response-bits-12
+#   - ecs-v4-response-bits-13
+#   - ecs-v4-response-bits-14
+#   - ecs-v4-response-bits-15
+#   - ecs-v4-response-bits-16
+#   - ecs-v4-response-bits-17
+#   - ecs-v4-response-bits-18
+#   - ecs-v4-response-bits-19
+#   - ecs-v4-response-bits-20
+#   - ecs-v4-response-bits-21
+#   - ecs-v4-response-bits-22
+#   - ecs-v4-response-bits-23
+#   - ecs-v4-response-bits-24
+#   - ecs-v4-response-bits-25
+#   - ecs-v4-response-bits-26
+#   - ecs-v4-response-bits-27
+#   - ecs-v4-response-bits-28
+#   - ecs-v4-response-bits-29
+#   - ecs-v4-response-bits-30
+#   - ecs-v4-response-bits-31
+#   - ecs-v4-response-bits-32
+#   - ecs-v6-response-bits-1
+#   - ecs-v6-response-bits-2
+#   - ecs-v6-response-bits-3
+#   - ecs-v6-response-bits-4
+#   - ecs-v6-response-bits-5
+#   - ecs-v6-response-bits-6
+#   - ecs-v6-response-bits-7
+#   - ecs-v6-response-bits-8
+#   - ecs-v6-response-bits-9
+#   - ecs-v6-response-bits-10
+#   - ecs-v6-response-bits-11
+#   - ecs-v6-response-bits-12
+#   - ecs-v6-response-bits-13
+#   - ecs-v6-response-bits-14
+#   - ecs-v6-response-bits-15
+#   - ecs-v6-response-bits-16
+#   - ecs-v6-response-bits-17
+#   - ecs-v6-response-bits-18
+#   - ecs-v6-response-bits-19
+#   - ecs-v6-response-bits-20
+#   - ecs-v6-response-bits-21
+#   - ecs-v6-response-bits-22
+#   - ecs-v6-response-bits-23
+#   - ecs-v6-response-bits-24
+#   - ecs-v6-response-bits-25
+#   - ecs-v6-response-bits-26
+#   - ecs-v6-response-bits-27
+#   - ecs-v6-response-bits-28
+#   - ecs-v6-response-bits-29
+#   - ecs-v6-response-bits-30
+#   - ecs-v6-response-bits-31
+#   - ecs-v6-response-bits-32
+#   - ecs-v6-response-bits-33
+#   - ecs-v6-response-bits-34
+#   - ecs-v6-response-bits-35
+#   - ecs-v6-response-bits-36
+#   - ecs-v6-response-bits-37
+#   - ecs-v6-response-bits-38
+#   - ecs-v6-response-bits-39
+#   - ecs-v6-response-bits-40
+#   - ecs-v6-response-bits-41
+#   - ecs-v6-response-bits-42
+#   - ecs-v6-response-bits-43
+#   - ecs-v6-response-bits-44
+#   - ecs-v6-response-bits-45
+#   - ecs-v6-response-bits-46
+#   - ecs-v6-response-bits-47
+#   - ecs-v6-response-bits-48
+#   - ecs-v6-response-bits-49
+#   - ecs-v6-response-bits-50
+#   - ecs-v6-response-bits-51
+#   - ecs-v6-response-bits-52
+#   - ecs-v6-response-bits-53
+#   - ecs-v6-response-bits-54
+#   - ecs-v6-response-bits-55
+#   - ecs-v6-response-bits-56
+#   - ecs-v6-response-bits-57
+#   - ecs-v6-response-bits-58
+#   - ecs-v6-response-bits-59
+#   - ecs-v6-response-bits-60
+#   - ecs-v6-response-bits-61
+#   - ecs-v6-response-bits-62
+#   - ecs-v6-response-bits-63
+#   - ecs-v6-response-bits-64
+#   - ecs-v6-response-bits-65
+#   - ecs-v6-response-bits-66
+#   - ecs-v6-response-bits-67
+#   - ecs-v6-response-bits-68
+#   - ecs-v6-response-bits-69
+#   - ecs-v6-response-bits-70
+#   - ecs-v6-response-bits-71
+#   - ecs-v6-response-bits-72
+#   - ecs-v6-response-bits-73
+#   - ecs-v6-response-bits-74
+#   - ecs-v6-response-bits-75
+#   - ecs-v6-response-bits-76
+#   - ecs-v6-response-bits-77
+#   - ecs-v6-response-bits-78
+#   - ecs-v6-response-bits-79
+#   - ecs-v6-response-bits-80
+#   - ecs-v6-response-bits-81
+#   - ecs-v6-response-bits-82
+#   - ecs-v6-response-bits-83
+#   - ecs-v6-response-bits-84
+#   - ecs-v6-response-bits-85
+#   - ecs-v6-response-bits-86
+#   - ecs-v6-response-bits-87
+#   - ecs-v6-response-bits-88
+#   - ecs-v6-response-bits-89
+#   - ecs-v6-response-bits-90
+#   - ecs-v6-response-bits-91
+#   - ecs-v6-response-bits-92
+#   - ecs-v6-response-bits-93
+#   - ecs-v6-response-bits-94
+#   - ecs-v6-response-bits-95
+#   - ecs-v6-response-bits-96
+#   - ecs-v6-response-bits-97
+#   - ecs-v6-response-bits-98
+#   - ecs-v6-response-bits-99
+#   - ecs-v6-response-bits-100
+#   - ecs-v6-response-bits-101
+#   - ecs-v6-response-bits-102
+#   - ecs-v6-response-bits-103
+#   - ecs-v6-response-bits-104
+#   - ecs-v6-response-bits-105
+#   - ecs-v6-response-bits-106
+#   - ecs-v6-response-bits-107
+#   - ecs-v6-response-bits-108
+#   - ecs-v6-response-bits-109
+#   - ecs-v6-response-bits-110
+#   - ecs-v6-response-bits-111
+#   - ecs-v6-response-bits-112
+#   - ecs-v6-response-bits-113
+#   - ecs-v6-response-bits-114
+#   - ecs-v6-response-bits-115
+#   - ecs-v6-response-bits-116
+#   - ecs-v6-response-bits-117
+#   - ecs-v6-response-bits-118
+#   - ecs-v6-response-bits-119
+#   - ecs-v6-response-bits-120
+#   - ecs-v6-response-bits-121
+#   - ecs-v6-response-bits-122
+#   - ecs-v6-response-bits-123
+#   - ecs-v6-response-bits-124
+#   - ecs-v6-response-bits-125
+#   - ecs-v6-response-bits-126
+#   - ecs-v6-response-bits-127
+#   - ecs-v6-response-bits-128
+#   - cumul-clientanswers
+#   - cumul-authanswers
+#   - policy-hits
+#   - proxy-mapping-total
+#   - remote-logger-count
+##### Set interval (in seconds) of the re-resolve checks of system resolver subsystem.
+#   system_resolver_interval: 0
+##### Check for potential self-resolve, default enabled.
+#   system_resolver_self_resolve_check: true
+##### Set TTL of system resolver feature, 0 (default) is disabled
+#   system_resolver_ttl: 0
+##### Launch this number of threads listening for and processing TCP queries
+#   tcp_threads: 1
+##### Launch this number of threads
+#   threads: 2
+##### string reported on version.pdns or version.bind
+#   version_string: '*runtime determined*'
+##### Write a PID file
+#   write_pid: true
+
+#}

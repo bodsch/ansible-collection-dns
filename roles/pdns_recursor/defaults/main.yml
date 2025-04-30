@@ -1,33 +1,48 @@
 ---
 
+pdns_recursor_carbon: {}
+pdns_recursor_dnssec: {}
+pdns_recursor_ecs: {}
+pdns_recursor_incoming: {}
+pdns_recursor_logging: {}
+pdns_recursor_nod: {}
+pdns_recursor_outgoing: {}
+pdns_recursor_packetcache: {}
+pdns_recursor_recordcache: {}
+pdns_recursor_recursor: {}
+pdns_recursor_snmp: {}
+pdns_recursor_webservice: {}
+
+
+
 # By default the PowerDNS Recursor is installed from the os default repositories.
 # This setting has no effect on FreeBSD
-pdns_rec_install_repo: ""
+pdns_recursor_install_repo: ""
 
 # Install the EPEL repository.
 # EPEL is needed to satisfy some PowerDNS Recursor dependencies like protobuf
-pdns_rec_install_epel: True
+pdns_recursor_install_epel: True
 
 # You can install the PowerDNS Recursor package from the 'master' branch as
 # follows:
 # - hosts: all
 #   roles:
 #    - { role: PowerDNS.pdns_recursor,
-#        pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
+#        pdns_recursor_install_repo: "{{ pdns_recursor_powerdns_repo_master }}"
 #
 # To install the PowerDNS Recursor package from the '40' branch of
 # the PowerDNS official repository use the following playbook
 # - hosts: all
 #   roles:
 #    - { role: PowerDNS.pdns_recursor,
-#        pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
+#        pdns_recursor_install_repo: "{{ pdns_recursor_powerdns_repo_40 }}"
 #
 # To install the PowerDNS Recursor package from a custom repository
-# override the `pdns_rec_install_repo` default value in your playbook.
+# override the `pdns_recursor_install_repo` default value in your playbook.
 # e.g.
 # - hosts: all
 #   vars:
-#     pdns_rec_install_repo:
+#     pdns_recursor_install_repo:
 #       apt_repo_origin: "repo.example.com"  # used to pin the pdns-recursor to the provided repository
 #       apt_repo: "deb http://repo.example.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}/pdns-recursor main"
 #       gpg_key: "http://repo.example.com/MYREPOGPGPUBKEY.asc" # repository public GPG key
@@ -39,58 +54,58 @@ pdns_rec_install_epel: True
 #    - { role: PowerDNS.pdns_recursor }
 
 # The name of the PowerDNS package
-pdns_rec_package_name: "{{ default_pdns_rec_package_name }}"
-pdns_rec_package_version: ""
+pdns_recursor_package_name: "{{ default_pdns_recursor_package_name }}"
+pdns_recursor_package_version: ""
 
 # Install PowerDNS Recursor debug symbols package
-pdns_rec_install_debug_symbols_package: False
+pdns_recursor_install_debug_symbols_package: False
 
 # The name of the PowerDNS Recursor debug symbols package
-pdns_rec_debug_symbols_package_name: "{{ default_pdns_rec_debug_symbols_package_name }}"
+pdns_recursor_debug_symbols_package_name: "{{ default_pdns_recursor_debug_symbols_package_name }}"
 
 # The user and group the PowerDNS Recursor will run as.
 # NOTE: This role does not create any user as we assume the "pdns" user and group
 # to be created by the PowerDNS Recursor package or by an other role.
 # If you change these variables, make sure to create the user and groups before
 # applying this role
-pdns_rec_user: "{{ default_pdns_rec_user }}"
-pdns_rec_group: "{{ default_pdns_rec_group }}"
+pdns_recursor_user: "{{ default_pdns_recursor_user }}"
+pdns_recursor_group: "{{ default_pdns_recursor_group }}"
 
 # The user and group that own the configuration files
-pdns_rec_file_owner: "root"
-pdns_rec_file_group: "{{ default_pdns_rec_file_group }}"
+pdns_recursor_file_owner: "root"
+pdns_recursor_file_group: "{{ default_pdns_recursor_file_group }}"
 
 # Name of the PowerDNS Service
-pdns_rec_service_name: "pdns-recursor"
+pdns_recursor_service_name: "pdns-recursor"
 # Name of the PowerDNS binary.
-pdns_rec_bin_name: "pdns_recursor"
+pdns_recursor_bin_name: "pdns_recursor"
 
 # State of the PowerDNS Recursor service
-pdns_rec_service_state: "started"
-pdns_rec_service_enabled: "yes"
+pdns_recursor_service_state: "started"
+pdns_recursor_service_enabled: "yes"
 
 # When True, disable the automated restart of the PowerDNS Recursor service
-pdns_rec_disable_handlers: False
+pdns_recursor_disable_handlers: False
 
 # Configuration directory and files
-pdns_rec_config_dir: "{{ default_pdns_rec_config_dir }}"
-pdns_rec_config_file: "recursor.conf"
-pdns_rec_config_lua: "{{ pdns_rec_config_dir }}/config.lua"
-pdns_rec_config_lua_file_content: ""
-pdns_rec_config_dns_script: "{{ pdns_rec_config_dir }}/dns-script.lua"
-pdns_rec_config_dns_script_file_content: ""
+pdns_recursor_config_dir: "{{ default_pdns_recursor_config_dir }}"
+pdns_recursor_config_file: "recursor.conf"
+pdns_recursor_config_lua: "{{ pdns_recursor_config_dir }}/config.lua"
+pdns_recursor_config_lua_file_content: ""
+pdns_recursor_config_dns_script: "{{ pdns_recursor_config_dir }}/dns-script.lua"
+pdns_recursor_config_dns_script_file_content: ""
 
 # Mode for directories from include-dir
-pdns_rec_config_include_dir_mode: 0750
+pdns_recursor_config_include_dir_mode: 0750
 
 # Directories and files required by recursor configuration
-pdns_rec_config_from_files_dir_mode: 0750
-pdns_rec_config_from_files: []
+pdns_recursor_config_from_files_dir_mode: 0750
+pdns_recursor_config_from_files: []
 
 # Dict containing all configuration options, except for the
 # "config-dir", "setuid" and "setgid" directives in YAML format.
-pdns_rec_config: {}
-# pdns_rec_config:
+pdns_recursor_config: {}
+# pdns_recursor_config:
 #  allow-from: '127.0.0.1/8,192.168.2.0/24'
 #  local-address: 0.0.0.0
 #  server-id: 'nothing to see here'
@@ -99,4 +114,4 @@ pdns_rec_config: {}
 #    - "foo.example.com=2001:db8::abcd:1;[2001:db8::ef99]:5300"
 
 # Dict with overrides for the service (systemd only)
-pdns_rec_service_overrides: "{{ default_pdns_rec_service_overrides }}"
+pdns_recursor_service_overrides: "{{ default_pdns_recursor_service_overrides }}"
