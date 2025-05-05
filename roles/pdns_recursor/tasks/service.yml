@@ -1,10 +1,14 @@
 ---
 
+- name: merge powerdns configuration between defaults and custom
+  ansible.builtin.set_fact:
+    pdns_recursor_service: "{{ pdns_recursor_defaults_service | combine(pdns_recursor_service, recursive=True) }}"
+
 - name: Set the status of the PowerDNS Recursor service
-  service:
-    name: "{{ pdns_recursor_service_name }}"
-    state: "{{ pdns_recursor_service_state }}"
-    enabled: "{{ pdns_recursor_service_enabled }}"
+  ansible.builtin.service:
+    name: "{{ pdns_recursor_service.name }}"
+    state: "{{ pdns_recursor_service.state }}"
+    enabled: "{{ pdns_recursor_service.enabled }}"
   tags:
     - service
 

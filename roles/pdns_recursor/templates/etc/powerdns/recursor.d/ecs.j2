@@ -1,4 +1,8 @@
-
+{% set values = pdns_recursor_ecs | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+ecs:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{% endif %}
 {#
 ######### SECTION ecs #########
 ecs:
@@ -33,5 +37,4 @@ ecs:
 #   minimum_ttl_override: 1
 ##### Address to send to allow-listed authoritative servers for incoming queries with ECS prefix-length source of 0
 #   scope_zero_address: ''
-
 #}

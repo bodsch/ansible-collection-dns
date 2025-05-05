@@ -1,6 +1,6 @@
 ---
 
-- name: merge postfix configuration between defaults and custom
+- name: merge powerdns-recursor configuration between defaults and custom
   ansible.builtin.set_fact:
     pdns_recursor_carbon: "{{ pdns_recursor_defaults_carbon | combine(pdns_recursor_carbon, recursive=True) }}"
     pdns_recursor_dnssec: "{{ pdns_recursor_defaults_dnssec | combine(pdns_recursor_dnssec, recursive=True) }}"

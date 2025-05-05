@@ -3,7 +3,7 @@
 pdns_recursor_packages:
   - powerdns-recursor
 
-pdns_recursor_service:
+pdns_recursor_defaults_service:
   name: pdns-recursor
   # pdns-recursor@.service
 

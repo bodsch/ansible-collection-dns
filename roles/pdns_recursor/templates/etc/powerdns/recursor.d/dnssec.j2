@@ -1,7 +1,8 @@
-
+{% set values = pdns_recursor_dnssec | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
 dnssec:
-  {{ pdns_recursor_dnssec | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
-
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{% endif %}
 {#
 ######### SECTION dnssec #########
 dnssec:
@@ -43,6 +44,4 @@ dnssec:
 #   validation: process
 ##### Collect DNSSEC statistics for names or suffixes in this list in separate x-dnssec counters
 #   x_dnssec_names: []
-
-
 #}

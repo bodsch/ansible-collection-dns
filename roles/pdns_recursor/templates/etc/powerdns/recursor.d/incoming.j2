@@ -1,4 +1,8 @@
-
+{% set values = pdns_recursor_incoming | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+incoming:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{% endif %}
 {#
 ######### SECTION incoming #########
 incoming:

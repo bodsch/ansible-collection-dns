@@ -1,7 +1,7 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 # {{ ansible_managed }}
 
-{%- include('recursor.d/carbon.j2') -%}
+{% include('recursor.d/carbon.j2') -%}
 {%- include('recursor.d/dnssec.j2') -%}
 {%- include('recursor.d/ecs.j2') -%}
 {%- include('recursor.d/incoming.j2') -%}

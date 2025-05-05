@@ -1,7 +1,8 @@
-
+{% set values = pdns_recursor_carbon | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
 carbon:
-  {{ pdns_recursor_carbon | bodsch.core.remove_empty_values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
-
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{% endif %}
 {#
 ######### SECTION carbon #########
 carbon:
@@ -15,5 +16,4 @@ carbon:
 #   ourname: ''
 ##### If set, send metrics in carbon (graphite) format to this server IP address
 #   server: []
-
 #}
