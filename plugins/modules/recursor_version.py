@@ -91,23 +91,49 @@ class RecursorVersion(object):
 
         rc, out, err = self._exec(args)
 
-        # self.module.log(msg=f"= result: {result}")
+        # self.module.log(msg=f"= out: {out} {type(out)}")
+        # self.module.log(msg=f"= err: {err} {type(err)}")
 
-        if rc == 0:
-            output = out
-        else:
-            output = err
+        _out = out.splitlines()
+        _err = err.splitlines()
+
+        # self.module.log(msg=f"= _out: {_out} {type(_out)}")
+        # self.module.log(msg=f"= _err: {_err} {type(_err)}")
+
+        _output = []
+        _output += _out
+        _output += _err
+
+        # if rc == 0:
+        #     output = out
+        # else:
+        #     output = err
+
+        # self.module.log(msg=f"= output: {_output}")
+        # self.module.log(msg=f"= output: {set(_output)}")
 
         msg = "unknown message"
 
         pattern = re.compile(
             r".*PowerDNS Recursor (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
-        version = re.search(pattern, output)
+
+        version = next((m.groupdict() for s in _output if (m := pattern.search(s))), None)
+
+        # version = next(re.search(pattern, s).group(0) for s in _output if re.search(pattern, s))
+        # version = re.search(pattern, _output)
         if version:
-            version_full_string = version.group('version')
-            version_major_string = version.group("major")
-            version_minor_string = version.group("minor")
-            version_patch_string = version.group("patch")
+
+            self.module.log(msg=f"= version: {version} {type(version)}")
+            if isinstance(version, dict):
+                version_full_string = version.get('version')
+                version_major_string = version.get("major")
+                version_minor_string = version.get("minor")
+                version_patch_string = version.get("patch")
+            else:
+                version_full_string = version.group('version')
+                version_major_string = version.group("major")
+                version_minor_string = version.group("minor")
+                version_patch_string = version.group("patch")
 
         if self.validate_version:
             if version_full_string == self.validate_version:

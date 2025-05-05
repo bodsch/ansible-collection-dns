@@ -1,7 +1,21 @@
 {% set values = pdns_recursor_webservice | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- webservice --------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 webservice:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+webserver={{ values.get("webserver") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+webserver-address={{ values.get("address") }}
+webserver-allow-from={{ values.get("allow_from") | join(', ') }}
+webserver-hash-plaintext-credentials={{ values.get("hash_plaintext_credentials") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+webserver-loglevel={{ values.get("loglevel") }}
+webserver-password={{ values.get("password") }}
+webserver-port={{ values.get("port") }}
+api-config-dir={{ values.get("api_dir") }}
+api-key={{ values.get("api_key") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION webservice #########

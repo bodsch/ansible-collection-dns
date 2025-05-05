@@ -1,11 +1,16 @@
 {% set values = pdns_recursor_recordcache | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- recordcache -------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 recordcache:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION recordcache #########
-recordcache:
+recordcache:logging
 ##### Limit answers to ANY queries in size
 #   limit_qtype_any: true
 ##### Replace records in record cache only after this % of original TTL has passed

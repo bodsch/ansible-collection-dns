@@ -1,7 +1,12 @@
 {% set values = pdns_recursor_nod | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- nod ---------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 nod:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION nod #########

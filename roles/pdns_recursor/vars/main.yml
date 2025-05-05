@@ -9,6 +9,10 @@ pdns_recursor_config_dir: '/etc/powerdns'
 pdns_recursor_owner: pdns-recursor
 pdns_recursor_group: pdns-recursor
 
+pdns_recursor_defaults_service:
+  name: pdns-recursor
+  # pdns-recursor@.service
+
 pdns_recursor_defaults_carbon:
   instance: ""                                    # recursor
   interval: ""                                    # 30
@@ -114,13 +118,13 @@ pdns_recursor_defaults_logging:
   outgoing_protobuf_servers: []
   protobuf_servers: []
   protobuf_use_kernel_timestamp: false
-  quiet: false
+  quiet: true
   rpz_changes: false
   statistics_interval: 1800
   structured_logging: true
   structured_logging_backend: default
   timestamp: true
-  trace: false
+  trace: fail                                     # set to 'fail' to only log failing domains
 
 pdns_recursor_defaults_nod:
   db_size: 67108864
@@ -221,7 +225,7 @@ pdns_recursor_defaults_recursor:
   forward_zones_file: ''
   forward_zones_recurse: []
   forwarding_catalog_zones: []
-  include_dir: ''
+  include_dir: /etc/powerdns/recursor.d
   lua_config_file: ''
   lua_dns_script: ''
   setgid: pdns-recursor

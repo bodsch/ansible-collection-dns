@@ -1,5 +1,19 @@
 ---
 
+- name: detect powerdns-recursor version
+  become: true
+  bodsch.dns.recursor_version:
+  register: pdns_recursor_version
+  check_mode: false
+  ignore_errors: true
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: pdns_recursor
+    facts:
+      full_version: "{{ pdns_recursor_version.full_version }}"
+      version: "{{ pdns_recursor_version.version }}"
+
 - name: merge powerdns-recursor configuration between defaults and custom
   ansible.builtin.set_fact:
     pdns_recursor_carbon: "{{ pdns_recursor_defaults_carbon | combine(pdns_recursor_carbon, recursive=True) }}"

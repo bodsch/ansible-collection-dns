@@ -1,7 +1,23 @@
 {% set values = pdns_recursor_logging | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- logging -----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 logging:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+disable-syslog={{ values.get("disable_syslog") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-common-errors={{ values.get("common_errors") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-rpz-changes={{ values.get("rpz_changes") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-timestamp={{ values.get("timestamp") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+logging-facility={{ values.get("facility") }}
+loglevel={{ values.get("loglevel") }}
+quiet={{ values.get("quiet") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+statistics-interval={{ values.get("statistics_interval") }}
+structured-logging={{ values.get("structured_logging") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+structured-logging-backend={{ values.get("structured_logging_backend") }}
+trace={{ values.get("trace") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION logging #########

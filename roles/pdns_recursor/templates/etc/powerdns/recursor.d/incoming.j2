@@ -1,7 +1,51 @@
 {% set values = pdns_recursor_incoming | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- incoming ----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 incoming:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+allow-from={{ values.get("allow_from") | join(', ') }}
+allow-from-file={{ values.get("allow_from_file") }}
+    {% if values.get("allow_notify_for", None) %}
+allow-notify-for={{ values.get("allow_notify_for") | join(', ') }}
+    {% endif %}
+allow-notify-for-file={{ values.get("allow_notify_for_file") }}
+    {% if values.get("allow_notify_from", None) %}
+allow-notify-from={{ values.get("allow_notify_from") | join(', ') }}
+    {% endif %}
+allow-notify-from-file={{ values.get("allow_notify_from_file") }}
+allow-trust-anchor-query={{ values.get("") }} # no
+distribution-load-factor={{ values.get("distribution_load_factor") }}
+distribution-pipe-buffer-size={{ values.get("distribution_pipe_buffer_size") }}
+distributor-threads={{ values.get("distributor_threads") }}
+edns-outgoing-bufsize={{ values.get("") }} # 1232
+edns-padding-from={{ values.get("edns_padding_from") }}
+edns-padding-mode={{ values.get("edns_padding_mode") }}
+edns-padding-out={{ values.get("") }} # yes
+edns-padding-tag={{ values.get("edns_padding_tag") }}
+edns-subnet-allow-list={{ values.get("") }} #
+edns-subnet-whitelist={{ values.get("") }} #
+gettag-needs-edns-options={{ values.get("gettag_needs_edns_options", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+local-address={{ values.get("listen") | join(', ') }}
+local-port={{ values.get("port") }}
+max-tcp-clients={{ values.get("max_tcp_clients") }}
+max-tcp-per-client={{ values.get("max_tcp_per_client") }}
+max-tcp-queries-per-connection={{ values.get("max_tcp_queries_per_connection") }}
+max-udp-queries-per-round={{ values.get("max_udp_queries_per_round") }}
+non-local-bind={{ values.get("non_local_bind", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+pdns-distributes-queries={{ values.get("pdns_distributes_queries", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if values.get("proxy_protocol_from", None) %}
+proxy-protocol-from={{ values.get("proxy_protocol_from") | join(', ') }}
+    {% endif %}
+proxy-protocol-maximum-size={{ values.get("proxy_protocol_maximum_size") }}
+tcp-fast-open={{ values.get("tcp_fast_open") }}
+client-tcp-timeout={{ values.get("tcp_timeout") }}
+udp-truncation-threshold={{ values.get("udp_truncation_threshold") }}
+use-incoming-edns-subnet={{ values.get("use_incoming_edns_subnet", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION incoming #########

@@ -1,7 +1,42 @@
 {% set values = pdns_recursor_outgoing | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- outgoing ----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 outgoing:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+dont-query={{ values.get("dont_query") | join(', ') }}
+    {% if values.get("dont_throttle_names", []) | count > 0 %}
+dont-throttle-names={{ values.get("dont_throttle_names") | join(', ') }}
+    {% endif %}
+    {% if values.get("dont_throttle_netmasks", []) | count > 0 %}
+dont-throttle-netmasks={{ values.get("dont_throttle_netmasks") | join(', ') }}
+    {% endif %}
+    {% if values.get("dot_to_auth_names", []) | count > 0 %}
+dot-to-auth-names={{ values.get("dot_to_auth_names") | join(', ') }}
+    {% endif %}
+dot-to-port-853={{ values.get("dot_to_port_853") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+lowercase-outgoing={{ values.get("lowercase") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+max-busy-dot-probes={{ values.get("max_busy_dot_probes") }}
+max-ns-address-qperq={{ values.get("max_ns_address_qperq") }}
+max-ns-per-resolve={{ values.get("max_ns_per_resolve") }}
+max-qperq={{ values.get("max_qperq") }}
+network-timeout={{ values.get("network_timeout") }}
+non-resolving-ns-max-fails={{ values.get("non_resolving_ns_max_fails") }}
+non-resolving-ns-throttle-time={{ values.get("non_resolving_ns_throttle_time") }}
+server-down-max-fails={{ values.get("server_down_max_fails") }}
+server-down-throttle-time={{ values.get("server_down_throttle_time") }}
+single-socket={{ values.get("single_socket") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if values.get("source_address", []) | count > 0 %}
+query-local-address={{ values.get("source_address") | join(', ') }}
+    {% endif %}
+    {% if values.get("udp_source_port_avoid", []) | count > 0 %}
+udp-source-port-avoid={{ values.get("udp_source_port_avoid") | join(', ') }}
+    {% endif %}
+udp-source-port-max={{ values.get("udp_source_port_max") }}
+udp-source-port-min={{ values.get("udp_source_port_min") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION outgoing #########

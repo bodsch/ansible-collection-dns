@@ -1,7 +1,52 @@
 {% set values = pdns_recursor_recursor | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- recursor ----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 recursor:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+config-dir={{ values.get("config_dir") }}
+    {% if values.get("cpu_map", []) | count > 0 %}
+cpu-map={{ values.get("cpu_map") | join(', ') }}
+    {% endif %}
+daemon={{ values.get("daemon") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+forward-zones={{ values.get("forward_zones") | bodsch.dns.recursor_backwards_compatibility(version=pdns_recursor_version.full_version) | join(', ') }}
+forward-zones-file={{ values.get("forward_zones_file") }}
+forward-zones-recurse={{ values.get("forward_zones_recurse") }}
+include-dir={{ values.get("include_dir") }}
+lua-config-file={{ values.get("lua_config_file") }} # /etc/powerdns/recursor.lua
+lua-dns-script={{ values.get("lua_dns_script") }}
+setgid={{ values.get("setgid") }}
+setuid={{ values.get("setuid") }}
+stack-size={{ values.get("stack_size") }}
+    {% if values.get("stats_api_blacklist", []) | count > 0 %}
+stats-api-blacklist={{ values.get("stats_api_blacklist") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_api_disabled_list", []) | count > 0 %}
+stats-api-disabled-list={{ values.get("stats_api_disabled_list") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_carbon_blacklist", []) | count > 0 %}
+stats-carbon-blacklist={{ values.get("stats_carbon_blacklist") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_carbon_disabled_list", []) | count > 0 %}
+stats-carbon-disabled-list={{ values.get("stats_carbon_disabled_list") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_carbon_blacklist", []) | count > 0 %}
+stats-rec-control-blacklist={{ values.get("stats_carbon_blacklist") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_rec_control_disabled_list", []) | count > 0 %}
+stats-rec-control-disabled-list={{ values.get("stats_rec_control_disabled_list") | default([]) | join(', ') }}
+    {% endif %}
+stats-ringbuffer-entries={{ values.get("stats_ringbuffer_entries") }}
+    {% if values.get("stats_snmp_blacklist", []) | count > 0 %}
+stats-snmp-blacklist={{ values.get("stats_snmp_blacklist") | default([]) | join(', ') }}
+    {% endif %}
+    {% if values.get("stats_snmp_disabled_list", []) | count > 0 %}
+stats-snmp-disabled-list={{ values.get("stats_snmp_disabled_list") | default([]) | join(', ') }}
+    {% endif %}
+threads={{ values.get("threads") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION recursor #########

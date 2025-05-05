@@ -1,7 +1,15 @@
 {% set values = pdns_recursor_snmp | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- snmp --------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 snmp:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+snmp-agent={{ values.get("agent") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+snmp-daemon-socket={{ values.get("daemon_socket") }}
+snmp-master-socket={{ values.get("master_socket") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION snmp #########

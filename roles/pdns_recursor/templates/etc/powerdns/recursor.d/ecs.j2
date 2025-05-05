@@ -1,7 +1,22 @@
 {% set values = pdns_recursor_ecs | bodsch.core.remove_empty_values %}
 {% if values | count > 0 %}
+## -- ecs ---------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 ecs:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+ecs-add-for={{ values.get("add_for") | join(', ') }}
+ecs-cache-limit-ttl={{ values.get("cache_limit_ttl") }}
+ecs-ipv4-bits={{ values.get("ipv4_bits") }}
+ecs-ipv4-cache-bits={{ values.get("ipv4_cache_bits") }}
+ecs-ipv4-never-cache={{ values.get("ipv4_never_cache", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+ecs-ipv6-bits={{ values.get("ipv6_bits") }}
+ecs-ipv6-cache-bits={{ values.get("ipv6_cache_bits") }}
+ecs-ipv6-never-cache={{ values.get("ipv6_never_cache", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+ecs-minimum-ttl-override={{ values.get("minimum_ttl_override") }}
+ecs-scope-zero-address={{ values.get("scope_zero_address") }}
+
+  {% endif %}
 {% endif %}
 {#
 ######### SECTION ecs #########
