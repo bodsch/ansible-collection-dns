@@ -6,6 +6,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+from ansible.plugins.test.core import version_compare
 from ansible.utils.display import Display
 
 # ---------------------------------------------------------------------------------------
@@ -23,8 +24,6 @@ class FilterModule(object):
         }
 
     def recursor_backwards_compatibility(self, data, version):
-        display.v(f"recursor_backwards_compatibility({data}, {version})")
-
         """
             input:
                 ```
@@ -33,14 +32,28 @@ class FilterModule(object):
                     - zone: matrix.lan
                       forwarders:
                         - 192.168.0.4:53
+                        - 192.168.0.1:5300
+                    - zone: google.de
+                      forwarders:
+                        - 127.0.0.1
+                    - zone: google.com
+                      forwarders:
+                        - 127.0.0.1
                 ```
             output:
                 ```
-                    [example.org=203.0.113.210]
+                    ['matrix.lan=192.168.0.4;192.168.0.1:5300', 'google.de=127.0.0.1', 'google.com=127.0.0.1']
                 ```
         """
+        # display.v(f"recursor_backwards_compatibility({data}, {version})")
         result = []
 
+        if version_compare(str(version), '5', '>='):
+            return data
+
+        for i in data:
+            zone = i.get('zone')
+            forwarders = ";".join(i.get('forwarders', []))
+            result.append(f"{zone}={forwarders}")
 
         return result
-

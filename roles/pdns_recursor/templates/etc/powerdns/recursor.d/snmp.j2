@@ -6,8 +6,14 @@ snmp:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
   {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
 snmp-agent={{ values.get("agent") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
-snmp-daemon-socket={{ values.get("daemon_socket") }}
-snmp-master-socket={{ values.get("master_socket") }}
+    {% set v = values.get("daemon_socket", None) %}
+    {% if v and v | string | length > 0 %}
+snmp-daemon-socket={{ v }}
+    {% endif %}
+    {% set v = values.get("master_socket", None) %}
+    {% if v and v | string | length > 0 %}
+snmp-master-socket={{ v }}
+    {% endif %}
 
   {% endif %}
 {% endif %}

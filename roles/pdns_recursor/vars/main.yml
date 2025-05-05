@@ -172,6 +172,7 @@ pdns_recursor_defaults_outgoing:
   edns_bufsize: 1232
   edns_padding: true
   edns_subnet_allow_list: []
+
   lowercase: false
   max_busy_dot_probes: 0
   max_ns_address_qperq: 10

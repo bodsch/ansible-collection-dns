@@ -5,11 +5,26 @@
 carbon:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
   {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
-carbon-instance={{ values.get("instance") }}
-carbon-interval={{ values.get("interval") }}
-carbon-namespace={{ values.get("ns") }}
-carbon-ourname={{ values.get("ourname") }}
-carbon-server={{ values.get("server") | default([]) | join(',') }}
+    {% set v = values.get("instance", None) %}
+    {% if v and v | string | length > 0 %}
+carbon-instance={{ v }}
+    {% endif %}
+    {% set v = values.get("interval", None) %}
+    {% if v and v | string | length > 0 %}
+carbon-interval={{ v }}
+    {% endif %}
+    {% set v = values.get("ns", None) %}
+    {% if v and v | string | length > 0 %}
+carbon-namespace={{ v }}
+    {% endif %}
+    {% set v = values.get("ourname", None) %}
+    {% if v and v | string | length > 0 %}
+carbon-ourname={{ v }}
+    {% endif %}
+    {% set v = values.get("server", None) %}
+    {% if v and v | count > 0 %}
+carbon-server={{ v | join(',') }}
+    {% endif %}
 
   {% endif %}
 {% endif %}

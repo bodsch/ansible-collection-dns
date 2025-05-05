@@ -10,14 +10,35 @@ config-dir={{ values.get("config_dir") }}
 cpu-map={{ values.get("cpu_map") | join(', ') }}
     {% endif %}
 daemon={{ values.get("daemon") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
-forward-zones={{ values.get("forward_zones") | bodsch.dns.recursor_backwards_compatibility(version=pdns_recursor_version.full_version) | join(', ') }}
-forward-zones-file={{ values.get("forward_zones_file") }}
-forward-zones-recurse={{ values.get("forward_zones_recurse") }}
+    {% set _zones = "" %}
+    {% if values.get("forward_zones", []) | count > 0 %}
+      {% set _zones = values.get("forward_zones") | bodsch.dns.recursor_backwards_compatibility(version=pdns_recursor_version.full_version) | join(', ') %}
+    {% endif %}
+    {% if _zones | string | length > 0 %}
+forward-zones={{ _zones }}
+    {% endif %}
+    {% set v = values.get("forward_zones_file", None) %}
+    {% if v and v | string | length > 0 %}
+forward-zones-file={{ v }}
+    {% endif %}
+    {% set v = values.get("forward_zones_recurse", None) %}
+    {% if v and v | string | length > 0 %}
+forward-zones-recurse={{ v }}
+    {% endif %}
 include-dir={{ values.get("include_dir") }}
-lua-config-file={{ values.get("lua_config_file") }} # /etc/powerdns/recursor.lua
-lua-dns-script={{ values.get("lua_dns_script") }}
-setgid={{ values.get("setgid") }}
-setuid={{ values.get("setuid") }}
+lua-config-file={{ values.get("lua_config_file") }}
+    {% set v = values.get("lua_dns_script", None) %}
+    {% if v and v | string | length > 0 %}
+lua-dns-script={{ v }}
+    {% endif %}
+    {% set v = values.get("setgid", None) %}
+    {% if v and v | string | length > 0 %}
+setgid={{ v }}
+    {% endif %}
+    {% set v = values.get("setuid", None) %}
+    {% if v and v | string | length > 0 %}
+setuid={{ v }}
+    {% endif %}
 stack-size={{ values.get("stack_size") }}
     {% if values.get("stats_api_blacklist", []) | count > 0 %}
 stats-api-blacklist={{ values.get("stats_api_blacklist") | default([]) | join(', ') }}

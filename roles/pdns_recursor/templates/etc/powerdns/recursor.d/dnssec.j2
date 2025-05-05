@@ -17,7 +17,7 @@ max-rrsigs-per-record={{ values.get("max_rrsigs_per_record") }}
 max-signature-validations-per-query={{ values.get("max_signature_validations_per_query") }}
 allow-trust-anchor-query={{ values.get("allow_trust_anchor_query", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
     {% if values.get("x_dnssec_names", []) | count > 0 %}
-x-dnssec-names={{ values.get("x_dnssec_names") | join(',') }}
+x-dnssec-names={{ values.get("x_dnssec_names") | join(', ') }}
     {% endif %}
 
   {% endif %}

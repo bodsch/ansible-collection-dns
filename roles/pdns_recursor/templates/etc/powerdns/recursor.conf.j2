@@ -2,6 +2,7 @@
 # {{ ansible_managed }}
 
 # Version: {{ pdns_recursor_version.full_version }}
+
 {% include('recursor.d/carbon.j2') -%}
 {%- include('recursor.d/dnssec.j2') -%}
 {%- include('recursor.d/ecs.j2') -%}
@@ -13,6 +14,5 @@
 {%- include('recursor.d/recordcache.j2') -%}
 {%- include('recursor.d/recursor.j2') -%}
 {%- include('recursor.d/snmp.j2') -%}
-{#
-#}
 {%- include('recursor.d/webservice.j2') -%}
+{##}

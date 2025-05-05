@@ -23,10 +23,7 @@ distributor-threads={{ values.get("distributor_threads") }}
 edns-outgoing-bufsize={{ values.get("") }} # 1232
 edns-padding-from={{ values.get("edns_padding_from") }}
 edns-padding-mode={{ values.get("edns_padding_mode") }}
-edns-padding-out={{ values.get("") }} # yes
 edns-padding-tag={{ values.get("edns_padding_tag") }}
-edns-subnet-allow-list={{ values.get("") }} #
-edns-subnet-whitelist={{ values.get("") }} #
 gettag-needs-edns-options={{ values.get("gettag_needs_edns_options", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
 local-address={{ values.get("listen") | join(', ') }}
 local-port={{ values.get("port") }}

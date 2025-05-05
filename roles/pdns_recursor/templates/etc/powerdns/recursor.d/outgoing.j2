@@ -26,6 +26,14 @@ non-resolving-ns-max-fails={{ values.get("non_resolving_ns_max_fails") }}
 non-resolving-ns-throttle-time={{ values.get("non_resolving_ns_throttle_time") }}
 server-down-max-fails={{ values.get("server_down_max_fails") }}
 server-down-throttle-time={{ values.get("server_down_throttle_time") }}
+edns-padding-out={{ values.get("edns_padding") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+{#
+    {% if values.get("edns_subnet_allow_list", []) | count > 0 %}
+edns-subnet-allow-list={{ values.get("edns_subnet_allow_list") | join(', ') }}
+# deprecated: alternative="edns-subnet-allow-list"
+# edns-subnet-whitelist={{ values.get("") }}
+    {% endif %}
+#}
 single-socket={{ values.get("single_socket") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
     {% if values.get("source_address", []) | count > 0 %}
 query-local-address={{ values.get("source_address") | join(', ') }}
