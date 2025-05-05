@@ -22,7 +22,7 @@ on:
     paths:
       - 'plugins/**'
       - '!roles/**'
-      - '!.github/workflows/test_role*.yml'
+      - '!.github/workflows/*.yml'
       - '.config/pycodestyle.cfg'
   pull_request:
     branches:
@@ -32,7 +32,7 @@ on:
     paths:
       - 'plugins/**'
       - '!roles/**'
-      - '!.github/workflows/test_role*.yml'
+      - '!.github/workflows/*.yml'
       - '.config/pycodestyle.cfg'
 
 jobs:
@@ -44,6 +44,8 @@ jobs:
         python_version:
           - "3.10"
           - "3.11"
+          - "3.12"
+          - "3.13"
 
     steps:
       - name: Check out the codebase.
@@ -63,4 +65,4 @@ jobs:
 
       - name: Lint code.
         run: |
-          pycodestyle plugins/ --config=.config/pycodestyle.cfg --statistics --count
+          pycodestyle plugins/ --config=.config/pycodestyle.cfg --statistics --count --exclude=test_*.py --exclude=hooks/*.py

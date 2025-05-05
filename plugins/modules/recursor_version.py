@@ -91,7 +91,7 @@ class RecursorVersion(object):
 
         rc, out, err = self._exec(args)
 
-        #self.module.log(msg=f"= result: {result}")
+        # self.module.log(msg=f"= result: {result}")
 
         if rc == 0:
             output = out

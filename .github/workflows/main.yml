@@ -58,6 +58,7 @@ jobs:
           - knot_resolver
           - dnsmasq
           - fqdn
+          - pdns_recursor
 
     steps:
       - name: check out the codebase.
