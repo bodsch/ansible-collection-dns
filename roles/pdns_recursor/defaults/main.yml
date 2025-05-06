@@ -1,0 +1,20 @@
+---
+
+pdns_recursor_carbon: {}
+pdns_recursor_dnssec: {}
+pdns_recursor_ecs: {}
+pdns_recursor_incoming: {}
+pdns_recursor_logging: {}
+pdns_recursor_nod: {}
+pdns_recursor_outgoing: {}
+pdns_recursor_packetcache: {}
+pdns_recursor_recordcache: {}
+pdns_recursor_recursor: {}
+pdns_recursor_snmp: {}
+pdns_recursor_webservice: {}
+
+# State of the PowerDNS Recursor service
+pdns_recursor_service:
+  name: pdns-recursor
+  state: started
+  enabled: true

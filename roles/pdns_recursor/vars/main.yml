@@ -1,0 +1,268 @@
+---
+
+pdns_recursor_requirements: []
+pdns_recursor_packages: []
+
+# The directory where the PowerDNS configuration is located
+pdns_recursor_config_dir: '/etc/powerdns'
+
+pdns_recursor_owner: pdns-recursor
+pdns_recursor_group: pdns-recursor
+
+pdns_recursor_defaults_service:
+  name: pdns-recursor
+  # pdns-recursor@.service
+
+pdns_recursor_defaults_carbon:
+  instance: ""                                    # recursor
+  interval: ""                                    # 30
+  ns: ""                                          # pdns
+  ourname: ''
+  server: []
+
+pdns_recursor_defaults_dnssec:
+  aggressive_cache_max_nsec3_hash_cost: 150
+  aggressive_cache_min_nsec3_hit_ratio: 2000
+  aggressive_nsec_cache_size: 100000
+  disabled_algorithms: []
+  log_bogus: false
+  max_dnskeys: 2
+  max_ds_per_zone: 8
+  max_nsec3_hash_computations_per_query: 600
+  max_nsec3s_per_record: 10
+  max_rrsigs_per_record: 2
+  max_signature_validations_per_query: 30
+  negative_trustanchors: []
+  nsec3_max_iterations: 50
+  signature_inception_skew: 60
+  trustanchorfile: ''
+  trustanchorfile_interval: 24
+  trustanchors: []
+  validation: process
+  x_dnssec_names: []
+
+pdns_recursor_defaults_ecs:
+  add_for:
+    - 0.0.0.0/0
+    - ::/0
+    - '!127.0.0.0/8'
+    - '!10.0.0.0/8'
+    - '!100.64.0.0/10'
+    - '!169.254.0.0/16'
+    - '!192.168.0.0/16'
+    - '!172.16.0.0/12'
+    - '!::1/128'
+    - '!fc00::/7'
+    - '!fe80::/10'
+  cache_limit_ttl: 0
+  ipv4_bits: 24
+  ipv4_cache_bits: 24
+  ipv4_never_cache: false
+  ipv6_bits: 56
+  ipv6_cache_bits: 56
+  ipv6_never_cache: false
+  minimum_ttl_override: 1
+  scope_zero_address: ''
+
+pdns_recursor_defaults_incoming:
+  allow_from:
+    - 127.0.0.0/8
+    - 10.0.0.0/8
+    - 100.64.0.0/10
+    - 169.254.0.0/16
+    - 192.168.0.0/16
+    - 172.16.0.0/12
+    - ::1/128
+    - fc00::/7
+    - fe80::/10
+  allow_from_file: ''
+  allow_no_rd: false
+  allow_notify_for: []
+  allow_notify_for_file: ''
+  allow_notify_from: []
+  allow_notify_from_file: ''
+  distribution_load_factor: 0.0
+  distribution_pipe_buffer_size: 0
+  distributor_threads: 0
+  edns_padding_from: []
+  edns_padding_mode: padded-queries-only
+  edns_padding_tag: 7830
+  gettag_needs_edns_options: false
+  listen:
+    - 127.0.0.1
+  max_concurrent_requests_per_tcp_connection: 10
+  max_tcp_clients: 1024
+  max_tcp_per_client: 0
+  max_tcp_queries_per_connection: 0
+  max_udp_queries_per_round: 10000
+  non_local_bind: false
+  pdns_distributes_queries: false
+  port: 53
+  proxy_protocol_exceptions: []
+  proxy_protocol_from: []
+  proxy_protocol_maximum_size: 512
+  proxymappings: []
+  reuseport: true
+  tcp_fast_open: 0
+  tcp_timeout: 2
+  udp_truncation_threshold: 1232
+  use_incoming_edns_subnet: false
+
+pdns_recursor_defaults_logging:
+  common_errors: false
+  disable_syslog: true
+  dnstap_framestream_servers: []
+  dnstap_nod_framestream_servers: []
+  facility: ''
+  loglevel: 2
+  outgoing_protobuf_servers: []
+  protobuf_servers: []
+  protobuf_use_kernel_timestamp: false
+  quiet: true
+  rpz_changes: false
+  statistics_interval: 1800
+  structured_logging: true
+  structured_logging_backend: default
+  timestamp: true
+  trace: fail                                     # set to 'fail' to only log failing domains
+
+pdns_recursor_defaults_nod:
+  db_size: 67108864
+  db_snapshot_interval: 600
+  history_dir: /usr/var/lib/pdns-recursor/nod
+  ignore_list: []
+  ignore_list_file: ''
+  log: true
+  lookup: ''
+  pb_tag: pdns-nod
+  tracking: false
+  unique_response_db_size: 67108864
+  unique_response_history_dir: /usr/var/lib/pdns-recursor/udr
+  unique_response_ignore_list: []
+  unique_response_log: true
+  unique_response_pb_tag: pdns-udr
+  unique_response_tracking: false
+
+pdns_recursor_defaults_outgoing:
+  bypass_server_throttling_probability: 25
+  dont_query:
+    - 127.0.0.0/8
+    - 10.0.0.0/8
+    - 100.64.0.0/10
+    - 169.254.0.0/16
+    - 192.168.0.0/16
+    - 172.16.0.0/12
+    - ::1/128
+    - fc00::/7
+    - fe80::/10
+    - 0.0.0.0/8
+    - 192.0.0.0/24
+    - 192.0.2.0/24
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+    - 240.0.0.0/4
+    - ::/96
+    - ::ffff:0:0/96
+    - 100::/64
+    - 2001:db8::/32
+  dont_throttle_names: []
+  dont_throttle_netmasks: []
+  dot_to_auth_names: []
+  dot_to_port_853: true
+  edns_bufsize: 1232
+  edns_padding: true
+  edns_subnet_allow_list: []
+
+  lowercase: false
+  max_busy_dot_probes: 0
+  max_ns_address_qperq: 10
+  max_ns_per_resolve: 13
+  max_qperq: 50
+  network_timeout: 1500
+  non_resolving_ns_max_fails: 5
+  non_resolving_ns_throttle_time: 60
+  server_down_max_fails: 64
+  server_down_throttle_time: 60
+  single_socket: false
+  source_address:
+    - 0.0.0.0
+  tcp_fast_open_connect: false
+  tcp_max_idle_ms: 10000
+  tcp_max_idle_per_auth: 10
+  tcp_max_idle_per_thread: 100
+  tcp_max_queries: 0
+  udp_source_port_avoid:
+    - '4791'
+    - '11211'
+  udp_source_port_max: 65535
+  udp_source_port_min: 1024
+
+pdns_recursor_defaults_packetcache:
+  disable: false
+  max_entries: 500000
+  negative_ttl: 60
+  servfail_ttl: 60
+  shards: 1024
+  ttl: 86400
+
+pdns_recursor_defaults_recordcache:
+  limit_qtype_any: true
+  locked_ttl_perc: 0
+  max_cache_bogus_ttl: 3600
+  max_entries: 1000000
+  max_negative_ttl: 3600
+  max_rrset_size: 256
+  max_ttl: 86400
+  refresh_on_ttl_perc: 0
+  serve_stale_extensions: 0
+  shards: 1024
+  zonetocaches: []
+
+pdns_recursor_defaults_recursor:
+  config_dir: /etc/powerdns
+  cpu_map: []
+  daemon: false
+  forward_zones: []
+  forward_zones_file: ''
+  forward_zones_recurse: []
+  forwarding_catalog_zones: []
+  include_dir: /etc/powerdns/recursor.d
+  lua_config_file: ''
+  lua_dns_script: ''
+  setgid: pdns-recursor
+  setuid: pdns-recursor
+  stack_cache_size: 100
+  stack_size: 200000
+  stats_api_disabled_list: []
+  stats_carbon_disabled_list: []
+  stats_rec_control_disabled_list: []
+  stats_ringbuffer_entries: 10000
+  stats_snmp_disabled_list: []
+  system_resolver_interval: 0
+  system_resolver_self_resolve_check: true
+  system_resolver_ttl: 0
+  tcp_threads: 1
+  threads: 2
+
+pdns_recursor_defaults_snmp:
+  agent: false
+  daemon_socket: ''
+
+pdns_recursor_defaults_webservice:
+  address: 127.0.0.1
+  allow_from:
+    - 127.0.0.1
+    - ::1
+  api_dir: ""
+  api_key: ""
+  hash_plaintext_credentials: false
+  loglevel: normal
+  password: ""
+  port: 8082
+  webserver: false
+
+# -------------
+
+pdns_recursor_defaults_lua:
+  config_file: ""
+  dns_script: ""

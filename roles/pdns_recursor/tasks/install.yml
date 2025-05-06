@@ -1,0 +1,25 @@
+---
+
+- name: install powerdns-recursor
+  become: true
+  ansible.builtin.package:
+    name: "{{ pdns_recursor_packages }}"
+    state: present
+  tags:
+    - pdns_recursor
+
+- name: detect powerdns-recursor version
+  become: true
+  bodsch.dns.recursor_version:
+  register: pdns_recursor_version
+  check_mode: false
+  ignore_errors: true
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: pdns_recursor
+    facts:
+      full_version: "{{ pdns_recursor_version.full_version }}"
+      version: "{{ pdns_recursor_version.version }}"
+
+...

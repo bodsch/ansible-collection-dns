@@ -1,0 +1,132 @@
+{% set values = pdns_recursor_outgoing | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- outgoing ----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+outgoing:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+dont-query={{ values.get("dont_query") | join(', ') }}
+    {% if values.get("dont_throttle_names", []) | count > 0 %}
+dont-throttle-names={{ values.get("dont_throttle_names") | join(', ') }}
+    {% endif %}
+    {% if values.get("dont_throttle_netmasks", []) | count > 0 %}
+dont-throttle-netmasks={{ values.get("dont_throttle_netmasks") | join(', ') }}
+    {% endif %}
+    {% if values.get("dot_to_auth_names", []) | count > 0 %}
+dot-to-auth-names={{ values.get("dot_to_auth_names") | join(', ') }}
+    {% endif %}
+dot-to-port-853={{ values.get("dot_to_port_853") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+lowercase-outgoing={{ values.get("lowercase") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+max-busy-dot-probes={{ values.get("max_busy_dot_probes") }}
+max-ns-address-qperq={{ values.get("max_ns_address_qperq") }}
+max-ns-per-resolve={{ values.get("max_ns_per_resolve") }}
+max-qperq={{ values.get("max_qperq") }}
+network-timeout={{ values.get("network_timeout") }}
+non-resolving-ns-max-fails={{ values.get("non_resolving_ns_max_fails") }}
+non-resolving-ns-throttle-time={{ values.get("non_resolving_ns_throttle_time") }}
+server-down-max-fails={{ values.get("server_down_max_fails") }}
+server-down-throttle-time={{ values.get("server_down_throttle_time") }}
+edns-padding-out={{ values.get("edns_padding") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+{#
+    {% if values.get("edns_subnet_allow_list", []) | count > 0 %}
+edns-subnet-allow-list={{ values.get("edns_subnet_allow_list") | join(', ') }}
+# deprecated: alternative="edns-subnet-allow-list"
+# edns-subnet-whitelist={{ values.get("") }}
+    {% endif %}
+#}
+single-socket={{ values.get("single_socket") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if values.get("source_address", []) | count > 0 %}
+query-local-address={{ values.get("source_address") | join(', ') }}
+    {% endif %}
+    {% if values.get("udp_source_port_avoid", []) | count > 0 %}
+udp-source-port-avoid={{ values.get("udp_source_port_avoid") | join(', ') }}
+    {% endif %}
+udp-source-port-max={{ values.get("udp_source_port_max") }}
+udp-source-port-min={{ values.get("udp_source_port_min") }}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION outgoing #########
+outgoing:
+##### Determines the probability of a server marked down to be used anyway
+#   bypass_server_throttling_probability: 25
+##### If set, do not query these netmasks for DNS data
+#   dont_query:
+#   - 127.0.0.0/8
+#   - 10.0.0.0/8
+#   - 100.64.0.0/10
+#   - 169.254.0.0/16
+#   - 192.168.0.0/16
+#   - 172.16.0.0/12
+#   - ::1/128
+#   - fc00::/7
+#   - fe80::/10
+#   - 0.0.0.0/8
+#   - 192.0.0.0/24
+#   - 192.0.2.0/24
+#   - 198.51.100.0/24
+#   - 203.0.113.0/24
+#   - 240.0.0.0/4
+#   - ::/96
+#   - ::ffff:0:0/96
+#   - 100::/64
+#   - 2001:db8::/32
+##### Do not throttle nameservers with this name or suffix
+#   dont_throttle_names: []
+##### Do not throttle nameservers with this IP netmask
+#   dont_throttle_netmasks: []
+##### Use DoT to authoritative servers with these names or suffixes
+#   dot_to_auth_names: []
+##### Force DoT connection to target port 853 if DoT compiled in
+#   dot_to_port_853: true
+##### Outgoing EDNS buffer size
+#   edns_bufsize: 1232
+##### Whether to add EDNS padding to outgoing DoT messages
+#   edns_padding: true
+##### List of netmasks and domains that we should enable EDNS subnet for
+#   edns_subnet_allow_list: []
+##### Force outgoing questions to lowercase
+#   lowercase: false
+##### Maximum number of concurrent DoT probes
+#   max_busy_dot_probes: 0
+##### Maximum outgoing NS address queries per query
+#   max_ns_address_qperq: 10
+##### Maximum number of NS records to consider to resolve a name, 0 is no limit
+#   max_ns_per_resolve: 13
+##### Maximum outgoing queries per query
+#   max_qperq: 50
+##### Wait this number of milliseconds for network i/o
+#   network_timeout: 1500
+##### Number of failed address resolves of a nameserver to start throttling it, 0 is disabled
+#   non_resolving_ns_max_fails: 5
+##### Number of seconds to throttle a nameserver with a name failing to resolve
+#   non_resolving_ns_throttle_time: 60
+##### Maximum number of consecutive timeouts (and unreachables) to mark a server as down ( 0 => disabled )
+#   server_down_max_fails: 64
+##### Number of seconds to throttle all queries to a server after being marked as down
+#   server_down_throttle_time: 60
+##### If set, only use a single socket for outgoing queries
+#   single_socket: false
+##### Source IP address for sending queries
+#   source_address:
+#   - 0.0.0.0
+##### Enable TCP Fast Open support on outgoing sockets
+#   tcp_fast_open_connect: false
+##### Time TCP/DoT connections are left idle in milliseconds or 0 if no limit
+#   tcp_max_idle_ms: 10000
+##### Maximum number of idle TCP/DoT connections to a specific IP per thread, 0 means do not keep idle connections open
+#   tcp_max_idle_per_auth: 10
+##### Maximum number of idle TCP/DoT connections per thread
+#   tcp_max_idle_per_thread: 100
+##### Maximum total number of queries per TCP/DoT connection, 0 means no limit
+#   tcp_max_queries: 0
+##### List of comma separated UDP port numbers to avoid
+#   udp_source_port_avoid:
+#   - '4791'
+#   - '11211'
+##### Maximum UDP port to bind on
+#   udp_source_port_max: 65535
+##### Minimum UDP port to bind on
+#   udp_source_port_min: 1024
+#}

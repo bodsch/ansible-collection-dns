@@ -1,0 +1,29 @@
+---
+
+pdns_recursor_packages:
+  - pdns-recursor
+
+pdns_recursor_owner: pdns
+pdns_recursor_group: pdns
+
+pdns_recursor_defaults_recursor:
+  config_dir: /etc/powerdns
+  cpu_map: []
+  daemon: false
+  forward_zones: []
+  forward_zones_file: ''
+  forward_zones_recurse: []
+  forwarding_catalog_zones: []
+  include_dir: /etc/powerdns/recursor.d
+  lua_config_file: /etc/powerdns/recursor.lua
+  lua_dns_script: ''
+  setgid: ""
+  setuid: ""
+  stack_cache_size: 100
+  stack_size: 200000
+  stats_api_disabled_list: []
+  stats_carbon_disabled_list: []
+  stats_rec_control_disabled_list: []
+  stats_ringbuffer_entries: 10000
+  stats_snmp_disabled_list: []
+  threads: 2

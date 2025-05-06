@@ -1,0 +1,36 @@
+{% set values = pdns_recursor_recordcache | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- recordcache -------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+recordcache:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION recordcache #########
+recordcache:logging
+##### Limit answers to ANY queries in size
+#   limit_qtype_any: true
+##### Replace records in record cache only after this % of original TTL has passed
+#   locked_ttl_perc: 0
+##### maximum number of seconds to keep a Bogus (positive or negative) cached entry in memory
+#   max_cache_bogus_ttl: 3600
+##### If set, maximum number of entries in the main cache
+#   max_entries: 1000000
+##### maximum number of seconds to keep a negative cached entry in memory
+#   max_negative_ttl: 3600
+##### Maximum size of RRSet in cache
+#   max_rrset_size: 256
+##### maximum number of seconds to keep a cached entry in memory
+#   max_ttl: 86400
+##### If a record is requested from the cache and only this % of original TTL remains, refetch
+#   refresh_on_ttl_perc: 0
+##### Number of times a record's ttl is extended by 30s to be served stale
+#   serve_stale_extensions: 0
+##### Number of shards in the record cache
+#   shards: 1024
+##### Sequence of ZoneToCache entries
+#   zonetocaches: []
+#}

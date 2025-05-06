@@ -5,6 +5,8 @@
 # set -x
 # set -e
 
+current_dir=$(pwd)
+
 TOX_TEST="${1}"
 
 if [[ ! -z "${COLLECTION_ROLE// }" ]]
@@ -18,7 +20,8 @@ then
 
     if [ -e collections.yml ]
     then
-      ansible_collection
+      ${current_dir}/hooks/manage_collections.py
+      # ansible_collection
     fi
 
     tox "${TOX_OPTS}" -- molecule ${TOX_TEST} --scenario-name ${COLLECTION_SCENARIO}
@@ -38,7 +41,8 @@ else
 
     if [ -e collections.yml ]
     then
-      ansible_collection
+      ${current_dir}/hooks/manage_collections.py
+      # ansible_collection
     fi
 
     if [ "${TOX_TEST}" = "lint" ]
