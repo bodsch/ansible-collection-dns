@@ -87,37 +87,26 @@ class PdnsVersion(object):
         args.append(self.pdns_bin)
         args.append('--version')
 
-        self.module.log(msg=f"  args : '{args}'")
+        # self.module.log(msg=f"  args : '{args}'")
 
         rc, out, err = self._exec(args)
 
-        #self.module.log(msg=f"= result: {result}")
-
-        if rc == 0:
-            output = out
-        else:
-            output = err
+        _output = []
+        _output += out.splitlines()
+        _output += err.splitlines()
 
         msg = "unknown message"
 
-        # pdns_server --version
-        # Apr 25 01:21:25 PowerDNS Authoritative Server 4.9.4 (C) PowerDNS.COM BV
-        # Apr 25 01:21:25 Using 64-bits mode. Built using gcc 14.2.1 20250128.
-        # Apr 25 01:21:25 PowerDNS comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it according to the terms of the GPL version 2.
-        # Apr 25 01:21:25 Features: libcrypto-ecdsa libcrypto-ed25519 libcrypto-ed448 libcrypto-eddsa libgeoip libmaxminddb lua lua-records protobuf sodium curl DoT scrypt
-        # Apr 25 01:21:25 Built-in modules:
-        # Apr 25 01:21:25 Loading '/usr/lib/powerdns/libbindbackend.so'
-        # Apr 25 01:21:25 Loading '/usr/lib/powerdns/libgeoipbackend.so'
-        # Apr 25 01:21:25 Unable to load module '/usr/lib/powerdns/libgeoipbackend.so': libyaml-cpp.so.0.8: cannot open shared object file: No such file or directory
-        # Apr 25 01:21:25 DNSBackend unable to load module in libgeoipbackend.so
         pattern = re.compile(
             r".*PowerDNS Authoritative Server (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
-        version = re.search(pattern, output)
-        if version:
-            version_full_string = version.group('version')
-            version_major_string = version.group("major")
-            version_minor_string = version.group("minor")
-            version_patch_string = version.group("patch")
+
+        version = next((m.groupdict() for s in _output if (m := pattern.search(s))), None)
+
+        if version and isinstance(version, dict):
+            version_full_string = version.get('version')
+            version_major_string = version.get("major")
+            version_minor_string = version.get("minor")
+            version_patch_string = version.get("patch")
 
         if self.validate_version:
             if version_full_string == self.validate_version:
@@ -150,12 +139,12 @@ class PdnsVersion(object):
         # self.module.log(msg=f"  commands: '{commands}'")
         rc, out, err = self.module.run_command(commands, check_rc=False)
 
-        self.module.log(msg=f"  rc : '{rc}'")
-        if int(rc) != 0:
-            self.module.log(msg=f"  out: '{out}'")
-            self.module.log(msg=f"  err: '{err}'")
-            for line in err.splitlines():
-                self.module.log(msg=f"   {line}")
+        # self.module.log(msg=f"  rc : '{rc}'")
+        # if int(rc) != 0:
+        #     self.module.log(msg=f"  out: '{out}'")
+        #     self.module.log(msg=f"  err: '{err}'")
+        #     for line in err.splitlines():
+        #         self.module.log(msg=f"   {line}")
 
         return (rc, out, err)
 
@@ -167,20 +156,22 @@ class PdnsVersion(object):
 
 def main():
 
+    arguments = dict(
+        validate_version=dict(
+            required=False,
+            type="str"
+        )
+    )
+
     module = AnsibleModule(
-        argument_spec=dict(
-            validate_version=dict(
-                required=False,
-                type="str"
-            )
-        ),
+        argument_spec=arguments,
         supports_check_mode=True,
     )
 
     r = PdnsVersion(module)
     result = r.run()
 
-    module.log(msg="= result: {}".format(result))
+    # module.log(msg="= result: {}".format(result))
 
     module.exit_json(**result)
 

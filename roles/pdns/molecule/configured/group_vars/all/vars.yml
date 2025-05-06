@@ -1,11 +1,11 @@
 ---
 
-pdns_mysql_databases_credentials:
-  'gmysql:one':
-    'priv_user': root
-    'priv_password': "{{ vault__pdns.database_root }}"
-    'priv_host':
-      - "localhost"
+# pdns_mysql_databases_credentials:
+#   'gmysql:one:
+#     'priv_user: root
+#     'priv_password: "{{ vault__pdns.databases.root }}"
+#     'priv_host:
+#       - "localhost"
 
 pdns_config:
   master: true
@@ -16,12 +16,32 @@ pdns_config:
   log-dns-details: "on"
   loglevel: "3"
 
+# https://doc.powerdns.com/authoritative/backends/index.html?highlight=backend
 pdns_backends:
-  'gmysql:one':
-    'user': powerdns
-    'host': localhost
-    'password': "{{ vault__pdns.database_pdns }}"
-    'dbname': pdns
+  - name: 'gmysql:one'
+    user: powerdns
+    host: localhost
+    password: "{{ vault__pdns.databases.pdns }}"
+    dbname: pdns
+    credentials: {}
+
+  - name: 'gmysql:two'
+    user: pdns_user
+    host: 192.0.2.15
+    port: 3307
+    password: "{{ vault__pdns.databases.external }}"
+    dbname: dns
+    credentials: {}
+
+  - name: bind
+    config: '/etc/named/named.conf'
+    hybrid:  true
+    dnssec-db: '{{ pdns_config_dir }}/dnssec.db'
+
+  - name: gsqlite3
+    database: /var/lib/powerdns/pdns.db
+    dnssec: true
+
 
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_44 }}"
 

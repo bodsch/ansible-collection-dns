@@ -27,7 +27,7 @@ tags:
 dependencies:
   community.general: ">=10.3.0"
   ansible.utils: "*"
-  bodsch.core: ">=1.1.2"
+  bodsch.core: ">=2.6.3"
 
 repository: https://github.com/bodsch/ansible-collection-dns
 documentation: https://github.com/bodsch/ansible-collection-dns/README.md

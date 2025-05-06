@@ -9,4 +9,4 @@
     NETRC: ''
 
   roles:
-    - role: bodsch.dns.bind
+    - role: bodsch.dns.pdns

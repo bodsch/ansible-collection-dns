@@ -11,7 +11,7 @@
 - name: reload pdns
   become: true
   ansible.builtin.service:
-    name: "{{ pdns_service }}"
+    name: "{{ pdns_service.name }}"
     state: reloaded
   when:
     - not running_in_check_mode
@@ -19,7 +19,7 @@
 - name: restart pdns
   become: true
   ansible.builtin.service:
-    name: "{{ pdns_service }}"
+    name: "{{ pdns_service.name }}"
     state: restarted
   when:
     - not running_in_check_mode

@@ -1,4 +1,5 @@
 ---
+
 # https://doc.powerdns.com/authoritative/backends/generic-sqlite3.html
 
 # - name: Install the SQLite dependencies on Debian
@@ -7,21 +8,27 @@
 #     state: present
 #   when: ansible_os_family == 'Debian'
 
-- name: Ensure that the directories containing the PowerDNS SQLite databases exist
-  ansible.builtin.file:
-    name: "{{ pdns_backends.gsqlite3.database | dirname }}"
-    owner: "{{ pdns_owner }}"
-    group: "{{ pdns_group }}"
-    state: directory
-    mode: "0750"
+- name: define sqlite backend data
+  ansible.builtin.set_fact:
+    _pdns_backend_data: "{{ pdns_backends | bodsch.dns.pdns_backend_data('sqlite') }}"
 
-- name: Ensure that the directories containing the PowerDNS SQLite databases exist
-  ansible.builtin.copy:
-    src: archlinux/schema.sqlite3.sql
-    dest: "{{ pdns_lib_dir }}"
-    mode: "0640"
+- name: archlinux
   when:
     - ansible_os_family | lower == 'archlinux'
+  block:
+    - name: create directory for powerdns sqlite schemas
+      ansible.builtin.file:
+        name: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}"
+        owner: "{{ pdns_owner }}"
+        group: "{{ pdns_group }}"
+        state: directory
+        mode: "0750"
+
+    - name: copy sqlite schema for archlinux
+      ansible.builtin.copy:
+        src: archlinux/schema.sqlite3.sql
+        dest: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}"
+        mode: "0640"
 
 # - name: Determine location of the SQL file
 #   ansible.builtin.shell:
@@ -42,17 +49,11 @@
 #   ansible.builtin.set_fact:
 #     pdns_sqlite_schema_file_to_use: "{% if pdns_sqlite_schema_file | length == 0 %}{{ pdns_sqlite_schema_file_detected.stdout }}{% else %}{{ pdns_sqlite_schema_file }}{% endif %}"
 
-- name: Create the PowerDNS SQLite databases
-  ansible.builtin.shell: "sqlite3 {{ pdns_backends.gsqlite3.database }} < {{ pdns_lib_dir }}/schema.sqlite3.sql"
-  args:
-    creates: "{{ pdns_backends.gsqlite3.database }}"
-  # with_items: "{{ pdns_sqlite_databases_locations }}"
-
-- name: Check the PowerDNS SQLite databases permissions
-  ansible.builtin.file:
-    name: "{{ pdns_backends.gsqlite3.database }}"
+- name: create powerdns sqlite databases
+  bodsch.dns.pdns_sqlite_backend:
+    state: create
     owner: "{{ pdns_owner }}"
     group: "{{ pdns_group }}"
-    mode: "0640"
-    state: file
-  # with_items: "{{ pdns_sqlite_databases_locations }}"
+    mode: "0644"
+    databases: "{{ _pdns_backend_data }}"
+    schemas: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}/schema.sqlite3.sql"
