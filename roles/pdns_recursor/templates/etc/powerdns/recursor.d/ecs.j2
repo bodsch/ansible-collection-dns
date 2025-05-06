@@ -1,0 +1,55 @@
+{% set values = pdns_recursor_ecs | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- ecs ---------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+ecs:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+ecs-add-for={{ values.get("add_for") | join(', ') }}
+ecs-cache-limit-ttl={{ values.get("cache_limit_ttl") }}
+ecs-ipv4-bits={{ values.get("ipv4_bits") }}
+ecs-ipv4-cache-bits={{ values.get("ipv4_cache_bits") }}
+ecs-ipv4-never-cache={{ values.get("ipv4_never_cache", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+ecs-ipv6-bits={{ values.get("ipv6_bits") }}
+ecs-ipv6-cache-bits={{ values.get("ipv6_cache_bits") }}
+ecs-ipv6-never-cache={{ values.get("ipv6_never_cache", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+ecs-minimum-ttl-override={{ values.get("minimum_ttl_override") }}
+ecs-scope-zero-address={{ values.get("scope_zero_address") }}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION ecs #########
+ecs:
+##### List of client netmasks for which EDNS Client Subnet will be added
+#   add_for:
+#   - 0.0.0.0/0
+#   - ::/0
+#   - '!127.0.0.0/8'
+#   - '!10.0.0.0/8'
+#   - '!100.64.0.0/10'
+#   - '!169.254.0.0/16'
+#   - '!192.168.0.0/16'
+#   - '!172.16.0.0/12'
+#   - '!::1/128'
+#   - '!fc00::/7'
+#   - '!fe80::/10'
+##### Minimum TTL to cache ECS response
+#   cache_limit_ttl: 0
+##### Number of bits of IPv4 address to pass for EDNS Client Subnet
+#   ipv4_bits: 24
+##### Maximum number of bits of IPv4 mask to cache ECS response
+#   ipv4_cache_bits: 24
+##### If we should never cache IPv4 ECS responses
+#   ipv4_never_cache: false
+##### Number of bits of IPv6 address to pass for EDNS Client Subnet
+#   ipv6_bits: 56
+##### Maximum number of bits of IPv6 mask to cache ECS response
+#   ipv6_cache_bits: 56
+##### If we should never cache IPv6 ECS responses
+#   ipv6_never_cache: false
+##### The minimum TTL for records in ECS-specific answers
+#   minimum_ttl_override: 1
+##### Address to send to allow-listed authoritative servers for incoming queries with ECS prefix-length source of 0
+#   scope_zero_address: ''
+#}

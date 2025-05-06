@@ -1,0 +1,26 @@
+{% set values = pdns_recursor_packetcache | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- packetcache -------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+packetcache:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION packetcache #########
+packetcache:
+##### Disable packetcache
+#   disable: false
+##### maximum number of entries to keep in the packetcache
+#   max_entries: 500000
+##### maximum number of seconds to keep a cached NxDomain or NoData entry in packetcache
+#   negative_ttl: 60
+##### maximum number of seconds to keep a cached servfail entry in packetcache
+#   servfail_ttl: 60
+##### Number of shards in the packet cache
+#   shards: 1024
+##### maximum number of seconds to keep a cached entry in packetcache
+#   ttl: 86400
+#}

@@ -1,0 +1,29 @@
+config-dir={{ pdns_recursor_config_dir }}
+setuid={{ pdns_recursor_user }}
+setgid={{ pdns_recursor_group }}
+
+{% for config_item, value in pdns_recursor_config.items() | sort() %}
+{% if config_item not in ["config-dir", "setuid", "setgid"] %}
+{% if config_item == 'threads' %}
+{{ config_item }}={{ value | string }}
+{% elif value is sameas True %}
+{{ config_item }}=yes
+{% elif value is sameas False %}
+{{ config_item }}=no
+{% elif value is string %}
+{{ config_item }}={{ value | string }}
+{% elif value is sequence %}
+{{ config_item }}={{ value | join(',') }}
+{% else %}
+{{ config_item }}={{ value | string }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if pdns_recursor_config_lua_file_content != "" %}
+lua-config-file={{ pdns_recursor_config_lua }}
+{% endif %}
+
+{% if pdns_recursor_config_dns_script_file_content != "" %}
+lua-dns-script={{ pdns_recursor_config_dns_script }}
+{% endif %}

@@ -1,0 +1,57 @@
+{% set values = pdns_recursor_logging | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- logging -----------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+logging:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+disable-syslog={{ values.get("disable_syslog") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-common-errors={{ values.get("common_errors") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-rpz-changes={{ values.get("rpz_changes") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+log-timestamp={{ values.get("timestamp") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+logging-facility={{ values.get("facility") }}
+loglevel={{ values.get("loglevel") }}
+quiet={{ values.get("quiet") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+statistics-interval={{ values.get("statistics_interval") }}
+structured-logging={{ values.get("structured_logging") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+structured-logging-backend={{ values.get("structured_logging_backend") }}
+trace={{ values.get("trace") }}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION logging #########
+logging:
+##### If we should log rather common errors
+#   common_errors: false
+##### Disable logging to syslog, useful when running inside a supervisor that logs stderr
+#   disable_syslog: false
+##### Sequence of dnstap servers
+#   dnstap_framestream_servers: []
+##### Sequence of NOD dnstap servers
+#   dnstap_nod_framestream_servers: []
+##### Facility to log messages as. 0 corresponds to local0
+#   facility: ''
+##### Amount of logging. Higher is more. Do not set below 3
+#   loglevel: 6
+##### List of outgoing protobuf servers
+#   outgoing_protobuf_servers: []
+##### Sequence of protobuf servers
+#   protobuf_servers: []
+##### Compute the latency of queries in protobuf messages by using the timestamp set by the kernel when the query was received (when available)
+#   protobuf_use_kernel_timestamp: false
+##### Suppress logging of questions and answers
+#   quiet: true
+##### Log additions and removals to RPZ zones at Info level
+#   rpz_changes: false
+##### Number of seconds between printing of recursor statistics, 0 to disable
+#   statistics_interval: 1800
+##### Prefer structured logging
+#   structured_logging: true
+##### Structured logging backend
+#   structured_logging_backend: default
+##### Print timestamps in log lines, useful to disable when running with a tool that timestamps stderr already
+#   timestamp: true
+##### if we should output heaps of logging. set to 'fail' to only log failing domains
+#   trace: no
+#}

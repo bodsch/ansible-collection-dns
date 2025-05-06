@@ -1,0 +1,46 @@
+{% set values = pdns_recursor_nod | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- nod ---------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+nod:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION nod #########
+nod:
+##### Size of the DB used to track new domains in terms of number of cells. Defaults to 67108864
+#   db_size: 67108864
+##### Interval (in seconds) to write the NOD and UDR DB snapshots
+#   db_snapshot_interval: 600
+##### Persist new domain tracking data here to persist between restarts
+#   history_dir: /usr/var/lib/pdns-recursor/nod
+##### List of domains (and implicitly all subdomains) which will never be considered a new domain
+#   ignore_list: []
+##### File with a list of domains (and implicitly all subdomains) which will never be considered a new domain
+#   ignore_list_file: ''
+##### Log newly observed domains.
+#   log: true
+##### Perform a DNS lookup newly observed domains as a subdomain of the configured domain
+#   lookup: ''
+##### If protobuf is configured, the tag to use for messages containing newly observed domains. Defaults to 'pdns-nod'
+#   pb_tag: pdns-nod
+##### Track newly observed domains (i.e. never seen before).
+#   tracking: false
+##### Size of the DB used to track unique responses in terms of number of cells. Defaults to 67108864
+#   unique_response_db_size: 67108864
+##### Persist unique response tracking data here to persist between restarts
+#   unique_response_history_dir: /usr/var/lib/pdns-recursor/udr
+##### List of domains (and implicitly all subdomains) which will never be considered for UDR
+#   unique_response_ignore_list: []
+##### File with list of domains (and implicitly all subdomains) which will never be considered for UDR
+#   unique_response_ignore_list_file: ''
+##### Log unique responses
+#   unique_response_log: true
+##### If protobuf is configured, the tag to use for messages containing unique DNS responses. Defaults to 'pdns-udr'
+#   unique_response_pb_tag: pdns-udr
+##### Track unique responses (tuple of query name, type and RR).
+#   unique_response_tracking: false
+#}

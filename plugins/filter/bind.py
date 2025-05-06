@@ -306,16 +306,18 @@ class FilterModule(object):
 
     def zone_filename(self, data, zone_data):
         """
-            append to evvery list element
+            append to every list element
         """
         # display.v(f"zone_filename({data}, {zone_data})")
         result = None
 
         zone_data = zone_data.get("zone_data", {})
 
+        # display.v(f"  - zone_data: {zone_data}")
+
         item = {k: v for key, values in zone_data.items() for x in values for k, v in x.items() if k == data}
 
-        # display.v(f"  - {item}")
+        # display.v(f"  - item     : {item}")
 
         if item:
             result = list(item.values())[0].get("filename")

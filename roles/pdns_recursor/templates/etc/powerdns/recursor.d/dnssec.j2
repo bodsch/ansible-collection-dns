@@ -1,0 +1,66 @@
+{% set values = pdns_recursor_dnssec | bodsch.core.remove_empty_values %}
+{% if values | count > 0 %}
+## -- dnssec ------------------------------------------------------------------
+  {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
+dnssec:
+  {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+aggressive-cache-max-nsec3-hash-cost={{ values.get("aggressive_cache_max_nsec3_hash_cost") }}
+aggressive-nsec-cache-size={{ values.get("aggressive_nsec_cache_size") }}
+dnssec={{ values.get("validation") }}
+dnssec-log-bogus={{ values.get("log_bogus") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+max-dnskeys={{ values.get("max_dnskeys") }}
+max-ds-per-zone={{ values.get("max_ds_per_zone") }}
+max-nsec3-hash-computations-per-query={{ values.get("max_nsec3_hash_computations_per_query") }}
+max-nsec3s-per-record={{ values.get("max_nsec3s_per_record") }}
+max-rrsigs-per-record={{ values.get("max_rrsigs_per_record") }}
+max-signature-validations-per-query={{ values.get("max_signature_validations_per_query") }}
+allow-trust-anchor-query={{ values.get("allow_trust_anchor_query", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if values.get("x_dnssec_names", []) | count > 0 %}
+x-dnssec-names={{ values.get("x_dnssec_names") | join(', ') }}
+    {% endif %}
+
+  {% endif %}
+{% endif %}
+{#
+######### SECTION dnssec #########
+dnssec:
+##### Maximum estimated NSEC3 cost for a given query to consider aggressive use of the NSEC3 cache
+#   aggressive_cache_max_nsec3_hash_cost: 150
+##### The minimum expected hit ratio to store NSEC3 records into the aggressive cache
+#   aggressive_cache_min_nsec3_hit_ratio: 2000
+##### The number of records to cache in the aggressive cache. If set to a value greater than 0, and DNSSEC processing or validation is enabled, the recursor will cache NSEC and NSEC3 records to generate negative answers, as defined in rfc8198
+#   aggressive_nsec_cache_size: 100000
+##### List of DNSSEC algorithm numbers that are considered unsupported
+#   disabled_algorithms: []
+##### Log DNSSEC bogus validations
+#   log_bogus: false
+##### Maximum number of DNSKEYs with the same algorithm and tag to consider when validating a given record
+#   max_dnskeys: 2
+##### Maximum number of DS records to consider per zone
+#   max_ds_per_zone: 8
+##### Maximum number of NSEC3 hashes that we are willing to compute during DNSSEC validation, per incoming query
+#   max_nsec3_hash_computations_per_query: 600
+##### Maximum number of NSEC3s to consider when validating a given denial of existence
+#   max_nsec3s_per_record: 10
+##### Maximum number of RRSIGs to consider when validating a given record
+#   max_rrsigs_per_record: 2
+##### Maximum number of RRSIG signatures we are willing to validate per incoming query
+#   max_signature_validations_per_query: 30
+##### A sequence of negative trust anchors
+#   negative_trustanchors: []
+##### Maximum number of iterations allowed for an NSEC3 record
+#   nsec3_max_iterations: 50
+##### Allow the signature inception to be off by this number of seconds
+#   signature_inception_skew: 60
+##### A path to a zone file containing trust anchors
+#   trustanchorfile: ''
+##### Interval (in hours) to read the trust anchors file
+#   trustanchorfile_interval: 24
+##### Sequence of trust anchors
+#   trustanchors: []
+##### DNSSEC mode: off/process-no-validate/process (default)/log-fail/validate
+#   validation: process
+##### Collect DNSSEC statistics for names or suffixes in this list in separate x-dnssec counters
+#   x_dnssec_names: []
+#}
