@@ -1,5 +1,6 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 # {{ ansible_managed }}
+{% set pdns_config = pdns_config | bodsch.dns.pdns_config_upgrades(version=pdns_version.get("full_version")) %}
 
 {% for config_item, value in pdns_config.items() | sort() %}
   {% if config_item not in ["config-dir", "launch", "setuid", "setgid"] %}

@@ -9,9 +9,9 @@
 - name: install
   ansible.builtin.include_tasks: database/main.yml
 
-#- name: configure
-#  ansible.builtin.include_tasks: configure.yml
-#
+- name: configure
+  ansible.builtin.include_tasks: configure.yml
+
 # - name: service
 #   ansible.builtin.include_tasks: service.yml
 

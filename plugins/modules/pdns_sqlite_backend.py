@@ -10,6 +10,7 @@ import sqlite3
 import shutil
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 
 # ---------------------------------------------------------------------------------------
 
@@ -89,6 +90,11 @@ class PdnsBackendSqlite(object):
                 self.module.log(msg=f"  db: '{db}'")
 
                 dbname = db.get("database")
+                dirname = os.path.dirname(dbname)
+
+                self.module.log(msg=f"  dirname: '{dirname}'")
+
+                create_directory(directory=dirname, owner=self.owner, group=self.group, mode="0750")
 
                 result = self._sqlite(dbname)
 
@@ -201,10 +207,10 @@ class PdnsBackendSqlite(object):
 
                     if os.path.exists(dbname):
                         os.remove(dbname)
-                        _changed=True
-                        _msg="The database has been successfully deleted."
+                        _changed = True
+                        _msg = "The database has been successfully deleted."
                     else:
-                        _msg=f"The database file '{dbname}' does not exist."
+                        _msg = f"The database file '{dbname}' does not exist."
 
             return dict(
                 rc=0,
@@ -212,7 +218,6 @@ class PdnsBackendSqlite(object):
                 changed=_changed,
                 msg=_msg
             )
-
 
         return []
 

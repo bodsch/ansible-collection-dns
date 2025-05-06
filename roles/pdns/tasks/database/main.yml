@@ -21,8 +21,8 @@
 #       - "{{ 'sqlite3' in pdns_backend_types }}"
 
 - name: backend handling
-  when:
-    - ansible_os_family | lower == 'debian'
+  #when:
+  #  - ansible_os_family | lower == 'debian'
   block:
     - name: define backend packages
       ansible.builtin.set_fact:

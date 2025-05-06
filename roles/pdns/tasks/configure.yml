@@ -20,7 +20,7 @@
 #
 #   - name: Reload systemd
 #     systemd:
-#       daemon_reload: yes
+#       daemon_restart: yes
 #     when: not pdns_disable_handlers
 #       and _pdns_override_unit.changed
 #
@@ -57,7 +57,7 @@
     - pdns_backends
     - pdns_webserver
   notify:
-    - reload pdns
+    - restart pdns
 
 - name: generate the pdns configuration
   ansible.builtin.template:
@@ -68,7 +68,7 @@
     mode: "0640"
     backup: true
   notify:
-    - reload pdns
+    - restart pdns
 #  register: _pdns_configuration
 
 

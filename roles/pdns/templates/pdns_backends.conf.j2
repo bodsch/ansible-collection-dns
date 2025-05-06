@@ -1,9 +1,22 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 # {{ ansible_managed }}
-
+{% set pdns_backends = pdns_backends | bodsch.dns.pdns_config_upgrades(version=pdns_version.get("full_version")) %}
 launch=
 
-{% for backend in pdns_backends | sort() -%}
+{% for backend in pdns_backends %}
+  {% set backend_name = backend.get("name") | ansible.builtin.split(':') | first %}
+  {% set _ = backend.pop("name") %}
+  {% set _ = backend.pop("credentials") %}
+  {% set backend_string = backend_name | replace(':', '-') %}
+launch+={{ backend_name }}
+  {% for backend_item, value in backend.items() %}
+    {% if value | bodsch.core.type == "bool" %}
+      {% set value = value | bodsch.core.config_bool(true_as='yes', false_as='no') %}
+    {% endif %}
+{{ backend_string }}-{{ backend_item }} = {{ value }}
+  {% endfor %}
+
+{#
 launch+={{ backend }}
   {% set backend_string = backend | replace(':', '-') %}
   {% for backend_item, value in pdns_backends[backend].items() | sort() -%}
@@ -17,5 +30,6 @@ launch+={{ backend }}
 {{ backend_string }}-{{ backend_item }}={{ value | string }}
     {% endif %}
   {% endfor %}
+#}
 
 {% endfor -%}

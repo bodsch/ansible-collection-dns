@@ -3,12 +3,13 @@
 pdns_packages:
   - powerdns
 
-# _pdns_backends_packages: {}
+_pdns_backend_packages:
+  mysql: mariadb-libs
 
 # The directory where the PowerDNS configuration is located
 pdns_config_dir: '/etc/powerdns'
 
-_pdns_backend_packages: {}
+# _pdns_backend_packages: {}
 
 pdns_lib_dir: /var/lib/powerdns
 
