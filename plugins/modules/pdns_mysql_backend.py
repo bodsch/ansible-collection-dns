@@ -6,12 +6,9 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import sqlite3
-import shutil
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.dns.plugins.module_utils.database import Database
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 
 # ---------------------------------------------------------------------------------------
 
@@ -68,7 +65,7 @@ class PdnsBackendMariadb(Database):
 
         self.state = module.params.get('state')
         self.database = module.params.get("database")
-        self.schemas = module.params.get("schemas")
+        self.schema_file = module.params.get("schema_file")
         self.owner = module.params.get('owner')
         self.group = module.params.get('group')
         self.mode = module.params.get("mode")
@@ -92,8 +89,9 @@ class PdnsBackendMariadb(Database):
             full_version="unknown"
         )
 
-        return result
+        result = self._mariadb()
 
+        return result
 
     def _mariadb(self):
         """
@@ -108,14 +106,9 @@ class PdnsBackendMariadb(Database):
                 msg=msg
             )
 
-        config = self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
-
-        self.module.log(msg=f"  config: '{self.config}'")
-
+        self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
 
         (db_connect_error, db_message) = self.db_connect()
-
-        self.module.log(msg=f"  '{db_connect_error}' - '{db_message}'")
 
         if db_connect_error:
             return dict(
@@ -125,8 +118,6 @@ class PdnsBackendMariadb(Database):
 
         (state, db_error, db_error_message) = self.check_table_schema("domains")
 
-        self.module.log(msg=f"  '{state}' - '{db_error}' - '{db_error_message}'")
-
         if state:
             return dict(
                 changed=False,
@@ -134,16 +125,14 @@ class PdnsBackendMariadb(Database):
             )
 
         # import DB schema
-        if os.path.exists(self.schemas):
+        if os.path.exists(self.schema_file):
             """
             """
-            result_state = {}
+            # file_name = os.path.basename(self.schema_file)
+            # self.module.log(msg=f"import schema from '{file_name}'")
 
-            file_name = os.path.basename(self.schemas)
-            self.module.log(msg=f"import schema from '{file_name}'")
-
-            (state, _msg) = self.db_import_sqlfile(
-                sql_file=self.schemas,
+            (state, _msg) = self.import_sqlfile(
+                sql_file=self.schema_file,
                 commit=True,
                 rollback=True,
                 close_cursor=False
@@ -154,8 +143,6 @@ class PdnsBackendMariadb(Database):
                 changed=(not state),
                 msg=_msg
             )
-
-
 
 
 def main():
@@ -182,7 +169,7 @@ def main():
             type='str',
             default="0644"
         ),
-        schemas=dict(
+        schema_file=dict(
             required=True,
             type='str',
         ),

@@ -1,0 +1,24 @@
+---
+
+- name: create directory for powerdns backend schema files
+  ansible.builtin.file:
+    name: "{{ pdns_config_dir }}/backends"
+    owner: "{{ pdns_owner }}"
+    group: "{{ pdns_group }}"
+    state: directory
+    mode: "0755"
+
+- name: copy backend schema files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ pdns_config_dir }}/backends/"
+    mode: "0640"
+  loop:
+    - bind-dnssec.schema.sqlite3.sql
+    - schema.mysql.sql
+    - schema.pgsql.sql
+    - schema.sqlite3.sql
+  loop_control:
+    label: "{{ item }}"
+
+...

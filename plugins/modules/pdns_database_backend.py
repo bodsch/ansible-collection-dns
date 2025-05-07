@@ -54,7 +54,7 @@ RETURN = """
 # ---------------------------------------------------------------------------------------
 
 
-class PdnsBackendMariadb(Database):
+class PdnsDatabaseBackend(Database):
     """
       Main Class
     """
@@ -100,7 +100,6 @@ class PdnsBackendMariadb(Database):
             result = _mariadb()
 
         return result
-
 
     def _sqlite(self, dbname):
         """
@@ -221,7 +220,6 @@ class PdnsBackendMariadb(Database):
 
         return []
 
-
     def _mariadb(self):
         """
             mysql / mariadb support
@@ -238,7 +236,6 @@ class PdnsBackendMariadb(Database):
         config = self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
 
         self.module.log(msg=f"  config: '{self.config}'")
-
 
         (db_connect_error, db_message) = self.db_connect()
 
@@ -322,7 +319,7 @@ def main():
         supports_check_mode=True,
     )
 
-    r = PdnsBackendMariadb(module)
+    r = PdnsDatabaseBackend(module)
     result = r.run()
 
     # module.log(msg="= result: {}".format(result))

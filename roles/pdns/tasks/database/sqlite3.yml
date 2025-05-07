@@ -1,86 +1,36 @@
 ---
-
 # https://doc.powerdns.com/authoritative/backends/generic-sqlite3.html
-
-# - name: Install the SQLite dependencies on Debian
-#   ansible.builtin.package:
-#     name: sqlite3
-#     state: present
-#   when: ansible_os_family == 'Debian'
 
 - name: define sqlite backend data
   ansible.builtin.set_fact:
     _pdns_backend_data: "{{ pdns_backends | bodsch.dns.pdns_backend_data('sqlite') }}"
 
-- name: archlinux
+- name: find schema file for sqlite database
+  ansible.builtin.find:
+    paths:
+      - "/usr/share/pdns-backend-sqlite3/schema"
+      - "{{ pdns_config_dir }}/backends"
+    file_type: file
+    patterns:
+      - schema.sqlite3.sql
+    recurse: true
+  register: found_files
+  no_log: true
+
+- name: define sqlite schema file
+  ansible.builtin.set_fact:
+    pdns_sqlite_schema: "{{ found_files.files | sort(attribute='path', reverse=True) | map(attribute='path') | list | first }}"
   when:
-    - ansible_os_family | lower == 'archlinux'
-  block:
-    - name: create directory for powerdns sqlite schemas
-      ansible.builtin.file:
-        name: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}"
-        owner: "{{ pdns_owner }}"
-        group: "{{ pdns_group }}"
-        state: directory
-        mode: "0750"
-
-    - name: copy sqlite schema for archlinux
-      ansible.builtin.copy:
-        src: archlinux/schema.sqlite3.sql
-        dest: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}"
-        mode: "0640"
-
-    - name: define sqlite schema file
-      ansible.builtin.set_fact:
-        pdns_sqlite_schema: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}/schema.sqlite3.sql"
-
-- name: find sqlite schema file
-  when:
-    - ansible_os_family | lower != 'archlinux'
-  block:
-    - name: find OS specific plugins directory
-      ansible.builtin.find:
-        paths: "/usr/share/doc/,/usr/share,/usr/share/pdns-backend-sqlite3"
-        file_type: file
-        patterns:
-          - schema.sqlite3.sql
-          - "*.sql"
-        recurse: true
-      register: found_files
-
-    - name: define sqlite schema file
-      ansible.builtin.set_fact:
-        pdns_sqlite_schema: "{{ found_files.files | sort(attribute='path', reverse=True) | map(attribute='path') | list | first }}"
-      when:
-        - found_files.files is defined
-        - found_files.files | count > 0
+    - found_files.files is defined
+    - found_files.files | count > 0
 
 - name: validate sqlite schema file
   ansible.builtin.fail:
     msg: "i can't find a valid sqlite schema file!\n"
   when:
     - pdns_sqlite_schema is defined
-    - pdns_sqlite_schema | string | length > 0
+    - pdns_sqlite_schema | string | length == 0
   run_once: true
-
-# - name: Determine location of the SQL file
-#   ansible.builtin.shell:
-#     cmd: |
-#       for p in /usr/share/doc/pdns-backend-sqlite-{{ _pdns_running_version }}/schema.sql /usr/share/doc/pdns-backend-sqlite-{{ _pdns_running_version }}/schema.sqlite3.sql /usr/share/doc/pdns/schema.sqlite3.sql /usr/share/doc/pdns-backend-sqlite3/schema.sqlite3.sql /usr/share/doc/pdns-backend-sqlite/schema.sqlite3.sql /usr/share/doc/powerdns/schema.sqlite3.sql; do
-#         if [ -f $p ]; then
-#           echo $p
-#           exit 0
-#         fi
-#       done
-#       echo "Can't determine path to SQLite schema">&2
-#       exit 1
-#   changed_when: false
-#   register: pdns_sqlite_schema_file_detected
-#   when: pdns_sqlite_schema_file | length == 0
-
-# - name: Set the schema file variable
-#   ansible.builtin.set_fact:
-#     pdns_sqlite_schema_file_to_use: "{% if pdns_sqlite_schema_file | length == 0 %}{{ pdns_sqlite_schema_file_detected.stdout }}{% else %}{{ pdns_sqlite_schema_file }}{% endif %}"
 
 - name: create powerdns sqlite databases
   bodsch.dns.pdns_sqlite_backend:
@@ -88,5 +38,5 @@
     owner: "{{ pdns_owner }}"
     group: "{{ pdns_group }}"
     mode: "0644"
-    databases: "{{ _pdns_backend_data }}"
-    schemas: "{{ pdns_sqlite_schema }}"
+    database: "{{ _pdns_backend_data[0] }}"
+    schema_file: "{{ pdns_sqlite_schema }}"

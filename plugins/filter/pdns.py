@@ -62,7 +62,7 @@ class FilterModule(object):
                 ['bind', 'mysql', 'sqlite3']
                 ```
         """
-        # display.v(f"backend_types({data}, {version})")
+        display.v(f"backend_types({data}, {version})")
         result = []
         names = set()
         for entry in data:
@@ -74,7 +74,7 @@ class FilterModule(object):
 
         result = sorted(names)
 
-        # display.v(f"= {result})")
+        display.v(f"= {result})")
 
         return result
 

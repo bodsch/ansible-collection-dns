@@ -66,6 +66,13 @@
   notify:
     - restart pdns
 
+- name: remove built-in pdns backend lmdb configuration
+  ansible.builtin.file:
+    dest: "{{ pdns_config_include }}/lmdb.conf"
+    state: absent
+  notify:
+    - restart pdns
+
 - name: generate the pdns configuration
   ansible.builtin.template:
     src: pdns.conf.j2

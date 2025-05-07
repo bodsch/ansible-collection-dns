@@ -1,7 +1,6 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 # {{ ansible_managed }}
 {% set pdns_backends = pdns_backends | bodsch.dns.pdns_config_upgrades(version=pdns_version.get("full_version")) %}
-launch=
 
 {% for backend in pdns_backends %}
   {% set backend_name = backend.get("name") | ansible.builtin.split(':') | first %}

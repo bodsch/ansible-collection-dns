@@ -1,10 +1,14 @@
 ---
+# https://doc.powerdns.com/authoritative/backends/lmdb.html
 
-# - name: Ensure that the directories containing the PowerDNS LMDB databases exist
-#   ansible.builtin.file:
-#     name: "{{ item | dirname }}"
-#     owner: "{{ pdns_user }}"
-#     group: "{{ pdns_group }}"
-#     state: directory
-#     mode: 0750
-#   with_items: "{{ pdns_lmdb_databases_locations }}"
+- name: define lmdb backend data
+  ansible.builtin.set_fact:
+    _pdns_backend_data: "{{ pdns_backends | bodsch.dns.pdns_backend_data('lmdb') }}"
+
+- name: create directory for lmdb database
+  ansible.builtin.file:
+    name: "{{ _pdns_backend_data[0].filename | dirname }}"
+    owner: "{{ pdns_owner }}"
+    group: "{{ pdns_group }}"
+    state: directory
+    mode: "0750"
