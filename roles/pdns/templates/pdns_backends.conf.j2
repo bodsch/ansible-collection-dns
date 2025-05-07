@@ -6,7 +6,9 @@ launch=
 {% for backend in pdns_backends %}
   {% set backend_name = backend.get("name") | ansible.builtin.split(':') | first %}
   {% set _ = backend.pop("name") %}
-  {% set _ = backend.pop("credentials") %}
+  {% if backend.pop("credentials", None) %}
+    {% set _ = backend.pop("credentials") %}
+  {% endif %}
   {% set backend_string = backend_name | replace(':', '-') %}
 launch+={{ backend_name }}
   {% for backend_item, value in backend.items() %}

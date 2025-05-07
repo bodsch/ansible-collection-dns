@@ -1,10 +1,16 @@
 ---
 
+pdns_packages:
+  - pdns-server
+
 pdns_dependencies:
-  - gnpg
+  - gnupg
 
 # The directory where the PowerDNS Authoritative Server configuration is located
 pdns_config_dir: "/etc/powerdns"
+
+pdns_owner: pdns
+pdns_group: pdns
 
 # # The name of the PowerDNS Authoritative Server package
 # default_pdns_package_name: "pdns-server"
@@ -13,10 +19,10 @@ pdns_config_dir: "/etc/powerdns"
 # default_pdns_debug_symbols_package_name: "pdns-server-dbg"
 
 # Packages needed to install MySQL
-pdns_mysql_packages:
-  - default-mysql-client
-  - python-mysqldb
-  - python3-mysqldb
+# pdns_mysql_packages:
+#   - default-mysql-client
+#   - python-mysqldb
+#   - python3-mysqldb
 
 # List of PowerDNS Authoritative Server Backends packages on Debian
 _pdns_backend_packages:

@@ -1,7 +1,7 @@
 ---
 
 - name: converge
-  hosts: all
+  hosts: instance
   any_errors_fatal: true
   gather_facts: true
 
@@ -9,4 +9,4 @@
     NETRC: ''
 
   roles:
-    - role: bodsch.dns.bind
+    - role: bodsch.dns.pdns

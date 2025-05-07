@@ -30,6 +30,39 @@
         dest: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}"
         mode: "0640"
 
+    - name: define sqlite schema file
+      ansible.builtin.set_fact:
+        pdns_sqlite_schema: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}/schema.sqlite3.sql"
+
+- name: find sqlite schema file
+  when:
+    - ansible_os_family | lower != 'archlinux'
+  block:
+    - name: find OS specific plugins directory
+      ansible.builtin.find:
+        paths: "/usr/share/doc/,/usr/share,/usr/share/pdns-backend-sqlite3"
+        file_type: file
+        patterns:
+          - schema.sqlite3.sql
+          - "*.sql"
+        recurse: true
+      register: found_files
+
+    - name: define sqlite schema file
+      ansible.builtin.set_fact:
+        pdns_sqlite_schema: "{{ found_files.files | sort(attribute='path', reverse=True) | map(attribute='path') | list | first }}"
+      when:
+        - found_files.files is defined
+        - found_files.files | count > 0
+
+- name: validate sqlite schema file
+  ansible.builtin.fail:
+    msg: "i can't find a valid sqlite schema file!\n"
+  when:
+    - pdns_sqlite_schema is defined
+    - pdns_sqlite_schema | string | length > 0
+  run_once: true
+
 # - name: Determine location of the SQL file
 #   ansible.builtin.shell:
 #     cmd: |
@@ -56,4 +89,4 @@
     group: "{{ pdns_group }}"
     mode: "0644"
     databases: "{{ _pdns_backend_data }}"
-    schemas: "{{ pdns_config_dir }}/database_backends/sqlite/{{ pdns_version.full_version }}/schema.sqlite3.sql"
+    schemas: "{{ pdns_sqlite_schema }}"

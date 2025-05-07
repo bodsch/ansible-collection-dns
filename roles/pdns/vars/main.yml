@@ -2,19 +2,10 @@
 
 pdns_dependencies: []
 
-_pdns_backend_packages:
-  geo: pdns-backend-geo
-  geoip: pdns-backend-geoip
-  mysql: pdns-backend-mysql
-  pgsql: pdns-backend-pgsql
-  sqlite3: pdns-backend-sqlite3
-  ldap: pdns-backend-ldap
-  lmdb: pdns-backend-lmdb
-  lua: pdns-backend-lua
-  mydns: pdns-backend-mydns
-  pipe: pdns-backend-pipe
-  remote: pdns-backend-remote
-  tinydns: pdns-backend-tinydns
+# The directory where the PowerDNS configuration is located
+pdns_config_dir: '/etc/powerdns'
+
+pdns_lib_dir: /var/lib/powerdns
 
 pdns_defaults_webserver:
   enabled: false

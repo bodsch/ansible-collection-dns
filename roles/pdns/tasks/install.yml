@@ -1,5 +1,11 @@
 ---
 
+- name: repositories
+  ansible.builtin.include_tasks: repositories/debian.yml
+  when:
+    - ansible_os_family | lower == 'debian'
+    - pdns_external_repo | default('false') | bool
+
 - name: install pdns
   become: true
   package:

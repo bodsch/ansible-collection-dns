@@ -33,9 +33,4 @@
   when:
     - pdns_dependencies | default([]) | count > 0
 
-- name: repositories
-  ansible.builtin.include_tasks: repositories/debian.yml
-  when:
-    - ansible_os_family | lower == 'debian'
-
 ...

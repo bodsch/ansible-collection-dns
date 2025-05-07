@@ -1,0 +1,30 @@
+---
+
+mariadb_system_users:
+  - username: root
+    password: "{{ vault__pdns.databases.root }}"
+    home: /root
+    update: true
+    ignore: true
+
+mariadb_databases:
+  - name: pdns
+
+mariadb_users:
+  - name: pdns
+    host: "%"
+    password: "{{ vault__pdns.databases.pdns }}"
+    priv: "pdns.*:ALL"
+    encrypted: false
+
+mariadb_config_mysqld:
+  bind_address: 127.0.0.1
+  bind_address: 0.0.0.0
+  socket: "{{ mariadb_socket }}"
+  skip_external_locking:
+  skip_name_resolve: 1
+  performance_schema: 1
+  expire_logs_days: 2
+  max_connections: 20
+
+...

@@ -1,7 +1,6 @@
 ---
 
-pdns_config_include: "{{ pdns_config_dir }}/includes"
-
+pdns_config_include: "{{ pdns_config_dir }}/pdns.d"
 
 # The name of the PowerDNS Authoritative Server package
 pdns_package_name: "{{ default_pdns_package_name }}"
@@ -32,13 +31,15 @@ pdns_service:
   # State of the PowerDNS Authoritative Server service
   state: "started"
   enabled: true
+#  systemd_overrides:
+#     LimitNOFILE: 10000
 
 # When True, disable the automated restart of the PowerDNS service
-pdns_disable_handlers: False
+# pdns_disable_handlers: False
 
 # PowerDNS Authoritative Server configuration file and directory
-pdns_config_dir: "{{ default_pdns_config_dir }}"
-pdns_config_file: "pdns.conf"
+# pdns_config_dir: "{{ default_pdns_config_dir }}"
+# pdns_config_file: "pdns.conf"
 
 # Ddict containing all configuration options, except for backend
 # configuration and the "config-dir", "setuid" and "setgid" directives.
@@ -51,66 +52,70 @@ pdns_config: {}
 #  local-port: '5300'
 
 # Dict with overrides for the service (systemd only)
-pdns_service_overrides: "{{ default_pdns_service_overrides }}"
+# pdns_service_overrides: "{{ default_pdns_service_overrides }}"
 # pdns_service_overrides:
 #   LimitNOFILE: 10000
 
 # Dictionary of packages that should be installed to enable the backends.
 # backendname: packagename
-pdns_backends_packages: "{{ default_pdns_backends_packages }}"
+# pdns_backends_packages: "{{ default_pdns_backends_packages }}"
 
 # A dict with all the backends you'd like to configure.
 # This default starts just the bind-backend with an empty config file
 pdns_backends:
-  bind:
+  - name: bind
     config: '/dev/null'
-# pdns_backends:
-#   'gmysql:one':
-#     'user': root
-#     'host': 127.0.0.1
-#     'password': root
-#     'dbname': pdns
-#   'gmysql:two':
-#     'user': pdns_user
-#     'host': 192.0.2.15
-#     'port': 3307
-#     'password': my_password
-#     'dbname': dns
-#   'bind':
-#     'config': '/etc/named/named.conf'
-#     'hybrid':  yes
-#     'dnssec-db': '{{ pdns_config_dir }}/dnssec.db'
+    # check-interval: 10
+    # dnssec-db: "{{ pdns_config_dir }}/dnssec.db"
+    # dnssec-db-journal-mode: WAL
+    # hybrid: true
+    # ignore-broken-records: false
+    # supermaster-config: /var/lib/powerdns/supermaster.conf
+    # supermaster-destdir: /var/lib/powerdns/zones.slave.d
+    # supermasters: []
+  #
+  # - name: gsqlite3
+  #   database: /var/lib/powerdns/pdns.db
+  #   dnssec: true
+  #   pragma-journal-mode: true
+  #   pragma-synchronous: true
+  #   pragma-foreign-keys: true
+  #
+  # - name: gmysql
+  #   host: 10.11.0.10
+  #   dbname: pdns
+  #   user: pdns
+  #   password: "{{ vault__pdns.databases.pdns }}"
+  #   # # https://doc.powerdns.com/authoritative/backends/generic-mysql.html?highlight=gmysql#settings
+  #   # host: ""                    # Host (ip address) to connect to. Mutually exclusive with gmysql-socket.
+  #   #                             # Warning: When specified as a hostname a chicken/egg situation might arise where the database is needed to resolve the IP address of the database. It is best to supply an IP address of the database here.
+  #   # port: ""                    # The port to connect to on gmysql-host. Default: 3306.
+  #   # socket: ""                  # Connect to the UNIX socket at this path. Mutually exclusive with gmysql-host.
+  #   # dbname: ""                  # Name of the database to connect to. Default: “powerdns”.
+  #   # user: ""                    # User to connect as. Default: “powerdns”.
+  #   # group: ""                   # Group to connect as. Default: “client”.
+  #   # password: ""                # The password to for gmysql-user.
+  #   # dnssec: ""                  # Enable DNSSEC processing for this backend. Default: no.
+  #   # innodb-read-committed: ""   # Use the InnoDB READ-COMMITTED transaction isolation level. Default: yes.
+  #   # ssl: ""                     # Deprecated since version 5.0.0.
+  #   # timeout: ""                 # The timeout in seconds for each attempt to read from, or write to the server. A value of 0 will disable the timeout. Default: 10
+  #   # thread-cleanup: ""          # Only enable this if you are certain you need to
 
-# Administrative credentials to create the PowerDNS Authoritative Server MySQL backend database and user.
-pdns_mysql_databases_credentials: {}
-# pdns_mysql_databases_credentials:
-#   'gmysql:one':
-#     'priv_user': root
-#     'priv_password': my_first_password
-#     'priv_host':
-#       - "localhost"
-#       - "%"
-#   'gmysql:two':
-#     'priv_user': someprivuser
-#     'priv_password': my_second_password
-#     'priv_host':
-#       - "localhost"
-
-# This will create the PowerDNS Authoritative Server backend SQLite database
-# in the given locations.
-# NOTE: Requries the SQLite CLI tools to be available in the machine and the gsqlite3
-# backend to be installed on the machine.
-pdns_sqlite_databases_locations: []
-
-# This will create the PowerDNS Authoritative Server backend LMDB database
-# in the given locations.
-# NOTE: Requries lmdb backend to be installed on the machine.
-pdns_lmdb_databases_locations: []
-
-# Override the schema used to initialize the MySQL database
-# By default, this role tries to detect the correct file
-pdns_mysql_schema_file: ""
-
-# Override the schema used to initialize the SQLite database
-# By default, this role tries to detect the correct file
-pdns_sqlite_schema_file: ""
+# # This will create the PowerDNS Authoritative Server backend SQLite database
+# # in the given locations.
+# # NOTE: Requries the SQLite CLI tools to be available in the machine and the gsqlite3
+# # backend to be installed on the machine.
+# pdns_sqlite_databases_locations: []
+#
+# # This will create the PowerDNS Authoritative Server backend LMDB database
+# # in the given locations.
+# # NOTE: Requries lmdb backend to be installed on the machine.
+# pdns_lmdb_databases_locations: []
+#
+# # Override the schema used to initialize the MySQL database
+# # By default, this role tries to detect the correct file
+# pdns_mysql_schema_file: ""
+#
+# # Override the schema used to initialize the SQLite database
+# # By default, this role tries to detect the correct file
+# pdns_sqlite_schema_file: ""

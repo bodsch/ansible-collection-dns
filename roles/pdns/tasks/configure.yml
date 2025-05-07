@@ -59,25 +59,20 @@
   notify:
     - restart pdns
 
+- name: remove built-in pdns backend bind configuration
+  ansible.builtin.file:
+    dest: "{{ pdns_config_include }}/bind.conf"
+    state: absent
+  notify:
+    - restart pdns
+
 - name: generate the pdns configuration
   ansible.builtin.template:
     src: pdns.conf.j2
-    dest: "{{ pdns_config_dir }}/{{ pdns_config_file }}"
+    dest: "{{ pdns_config_dir }}/pdns.conf"
     owner: "{{ pdns_file_owner }}"
     group: "{{ pdns_file_group }}"
     mode: "0640"
     backup: true
   notify:
     - restart pdns
-#  register: _pdns_configuration
-
-
-# - name: Restart PowerDNS
-#   ansible.builtin.service:
-#     name: "{{ pdns_service_name }}"
-#     state: restarted
-#     sleep: 1
-#   when: not pdns_disable_handlers
-#     and pdns_service_state != 'stopped'
-#     and (_pdns_override_unit.changed
-#       or _pdns_configuration.changed)

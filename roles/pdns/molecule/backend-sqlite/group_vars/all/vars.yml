@@ -1,14 +1,17 @@
 ---
 
 pdns_backends:
-  gsqlite3:
+  - name: gsqlite3
     database: /var/lib/powerdns/pdns.db
-    dnssec: yes
+    dnssec: true
+    pragma-journal-mode: true
+    pragma-synchronous: true
+    pragma-foreign-keys: true
 
 pdns_config:
-  # master: true
-  # slave: false
-  # also-notify: ""
+  master: true
+  slave: false
+  also-notify: ""
   local-address: '127.0.0.1'
   local-port: '5300'
   log-dns-details: true

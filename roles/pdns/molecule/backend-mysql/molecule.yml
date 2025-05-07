@@ -30,13 +30,32 @@ platforms:
     groups:
       - dns
     docker_networks:
-      - name: bind
+      - name: pdns
         ipam_config:
           - subnet: "10.11.0.0/24"
             gateway: "10.11.0.254"
     networks:
-      - name: bind
+      - name: pdns
         ipv4_address: "10.11.0.1"
+
+  - name: database
+    image: "ghcr.io/bodsch/docker-ansible/ansible-debian:12"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
+    privileged: true
+    pre_build_image: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    capabilities:
+      - SYS_TIME
+    tmpfs:
+      - /run
+      - /tmp
+    networks:
+      - name: pdns
+        ipv4_address: "10.11.0.10"
 
 provisioner:
   name: ansible
