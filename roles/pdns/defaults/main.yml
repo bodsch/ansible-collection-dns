@@ -2,20 +2,6 @@
 
 pdns_config_include: "{{ pdns_config_dir }}/pdns.d"
 
-# The name of the PowerDNS Authoritative Server package
-pdns_package_name: "{{ default_pdns_package_name }}"
-
-# Install a specific version of the PowerDNS Authoritative Server package
-# NB: The usage of this variable makes only sense on RedHat-like systems,
-#     where each YUM repository can contains multiple versions of the same package.
-pdns_package_version: ""
-
-# Install the PowerDNS Authoritative Server debug symbols package
-pdns_install_debug_symbols_package: False
-
-# The name of the PowerDNS Authoritative Server debug symbols package
-pdns_debug_symbols_package_name: "{{ default_pdns_debug_symbols_package_name }}"
-
 # The user and group the PowerDNS Authoritative Server process will run as.
 # NOTE: at the moment, we don't create a user as we assume the package creates
 # a "pdns" user and group. If you change these variables, make sure to create
@@ -37,11 +23,7 @@ pdns_service:
 # When True, disable the automated restart of the PowerDNS service
 # pdns_disable_handlers: False
 
-# PowerDNS Authoritative Server configuration file and directory
-# pdns_config_dir: "{{ default_pdns_config_dir }}"
-# pdns_config_file: "pdns.conf"
-
-# Ddict containing all configuration options, except for backend
+# dict containing all configuration options, except for backend
 # configuration and the "config-dir", "setuid" and "setgid" directives.
 pdns_config: {}
 # pdns_config:
@@ -50,15 +32,6 @@ pdns_config: {}
 #  local-address: '192.0.2.53'
 #  local-ipv6: '2001:DB8:1::53'
 #  local-port: '5300'
-
-# Dict with overrides for the service (systemd only)
-# pdns_service_overrides: "{{ default_pdns_service_overrides }}"
-# pdns_service_overrides:
-#   LimitNOFILE: 10000
-
-# Dictionary of packages that should be installed to enable the backends.
-# backendname: packagename
-# pdns_backends_packages: "{{ default_pdns_backends_packages }}"
 
 # A dict with all the backends you'd like to configure.
 # This default starts just the bind-backend with an empty config file
@@ -101,21 +74,4 @@ pdns_backends:
   #   # timeout: ""                 # The timeout in seconds for each attempt to read from, or write to the server. A value of 0 will disable the timeout. Default: 10
   #   # thread-cleanup: ""          # Only enable this if you are certain you need to
 
-# # This will create the PowerDNS Authoritative Server backend SQLite database
-# # in the given locations.
-# # NOTE: Requries the SQLite CLI tools to be available in the machine and the gsqlite3
-# # backend to be installed on the machine.
-# pdns_sqlite_databases_locations: []
-#
-# # This will create the PowerDNS Authoritative Server backend LMDB database
-# # in the given locations.
-# # NOTE: Requries lmdb backend to be installed on the machine.
-# pdns_lmdb_databases_locations: []
-#
-# # Override the schema used to initialize the MySQL database
-# # By default, this role tries to detect the correct file
-# pdns_mysql_schema_file: ""
-#
-# # Override the schema used to initialize the SQLite database
-# # By default, this role tries to detect the correct file
-# pdns_sqlite_schema_file: ""
+pdns_zones: []

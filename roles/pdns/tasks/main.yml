@@ -12,7 +12,10 @@
 - name: configure
   ansible.builtin.include_tasks: configure.yml
 
-# - name: service
-#   ansible.builtin.include_tasks: service.yml
+- name: service
+  ansible.builtin.include_tasks: service.yml
+
+- name: domains
+  ansible.builtin.include_tasks: domains.yml
 
 ...

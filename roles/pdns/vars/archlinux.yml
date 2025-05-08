@@ -2,6 +2,8 @@
 
 pdns_packages:
   - powerdns
+  - python-requests
+  - python-urllib3
 
 _pdns_backend_packages:
   mysql: mariadb-libs

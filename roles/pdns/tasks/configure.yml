@@ -56,6 +56,7 @@
     - pdns_general
     - pdns_backends
     - pdns_webserver
+    - pdns_api
   notify:
     - restart pdns
 

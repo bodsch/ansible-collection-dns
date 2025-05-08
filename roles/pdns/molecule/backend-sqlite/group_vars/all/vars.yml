@@ -15,7 +15,7 @@ pdns_config:
   local-address: '127.0.0.1'
   local-port: '5300'
   log-dns-details: true
-  loglevel: "5"   # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+  loglevel: 6                 # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
 
 pdns_webserver:
   enabled: true
@@ -27,10 +27,68 @@ pdns_webserver:
     - "192.168.0.0/24"
   connection-timeout: 5
   hash-plaintext-credentials: false
-  loglevel: normal
+  loglevel: detailed          # (none, normal, detailed)
   max-bodysize: 2
-  password:
+  # password:
   port: 8081
   print-arguments: true
+
+pdns_api:
+  enabled: true
+  key: tNSNNEiFxeDe/3nhqA
+
+pdns_zones:
+  - name: 'acme-inc.com'
+    type: primary
+    create_forward_zones: true
+    create_reverse_zones: true
+    #primaries:
+    #  - 10.11.0.1
+    networks:
+      - '10.11.0'
+    ipv6_networks:
+      - '2001:db8::/48'
+    name_servers:
+      - ns1
+      - ns2
+    hosts:
+      - name: ns1
+        ip: 10.11.0.1
+      - name: ns2
+        ip: 10.11.0.2
+      - name: srv001
+        ip: 10.11.1.1
+        ipv6: 2001:db8::1
+        aliases:
+          - www
+          - foo
+
+    mail_servers:
+      - name: mail001
+        preference: 10
+      - name: mail002
+        preference: 20
+
+    services:
+      - name: _ldap._tcp
+        weight: 100
+        port: 631
+        target: srv010
+      - name: _ldap._tcp
+        weight: 50
+        port: 631
+        target: srv010
+      - name: _imap._tcp
+        weight: 50
+        port: 143
+        target: mail001
+
+    text:
+      - name: _kerberos
+        text: KERBEROS.ACME-INC.COM
+      - name: '@'
+        text:
+          - 'some text'
+          - 'more text'
 
 ...
