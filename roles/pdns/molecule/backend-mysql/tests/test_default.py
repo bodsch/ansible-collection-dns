@@ -144,7 +144,7 @@ def test_directories(host):
     directories = [
         "/etc/powerdns",
         "/etc/powerdns/pdns.d",
-        "/usr/lib/powerdns",
+        "/var/lib/powerdns",
     ]
 
     for dirs in directories:

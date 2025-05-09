@@ -28,7 +28,9 @@ pdns_group: pdns
 _pdns_backend_packages:
   geo: pdns-backend-geo
   geoip: pdns-backend-geoip
-  mysql: pdns-backend-mysql
+  mysql:
+    - pdns-backend-mysql
+    - python3-mysqldb
   pgsql: pdns-backend-pgsql
   sqlite3: pdns-backend-sqlite3
   ldap: pdns-backend-ldap

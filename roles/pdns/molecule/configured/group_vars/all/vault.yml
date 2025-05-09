@@ -1,8 +1,0 @@
----
-
-vault__pdns:
-  databases:
-    root: root
-    pdns: powerdns
-    external: powerdns
-...
