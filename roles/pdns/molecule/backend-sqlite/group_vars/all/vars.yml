@@ -1,0 +1,40 @@
+---
+
+pdns_backends:
+  - name: gsqlite3
+    database: /var/lib/powerdns/pdns.db
+    dnssec: true
+    pragma-journal-mode: true
+    pragma-synchronous: true
+    pragma-foreign-keys: true
+
+pdns_config:
+  master: true
+  slave: false
+  also-notify: ""
+  local-address: '127.0.0.1'
+  local-port: '5300'
+  log-dns-details: true
+  loglevel: 6                 # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+
+pdns_webserver:
+  enabled: true
+  address: "{{ ansible_default_ipv4.address }}"
+  allow-from:
+    - "127.0.0.1"
+    - "::1"
+    - "10.11.0.0/24"
+    - "192.168.0.0/24"
+  connection-timeout: 5
+  hash-plaintext-credentials: false
+  loglevel: normal          # (none, normal, detailed)
+  max-bodysize: 2
+  # password:
+  port: 8081
+  print-arguments: false
+
+pdns_api:
+  enabled: true
+  key: tNSNNEiFxeDe/3nhqA
+
+...

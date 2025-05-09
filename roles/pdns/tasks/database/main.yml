@@ -1,0 +1,69 @@
+---
+
+- name: define backend types
+  ansible.builtin.set_fact:
+    pdns_backend_types: "{{ pdns_backends | bodsch.dns.pdns_backend_types(version=pdns_version.full_version) }}"
+
+- name: backend handling
+  block:
+    - name: define backend packages
+      ansible.builtin.set_fact:
+        pdns_backend_packages: "{{ pdns_backend_types | bodsch.dns.pdns_backend_packages(_pdns_backend_packages) }}"
+
+    - name: install pdns backends
+      ansible.builtin.package:
+        name: "{{ pdns_backend_packages }}"
+        state: present
+      when:
+        - pdns_backend_packages is defined
+        - pdns_backend_packages | count > 0
+
+- name: find schema files for powerdns backends
+  ansible.builtin.find:
+    paths:
+      - "/usr/share/pdns-backend-sqlite3/schema"
+      - "/usr/share/pdns-backend-mysql/schema"
+      - "/usr/share/pdns-backend-bind/schema"
+      - "{{ pdns_config_dir }}/backends"
+    file_type: file
+    follow: true
+    recurse: true
+    depth: 2
+    limit: 5
+    use_regex: true
+    patterns:
+      - '^schema.*.sql$'
+  register: found_files
+  no_log: true
+
+- name: prepare schema files
+  ansible.builtin.include_tasks: schema_files.yml
+  when:
+    - found_files.matched | default(0) | int == 0
+
+- name: mysql database
+  ansible.builtin.include_tasks: database/mysql.yml
+  when:
+    - pdns_backends is defined
+    - "'mysql' in pdns_backend_types"
+  tags:
+    - db
+    - mysql
+
+- name: sqlite database
+  ansible.builtin.include_tasks: database/sqlite3.yml
+  when:
+    - pdns_backends is defined
+    - "'sqlite3' in pdns_backend_types"
+  tags:
+    - db
+    - sqlite
+
+- name: lmdb database
+  ansible.builtin.include_tasks: database/lmdb.yml
+  when:
+    - pdns_backends is defined
+    - "'lmdb' in pdns_backend_types"
+  tags:
+    - db
+    - lmdb

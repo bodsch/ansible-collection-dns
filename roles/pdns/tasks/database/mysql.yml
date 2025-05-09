@@ -1,0 +1,50 @@
+---
+# https://doc.powerdns.com/authoritative/backends/generic-mysql.html
+
+- name: define mysql backend data
+  ansible.builtin.set_fact:
+    _pdns_backend_data: "{{ pdns_backends | bodsch.dns.pdns_backend_data('mysql') }}"
+
+- name: find schema file for mysql database
+  ansible.builtin.find:
+    paths:
+      - "/usr/share/pdns-backend-mysql/schema"
+      - "{{ pdns_config_dir }}/backends"
+    file_type: file
+    patterns:
+      - schema.mysql.sql
+    recurse: true
+  register: found_files
+  no_log: true
+
+- name: define mysql schema file
+  ansible.builtin.set_fact:
+    pdns_mysql_schema: "{{ found_files.files | sort(attribute='path', reverse=True) | map(attribute='path') | list | first }}"
+  when:
+    - found_files.files is defined
+    - found_files.files | count > 0
+
+- name: validate mysql schema file
+  ansible.builtin.fail:
+    msg: "i can't find a valid mysql schema file!\n"
+  when:
+    - pdns_mysql_schema is defined
+    - pdns_mysql_schema | string | length == 0
+  run_once: true
+
+- name: create powerdns mysql databases
+  bodsch.dns.pdns_mysql_backend:
+    state: create
+    owner: "{{ pdns_owner }}"
+    group: "{{ pdns_group }}"
+    mode: "0644"
+    database:
+      hostname: "{{ _pdns_backend_data[0].host }}"
+      port: "{{ _pdns_backend_data[0].port | default(omit) }}"
+      socket: "{{ _pdns_backend_data[0].socket | default(omit) }}"
+      config_file: "{{ _pdns_backend_data[0].config_file | default(omit) }}"
+      schemaname: "{{ _pdns_backend_data[0].dbname | default(omit) }}"
+      login:
+        username: "{{ _pdns_backend_data[0].user | default(omit) }}"
+        password: "{{ _pdns_backend_data[0].password | default(omit) }}"
+    schema_file: "{{ pdns_mysql_schema }}"

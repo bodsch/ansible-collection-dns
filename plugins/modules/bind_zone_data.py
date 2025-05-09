@@ -225,11 +225,21 @@ class BindZoneData(object):
         reverse_ip = None
 
         if is_valid_ipv4(network):
-            reverse_ip = ".".join(network.replace(network + '.', '').split('.')[::-1])
+            # reverse_ip = ".".join(network.replace(network + '.', '').split('.')[::-1])
+            reverse_ip = ".".join(ip.split(".")[::-1])
 
             result = f"{reverse_ip}.in-addr.arpa"
 
         else:
+            import ipaddress
+
+            ipv6_obj = ipaddress.IPv6Address(ip)
+            exploded_ip = ipv6_obj.exploded  # Gibt die vollständige IPv6-Adresse zurück
+
+            # Entfernen der Doppelpunkte, Umkehren der Blöcke und Hinzufügen von '.ip6.arpa'
+            reversed_parts = ".".join(reversed(exploded_ip.replace(":", "")))
+            return reversed_parts + ".ip6.arpa."
+
             try:
                 _offset = None
                 if network.count("/") == 1:

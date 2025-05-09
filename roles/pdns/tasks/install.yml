@@ -1,0 +1,28 @@
+---
+
+- name: repositories
+  ansible.builtin.include_tasks: repositories/debian.yml
+  when:
+    - ansible_os_family | lower == 'debian'
+    - pdns_external_repo | default('false') | bool
+
+- name: install pdns
+  become: true
+  package:
+    name: "{{ pdns_packages }}"
+    state: present
+
+- name: detect pdns version
+  become: true
+  bodsch.dns.pdns_version:
+  register: pdns_version
+  check_mode: false
+  ignore_errors: true
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: pdns
+    facts:
+      full_version: "{{ pdns_version.full_version }}"
+      version: "{{ pdns_version.version }}"
+

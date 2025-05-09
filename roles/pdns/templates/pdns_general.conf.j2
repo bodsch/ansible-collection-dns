@@ -1,0 +1,19 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+{% set pdns_config = pdns_config | bodsch.dns.pdns_config_upgrades(version=pdns_version.get("full_version")) %}
+
+{% for config_item, value in pdns_config.items() | sort() %}
+  {% if config_item not in ["config-dir", "launch", "setuid", "setgid"] %}
+    {% if value | bodsch.core.type == "bool" %}
+{{ config_item }}={{ value | bodsch.core.config_bool(true_as='yes', false_as='no')  }}
+    {% elif value == None %}
+{{ config_item }}=
+    {% elif value is string %}
+{{ config_item }}={{ value | string }}
+    {% elif value | bodsch.core.type == "list" %}
+{{ config_item }}={{ value | join(',') }}
+    {% else %}
+{{ config_item }}={{ value | string }}
+    {% endif %}
+  {% endif %}
+{% endfor %}

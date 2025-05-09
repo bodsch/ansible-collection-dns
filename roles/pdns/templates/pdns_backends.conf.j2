@@ -1,0 +1,20 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+{% set pdns_backends = pdns_backends | bodsch.dns.pdns_config_upgrades(version=pdns_version.get("full_version")) %}
+
+{% for backend in pdns_backends %}
+  {% set backend_name = backend.get("name") | ansible.builtin.split(':') | first %}
+  {% set _ = backend.pop("name") %}
+  {% if backend.pop("credentials", None) %}
+    {% set _ = backend.pop("credentials") %}
+  {% endif %}
+  {% set backend_string = backend_name | replace(':', '-') %}
+launch+={{ backend_name }}
+  {% for backend_item, value in backend.items() %}
+    {% if value | bodsch.core.type == "bool" %}
+      {% set value = value | bodsch.core.config_bool(true_as='yes', false_as='no') %}
+    {% endif %}
+{{ backend_string }}-{{ backend_item }} = {{ value }}
+  {% endfor %}
+
+{% endfor -%}

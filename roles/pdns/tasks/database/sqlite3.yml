@@ -1,0 +1,42 @@
+---
+# https://doc.powerdns.com/authoritative/backends/generic-sqlite3.html
+
+- name: define sqlite backend data
+  ansible.builtin.set_fact:
+    _pdns_backend_data: "{{ pdns_backends | bodsch.dns.pdns_backend_data('sqlite') }}"
+
+- name: find schema file for sqlite database
+  ansible.builtin.find:
+    paths:
+      - "/usr/share/pdns-backend-sqlite3/schema"
+      - "{{ pdns_config_dir }}/backends"
+    file_type: file
+    patterns:
+      - schema.sqlite3.sql
+    recurse: true
+  register: found_files
+  no_log: true
+
+- name: define sqlite schema file
+  ansible.builtin.set_fact:
+    pdns_sqlite_schema: "{{ found_files.files | sort(attribute='path', reverse=True) | map(attribute='path') | list | first }}"
+  when:
+    - found_files.files is defined
+    - found_files.files | count > 0
+
+- name: validate sqlite schema file
+  ansible.builtin.fail:
+    msg: "i can't find a valid sqlite schema file!\n"
+  when:
+    - pdns_sqlite_schema is defined
+    - pdns_sqlite_schema | string | length == 0
+  run_once: true
+
+- name: create powerdns sqlite databases
+  bodsch.dns.pdns_sqlite_backend:
+    state: create
+    owner: "{{ pdns_owner }}"
+    group: "{{ pdns_group }}"
+    mode: "0644"
+    database: "{{ _pdns_backend_data[0] }}"
+    schema_file: "{{ pdns_sqlite_schema }}"

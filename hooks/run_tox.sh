@@ -20,8 +20,7 @@ then
 
     if [ -e collections.yml ]
     then
-      ${current_dir}/hooks/manage_collections.py
-      # ansible_collection
+      ${current_dir}/hooks/manage_collections.py --scenario ${COLLECTION_SCENARIO}
     fi
 
     tox "${TOX_OPTS}" -- molecule ${TOX_TEST} --scenario-name ${COLLECTION_SCENARIO}
@@ -41,8 +40,7 @@ else
 
     if [ -e collections.yml ]
     then
-      ${current_dir}/hooks/manage_collections.py
-      # ansible_collection
+      ${current_dir}/hooks/manage_collections.py --scenario ${COLLECTION_SCENARIO}
     fi
 
     if [ "${TOX_TEST}" = "lint" ]

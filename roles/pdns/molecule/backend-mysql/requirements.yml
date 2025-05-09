@@ -1,0 +1,11 @@
+---
+
+collections:
+  - name: community.mysql
+
+roles:
+  - name: bodsch.mariadb
+    src: bodsch.mariadb
+    version: 2.6.0
+
+...

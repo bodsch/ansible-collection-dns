@@ -1,0 +1,34 @@
+---
+
+pdns_backends:
+  - name: gmysql
+    host: 10.11.0.10
+    dbname: pdns
+    user: pdns
+    password: "{{ vault__pdns.databases.pdns }}"
+    # # https://doc.powerdns.com/authoritative/backends/generic-mysql.html?highlight=gmysql#settings
+    # host: ""                    # Host (ip address) to connect to. Mutually exclusive with gmysql-socket.
+    #                             # Warning: When specified as a hostname a chicken/egg situation might arise where the database is needed to resolve the IP address of the database. It is best to supply an IP address of the database here.
+    # port: ""                    # The port to connect to on gmysql-host. Default: 3306.
+    # socket: ""                  # Connect to the UNIX socket at this path. Mutually exclusive with gmysql-host.
+    # dbname: ""                  # Name of the database to connect to. Default: “powerdns”.
+    # user: ""                    # User to connect as. Default: “powerdns”.
+    # group: ""                   # Group to connect as. Default: “client”.
+    # password: ""                # The password to for gmysql-user.
+    # dnssec: ""                  # Enable DNSSEC processing for this backend. Default: no.
+    # innodb-read-committed: ""   # Use the InnoDB READ-COMMITTED transaction isolation level. Default: yes.
+    # ssl: ""                     # Deprecated since version 5.0.0.
+    # timeout: ""                 # The timeout in seconds for each attempt to read from, or write to the server. A value of 0 will disable the timeout. Default: 10
+    # thread-cleanup: ""          # Only enable this if you are certain you need to
+    # credentials: {}
+
+pdns_config:
+  master: true
+  slave: false
+  also-notify: ""
+  local-address: '127.0.0.1'
+  local-port: '5300'
+  log-dns-details: true
+  loglevel: "3"
+
+...

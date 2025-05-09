@@ -1,0 +1,12 @@
+---
+
+- name: Start and enable the PowerDNS service
+  throttle: 1
+  service:
+    name: "{{ pdns_service.name }}"
+    state: "{{ pdns_service.state }}"
+    enabled: "{{ pdns_service.enabled }}"
+  tags:
+    - service
+
+...

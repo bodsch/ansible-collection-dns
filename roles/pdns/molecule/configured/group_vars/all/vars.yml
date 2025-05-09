@@ -1,0 +1,12 @@
+---
+
+pdns_config:
+  master: true
+  slave: false
+  also-notify: ""
+  local-address: '127.0.0.1'
+  local-port: '5300'
+  log-dns-details: "on"
+  loglevel: 6
+
+...
