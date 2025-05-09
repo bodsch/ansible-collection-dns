@@ -1,0 +1,77 @@
+---
+
+pdns_config_include: "{{ pdns_config_dir }}/pdns.d"
+
+# The user and group the PowerDNS Authoritative Server process will run as.
+# NOTE: at the moment, we don't create a user as we assume the package creates
+# a "pdns" user and group. If you change these variables, make sure to create
+# the user and groups before applying this role
+# pdns_user: "pdns"
+# pdns_group: "pdns"
+pdns_file_owner: "root"
+pdns_file_group: "{{ pdns_group }}"
+
+pdns_service:
+  # Name of the PowerDNS Authoritative Server Service
+  name: "pdns"
+  # State of the PowerDNS Authoritative Server service
+  state: "started"
+  enabled: true
+#  systemd_overrides:
+#     LimitNOFILE: 10000
+
+# When True, disable the automated restart of the PowerDNS service
+# pdns_disable_handlers: False
+
+# dict containing all configuration options, except for backend
+# configuration and the "config-dir", "setuid" and "setgid" directives.
+pdns_config: {}
+# pdns_config:
+#  master: yes
+#  slave: no
+#  local-address: '192.0.2.53'
+#  local-ipv6: '2001:DB8:1::53'
+#  local-port: '5300'
+
+# A dict with all the backends you'd like to configure.
+# This default starts just the bind-backend with an empty config file
+pdns_backends:
+  - name: bind
+    config: '/dev/null'
+    # check-interval: 10
+    # dnssec-db: "{{ pdns_config_dir }}/dnssec.db"
+    # dnssec-db-journal-mode: WAL
+    # hybrid: true
+    # ignore-broken-records: false
+    # supermaster-config: /var/lib/powerdns/supermaster.conf
+    # supermaster-destdir: /var/lib/powerdns/zones.slave.d
+    # supermasters: []
+  #
+  # - name: gsqlite3
+  #   database: /var/lib/powerdns/pdns.db
+  #   dnssec: true
+  #   pragma-journal-mode: true
+  #   pragma-synchronous: true
+  #   pragma-foreign-keys: true
+  #
+  # - name: gmysql
+  #   host: 10.11.0.10
+  #   dbname: pdns
+  #   user: pdns
+  #   password: "{{ vault__pdns.databases.pdns }}"
+  #   # # https://doc.powerdns.com/authoritative/backends/generic-mysql.html?highlight=gmysql#settings
+  #   # host: ""                    # Host (ip address) to connect to. Mutually exclusive with gmysql-socket.
+  #   #                             # Warning: When specified as a hostname a chicken/egg situation might arise where the database is needed to resolve the IP address of the database. It is best to supply an IP address of the database here.
+  #   # port: ""                    # The port to connect to on gmysql-host. Default: 3306.
+  #   # socket: ""                  # Connect to the UNIX socket at this path. Mutually exclusive with gmysql-host.
+  #   # dbname: ""                  # Name of the database to connect to. Default: “powerdns”.
+  #   # user: ""                    # User to connect as. Default: “powerdns”.
+  #   # group: ""                   # Group to connect as. Default: “client”.
+  #   # password: ""                # The password to for gmysql-user.
+  #   # dnssec: ""                  # Enable DNSSEC processing for this backend. Default: no.
+  #   # innodb-read-committed: ""   # Use the InnoDB READ-COMMITTED transaction isolation level. Default: yes.
+  #   # ssl: ""                     # Deprecated since version 5.0.0.
+  #   # timeout: ""                 # The timeout in seconds for each attempt to read from, or write to the server. A value of 0 will disable the timeout. Default: 10
+  #   # thread-cleanup: ""          # Only enable this if you are certain you need to
+
+pdns_zones: []

@@ -29,7 +29,6 @@
     follow: true
     recurse: true
     depth: 2
-    limit: 5
     use_regex: true
     patterns:
       - '^schema.*.sql$'

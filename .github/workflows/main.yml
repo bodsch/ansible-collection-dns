@@ -60,6 +60,7 @@ jobs:
           - fqdn
           - pdns
           - pdns_recursor
+          # - pdns_records
 
     steps:
       - name: check out the codebase.
