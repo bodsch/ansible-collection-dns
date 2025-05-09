@@ -22,7 +22,6 @@ pdns_backends:
     # thread-cleanup: ""          # Only enable this if you are certain you need to
     # credentials: {}
 
-
 pdns_config:
   master: true
   slave: false
@@ -31,18 +30,5 @@ pdns_config:
   local-port: '5300'
   log-dns-details: true
   loglevel: "3"
-
-# pdns_rec_config:
-#   allow-from: "10.0.0.0/8"
-#   local-address: "10.0.4.1"
-#   forward-zones:
-#     - matrix.lan=10.0.4.1:5300
-#   webserver: true
-#   webserver-address: "{{ ansible_default_ipv4.address }}"
-#   webserver-port: 8082
-#   webserver-allow-from:
-#     - 127.0.0.1/32
-#     - 10.0.2.4/32
-#   webserver-loglevel: "normal"
 
 ...

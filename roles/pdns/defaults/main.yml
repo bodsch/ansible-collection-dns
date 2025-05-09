@@ -73,5 +73,3 @@ pdns_backends:
   #   # ssl: ""                     # Deprecated since version 5.0.0.
   #   # timeout: ""                 # The timeout in seconds for each attempt to read from, or write to the server. A value of 0 will disable the timeout. Default: 10
   #   # thread-cleanup: ""          # Only enable this if you are certain you need to
-
-pdns_zones: []

@@ -15,6 +15,7 @@ from collections import defaultdict
 class PowerDNSWebApi:
     """
     """
+
     def __init__(self, module, server_id, api_key, webserver_address, webserver_port=8081):
         self.module = module
         self.server_id = server_id
@@ -94,9 +95,9 @@ class PowerDNSWebApi:
 
         return False
 
-    def zone_add_slave(self, base_url, zone, masters, comment):
+    def zone_secondary(self, base_url, zone, masters, comment):
         """
-            Add a new Slave zone to PowerDNS
+            Add a new secondary zone to PowerDNS
         """
         # kind = self.zone_exists(zone)
         # if kind == 'SLAVE':
@@ -108,7 +109,7 @@ class PowerDNSWebApi:
         # masters = masters.split(',')
         #
         # data = {
-        #     'kind': 'Slave',
+        #     'kind': 'secondary',
         #     'masters': masters,
         #     'name': zone,
         #     'comments': [{
@@ -126,11 +127,11 @@ class PowerDNSWebApi:
 
         return False
 
-    def zone_add_master(self, zone, soa, nameservers, comment, ttl=60, wantkind='Master'):
+    def zone_primary(self, zone, soa, nameservers, comment, ttl=60, wantkind='Master'):
         """
             Add a new Master/Native zone to PowerDNS
         """
-        self.module.log(msg=f"PowerDNSWebApi::zone_add_master({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})")
+        self.module.log(msg=f"PowerDNSWebApi::zone_primary({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})")
 
         kind = self.zone_exists(zone)
 
@@ -207,6 +208,9 @@ class PowerDNSWebApi:
         if record_type in ["A", "AAAA"]:
             rrsets = self._add_record_hst(zone=zone, records=records, comment=comment, account=account)
 
+        if record_type in ["PTR"]:
+            rrsets = self._add_record_ptr(zone=zone, records=records, comment=comment, account=account)
+
         if record_type in ["MX"]:
             rrsets = self._add_record_mx(zone=zone, records=records, comment=comment, account=account)
 
@@ -238,6 +242,8 @@ class PowerDNSWebApi:
         return status_code, msg, json_response
 
         # self.module.log(msg=f"failed to update zone {zone} at {url}: {json_response}")
+
+    # ---------------------------------------------------------------------------
 
     def build_rrset(self, name, rtype, ttl, records, changetype="REPLACE", comment=None, account=None):
 
@@ -446,6 +452,26 @@ class PowerDNSWebApi:
                     comment=comment or ""
                 )
             )
+
+        return rrsets
+
+    def _add_record_ptr(self, zone, records, comment, account):
+        """
+        """
+        self.module.log(msg=f"PowerDNSWebApi::_add_record_ptr({zone}, {records}, {comment}, {account})")
+
+        rrsets = []
+
+        for z in records:
+            status_code, msg, json_response = self.create_zone(z, nameservers=[], kind="native", masters=None)
+
+            if status_code in [200, 201]:
+                rrsets = [
+                    self.build_rrset(z, "SOA", ttl, [soa]),
+                    # self.build_rrset(z, "NS", ttl, [self.fqdn(zone, for x in nameservers])
+                ]
+
+                status_code, msg, json_response = self.patch_zone(zone, rrsets)
 
         return rrsets
 

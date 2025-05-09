@@ -12,15 +12,19 @@ import glob
 
 
 class PowerDNSConfigLoader:
-    def __init__(self, module, main_config="/etc/powerdns/pdns.conf"):
+    """
+    """
+    def __init__(self, module):
         self.module = module
-        self.main_config = main_config
         self.config = {}
-        self.backends = []
-        self.backend_configs = {}
 
-    def load(self):
-        self._load_file(self.main_config)
+        # self.backends = []
+        # self.backend_configs = {}
+
+    def load(self, main_config="/etc/powerdns/pdns.conf"):
+        """
+        """
+        self._load_file(main_config)
 
         # Verarbeite das Include-Verzeichnis
         include_dir = self.config.get("include-dir")
@@ -29,13 +33,16 @@ class PowerDNSConfigLoader:
                 self._load_file(file_path)
 
         # Füge die Backend-Infos zur Hauptkonfiguration hinzu
-        self.config["launch_backends"] = self.backends
-        self.config["backend_configs"] = self.backend_configs
+        # self.config["launch_backends"] = self.backends
+        # self.config["backend_configs"] = self.backend_configs
         return self.config
 
     def _load_file(self, file_path):
+        """
+        """
         with open(file_path, "r") as f:
             current_backend = None
+
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -48,29 +55,31 @@ class PowerDNSConfigLoader:
                     self.module.log(msg=f"  - {lowered_key}")
 
                     if lowered_key == "launch":
-                        self.backends.clear()
-                        current_backend = None
+                        continue
+                        # self.backends.clear()
+                        # current_backend = None
 
                     # TODO backend parsing
                     elif lowered_key.startswith("launch+"):
+                        continue
 
-                        self.module.log(msg=f"  - backend {value}")
-
-                        # Beispiel: launch+gmysql → extrahiere "gmysql"
-                        backend = lowered_key.split("+", 1)[1]
-                        if backend not in self.backends:
-                            self.backends.append(backend)
-                        current_backend = backend
+                        # self.module.log(msg=f"  - backend {value}")
+                        #
+                        # # Beispiel: launch+gmysql → extrahiere "gmysql"
+                        # backend = lowered_key.split("+", 1)[1]
+                        # if backend not in self.backends:
+                        #     self.backends.append(backend)
+                        # current_backend = backend
 
                     else:
                         self.config[key] = self._convert_value(value)
-                        # prüfe, ob der Key zu einem der bekannten Backends gehört
-                        for backend in self.backends:
-                            if key.lower().startswith(backend):
-                                if backend not in self.backend_configs:
-                                    self.backend_configs[backend] = {}
-                                self.backend_configs[backend][key] = self._convert_value(value)
-                                break  # sobald ein Backend gematcht wurde, abbrechen
+                    #     # prüfe, ob der Key zu einem der bekannten Backends gehört
+                    #     for backend in self.backends:
+                    #         if key.lower().startswith(backend):
+                    #             if backend not in self.backend_configs:
+                    #                 self.backend_configs[backend] = {}
+                    #             self.backend_configs[backend][key] = self._convert_value(value)
+                    #             break  # sobald ein Backend gematcht wurde, abbrechen
 
     def _convert_value(self, value):
         lowered = value.lower()

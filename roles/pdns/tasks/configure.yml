@@ -1,31 +1,5 @@
 ---
 
-# - block:
-#
-#   - name: Ensure the override directory exists (systemd)
-#     file:
-#       name: "/etc/systemd/system/{{ pdns_service_name }}.service.d"
-#       state: directory
-#       owner: root
-#       group: root
-#
-#   - name: Override the PowerDNS Authoritative Server unit (systemd)
-#     template:
-#       src: "override-service.systemd.conf.j2"
-#       dest: "/etc/systemd/system/{{ pdns_service_name }}.service.d/override.conf"
-#       owner: root
-#       group: root
-#     register: _pdns_override_unit
-#     when: pdns_service_overrides | length > 0
-#
-#   - name: Reload systemd
-#     systemd:
-#       daemon_restart: yes
-#     when: not pdns_disable_handlers
-#       and _pdns_override_unit.changed
-#
-#   when: ansible_service_mgr == "systemd"
-
 - name: create directory for pdns configuration
   ansible.builtin.file:
     name: "{{ pdns_config_dir }}"

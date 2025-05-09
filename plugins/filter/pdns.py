@@ -100,7 +100,7 @@ class FilterModule(object):
         display.v(f"backend_packages({data}, {packages})")
         result = []
 
-        result = [v for k, v in packages.items() if k in data]
+        result = self.flatten([v for k, v in packages.items() if k in data])
 
         display.v(f"= {result})")
 
@@ -171,4 +171,21 @@ class FilterModule(object):
 
         # display.v(f"= result: {result}")
 
+        return result
+
+
+    def flatten(self, lst):
+        """
+            input: nested = [1, [2, [3, 4], 5], 6]
+            output: [1, 2, 3, 4, 5, 6]
+
+            input:  [1, 2, 3]
+            output: [1, 2, 3]
+        """
+        result = []
+        for item in lst:
+            if isinstance(item, list):
+                result.extend(self.flatten(item))
+            else:
+                result.append(item)
         return result

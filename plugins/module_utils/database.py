@@ -10,13 +10,21 @@ from __future__ import (absolute_import, print_function)
 import os
 import sqlite3
 import shutil
+import warnings
+
+from ansible.module_utils.basic import AnsibleModule
+#from ansible.module_utils.six.moves import configparser
+
+ansible_collections/community/mysql/
+
+from ansible.module_utils.mysql import (
+    mysql_driver,
+    mysql_driver_fail_msg,
+    mysql_common_argument_spec
+)
 
 from ansible.module_utils._text import to_native
-from ansible.module_utils.mysql import (
-    mysql_driver
-)
-# from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
-
+#from ansible.module_utils.mysql import mysql_driver
 
 class Database():
 
@@ -194,12 +202,26 @@ class Database():
         """
         # self.module.log(f"Database::db_connect()")
 
+        if mysql_driver is None:
+            self.module.fail_json(msg=mysql_driver_fail_msg)
+        else:
+            warnings.filterwarnings('error', category=mysql_driver.Warning)
+
         db_connect_error = True
+
+        # self.module.log(msg=f"config : {self.config}")
 
         try:
             self.db_connection = mysql_driver.connect(**self.config)
             self.db_cursor = self.db_connection.cursor()
             db_connect_error = False
+
+        except mysql_driver.Warning as e:
+            message = "unable to connect to database. "
+            message += f"Exception message: {to_native(e)}"
+
+            self.module.log(msg=message)
+            return (db_connect_error, message)
 
         except Exception as e:
             message = "unable to connect to database. "

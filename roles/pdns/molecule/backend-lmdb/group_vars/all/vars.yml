@@ -21,7 +21,7 @@ pdns_config:
   loglevel: "5"   # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
 
 pdns_webserver:
-  enabled: true
+  enabled: false
   address: "{{ ansible_default_ipv4.address }}"
   allow-from:
     - "127.0.0.1"

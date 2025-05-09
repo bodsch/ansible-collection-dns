@@ -4,9 +4,12 @@ pdns_packages:
   - powerdns
   - python-requests
   - python-urllib3
+  - python-netaddr
 
 _pdns_backend_packages:
-  mysql: mariadb-libs
+  mysql:
+    - mariadb-libs
+    - python-mysqlclient
 
 pdns_owner: powerdns
 pdns_group: powerdns
