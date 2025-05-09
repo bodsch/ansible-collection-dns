@@ -6,6 +6,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import (absolute_import, print_function)
+from ansible.module_utils._text import to_native
+from ansible.module_utils.mysql import (
+    mysql_driver,
+    mysql_driver_fail_msg,
+    mysql_common_argument_spec
+)
 
 import os
 import sqlite3
@@ -13,18 +19,7 @@ import shutil
 import warnings
 
 from ansible.module_utils.basic import AnsibleModule
-#from ansible.module_utils.six.moves import configparser
 
-ansible_collections/community/mysql/
-
-from ansible.module_utils.mysql import (
-    mysql_driver,
-    mysql_driver_fail_msg,
-    mysql_common_argument_spec
-)
-
-from ansible.module_utils._text import to_native
-#from ansible.module_utils.mysql import mysql_driver
 
 class Database():
 
