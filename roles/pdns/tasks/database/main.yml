@@ -34,7 +34,7 @@
     patterns:
       - '^schema.*.sql$'
   register: found_files
-  no_log: true
+  # no_log: true
 
 - name: prepare schema files
   ansible.builtin.include_tasks: schema_files.yml
