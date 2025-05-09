@@ -43,7 +43,9 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 | [bodsch.dns.hosts](./roles/hosts/README.md)                 | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/hosts.yml?branch=main)][hosts]     | Ansible role to install and configure `hosts`. |
 | [bodsch.dns.resolv](./roles/resolv/README.md)               | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/resolv.yml?branch=main)][resolv]   | Ansible role to install and configure `resolv`. |
 | [bodsch.dns.unbound](./roles/unbound/README.md)             | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/unbound.yml?branch=main)][unbound] | Ansible role to install and configure `unbound`. |
-
+| [bodsch.dns.pdns](./roles/pdns/README.md)                   | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/pdns.yml?branch=main)][pdns] | Ansible role to install and configure `powerdns`. |
+| [bodsch.dns.pdns_recursor](./roles/pdns_recursor/README.md) | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/pdns_recursor.yml?branch=main)][pdns_recursor] | Ansible role to install and configure `pdns_recursor`. |
+| [bodsch.dns.pdns_records](./roles/pdns_records/README.md)   | [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-collection-dns/pdns_records.yml?branch=main)][unbound] | Ansible role to create dns records for `pdns`. |
 
 
 [bind]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/bind.yml
@@ -54,3 +56,6 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 [hosts]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/hosts.yml
 [resolv]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/resolv.yml
 [unbound]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/unbound.yml
+[pdns]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/pdns.yml
+[pdns_recursor]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/pdns_recursor.yml
+[pdns_records]: https://github.com/bodsch/ansible-collection-dns/actions/workflows/pdns_records.yml

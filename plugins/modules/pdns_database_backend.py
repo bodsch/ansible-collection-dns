@@ -11,7 +11,7 @@ import shutil
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.dns.plugins.module_utils.database import Database
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
+# from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 
 # ---------------------------------------------------------------------------------------
 
@@ -94,10 +94,10 @@ class PdnsDatabaseBackend(Database):
         )
 
         if self.db_type == "sqlite3":
-            result = _sqlite(None)
+            result = self._sqlite(None)
 
         if self.db_type == "mariadb":
-            result = _mariadb()
+            result = self._mariadb()
 
         return result
 
@@ -233,7 +233,7 @@ class PdnsDatabaseBackend(Database):
                 msg=msg
             )
 
-        config = self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
+        self.config = self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
 
         self.module.log(msg=f"  config: '{self.config}'")
 
@@ -261,7 +261,7 @@ class PdnsDatabaseBackend(Database):
         if os.path.exists(self.schemas):
             """
             """
-            result_state = {}
+            # result_state = {}
 
             file_name = os.path.basename(self.schemas)
             self.module.log(msg=f"import schema from '{file_name}'")
