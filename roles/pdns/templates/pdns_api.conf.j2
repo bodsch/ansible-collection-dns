@@ -1,0 +1,7 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% if pdns_api is defined %}
+api = {{ pdns_api.enabled | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+api-key = {{ pdns_api.key }}
+{% endif %}
