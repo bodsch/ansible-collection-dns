@@ -144,10 +144,9 @@ def test_directories(host, get_vars):
     pp_json(get_vars)
 
     directories = [
-        get_vars.get("bind_dir"),
-        get_vars.get("bind_conf_dir"),
-        get_vars.get("bind_zone_dir"),
-        get_vars.get("bind_secondary_dir"),
+        get_vars.get("pdns_config_dir"),
+        get_vars.get("pdns_config_include"),
+        get_vars.get("pdns_lib_dir"),
     ]
 
     for dirs in directories:
@@ -160,7 +159,11 @@ def test_files(host, get_vars):
       created config files
     """
     files = [
-        get_vars.get("bind_config", "/etc/bind/named.conf")
+        "/etc/powerdns/pdns.conf",
+        "/etc/powerdns/pdns.d/pdns_api.conf",
+        "/etc/powerdns/pdns.d/pdns_backends.conf",
+        "/etc/powerdns/pdns.d/pdns_general.conf",
+        "/etc/powerdns/pdns.d/pdns_webserver.conf",
     ]
 
     for _file in files:

@@ -137,15 +137,16 @@ def get_vars(host):
     return result
 
 
-def test_directories(host):
+def test_directories(host, get_vars):
     """
       used config directory
     """
+    pp_json(get_vars)
+
     directories = [
-        "/etc/powerdns",
-        "/etc/powerdns/pdns.d",
-        # "/usr/lib/powerdns",
-        "/var/lib/powerdns"
+        get_vars.get("pdns_config_dir"),
+        get_vars.get("pdns_config_include"),
+        get_vars.get("pdns_lib_dir"),
     ]
 
     for dirs in directories:
