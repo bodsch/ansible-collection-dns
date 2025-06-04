@@ -11,7 +11,7 @@ import argparse
 
 from pathlib import Path
 from packaging.version import Version, InvalidVersion
-from packaging.specifiers import SpecifierSet
+from packaging.specifiers import SpecifierSet, InvalidSpecifier
 import site
 
 
@@ -74,7 +74,6 @@ class AnsibleCollectionManager():
         for item in required:
             name = item.get("name")
             required_version = item.get("version")
-
             current_version = installed.get(name)
 
             if current_version:
@@ -94,25 +93,34 @@ class AnsibleCollectionManager():
 
     def load_required_collections(self, path="collections.yml"):
         """
-        Lädt die benötigten Collections aus der YAML-Datei.
+            Lädt die benötigten Collections aus der YAML-Datei.
         """
+        result = []
+
         with open(path, "r") as f:
             data = yaml.safe_load(f)
-        return data.get("collections", [])
+            if data and isinstance(data, dict):
+                result = data.get("collections", [])
+
+        return result
 
     def is_version_compatible(self, installed_version: str, required_spec: str) -> bool:
         """
-        Prüft, ob die installierte Version mit dem geforderten Version-String kompatibel ist.
+            Prüft, ob die installierte Version mit dem geforderten Version-String kompatibel ist.
         """
         try:
             return Version(installed_version) in SpecifierSet(required_spec)
         except InvalidVersion:
+            print(f"⚠️ Ungültige installierte Version: {installed_version}")
+            return False
+        except InvalidSpecifier:
+            print(f"❌ Ungültiger Versions-Spezifizierer: '{required_spec}' — bitte verwende z. B. '>=4.0'")
             return False
 
     def get_ansible_collections_paths(self, ):
         """
-        Ermittelt gültige Ansible-Collection-Verzeichnisse anhand von Umgebungsvariablen
-        oder Standards.
+            Ermittelt gültige Ansible-Collection-Verzeichnisse anhand von Umgebungsvariablen
+            oder Standards.
         """
         paths = []
         env_paths = os.environ.get("ANSIBLE_COLLECTIONS_PATHS")
@@ -159,10 +167,16 @@ class AnsibleCollectionManager():
 
                                 if namespace and name and version:
                                     full_name = f"{namespace}.{name}"
-                                    installed[full_name] = version
+                                    # print(f"🔍 Found '{full_name}' version {version} at {coll_path}")
+                                    if full_name not in installed:
+                                        installed[full_name] = version
+                                    else:
+                                        try:
+                                            if Version(version) > Version(installed[full_name]):
+                                                installed[full_name] = version
+                                        except InvalidVersion:
+                                            pass  # falls Versionsvergleich fehlschlägt: einfach ignorieren
 
-                                # version = data.get("version")
-                                # installed[name] = version
                         except Exception as e:
                             print(f"⚠️ Errors when reading {manifest}: {e}")
 
@@ -170,15 +184,14 @@ class AnsibleCollectionManager():
 
     def install_collection(self, name):
         """
-        Installiert eine Collection über ansible-galaxy (ohne Versionsparameter).
+            Installiert eine Collection über ansible-galaxy (ohne Versionsparameter).
         """
         print(f"📦 Install ansible-galaxy collection {name} ...")
-        subprocess.run(["ansible-galaxy", "collection", "install", name], check=True)
+        subprocess.run(["ansible-galaxy", "collection", "install", "--force", name], check=True)
 
 
 def main(requirements_file="collections.yml"):
     """
-    Hauptfunktion: prüft installierte vs. benötigte Collections und installiert bei Bedarf.
     """
     mnger = AnsibleCollectionManager()
     mnger.run()
