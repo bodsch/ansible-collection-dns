@@ -1,5 +1,7 @@
 ---
 
+pdns_lib_dir: /usr/lib/powerdns
+
 pdns_packages:
   - powerdns
   - python-requests
