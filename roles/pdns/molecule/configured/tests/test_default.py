@@ -188,7 +188,7 @@ def test_listening_socket(host, get_vars):
     for i in listening:
         print(i)
 
-    bind_port = "53"
+    bind_port = "5300"
     bind_address = "127.0.0.1"
 
     listen = []
