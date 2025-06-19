@@ -4,22 +4,18 @@
   when:
     - ansible_os_family | lower == 'debian'
   block:
-    - name: detect installed knot-resolver repository
-      ansible.builtin.stat:
-        path: /etc/apt/sources.list.d/knot-resolver-latest.list
-      register: knot_resolver_sources
+    - name: download CZ.NIC gpg key and save as keyring
+      ansible.builtin.get_url:
+        url: https://pkg.labs.nic.cz/gpg
+        dest: /usr/share/keyrings/cznic-labs-pkg.gpg
+        mode: '0644'
 
-    - name: detect installed cznic-obs.gpg
-      ansible.builtin.stat:
-        path: /etc/apt/trusted.gpg.d/cznic-obs.gpg
-      register: knot_resolver_gpg
-
-    - name: install knot-resolver repositories
-      ansible.builtin.apt:
-        deb: https://secure.nic.cz/files/knot-resolver/knot-resolver-release.deb
-      when:
-        - not knot_resolver_sources.stat.exists
-        - not knot_resolver_gpg.stat.exists
+    - name: add CZ.NIC apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/cznic-labs-pkg.gpg] https://pkg.labs.nic.cz/knot-resolver bookworm main"
+        filename: "cznic-labs-knot-resolver.list"
+        state: present
+        update_cache: true
 
 - name: update package cache
   ansible.builtin.package:

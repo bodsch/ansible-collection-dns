@@ -3,6 +3,8 @@
 
 This role will fully configure and install [knot-resolver](https://github.com/CZ-NIC/knot-resolver).
 
+[pkg.labs.nic.cz](https://pkg.labs.nic.cz/doc/?project=knot-resolver)
+
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-knot-resolver/main.yml?branch=main)][ci]
 [![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-knot-resolver)][issues]
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-knot-resolver)][releases]
