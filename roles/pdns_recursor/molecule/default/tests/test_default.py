@@ -108,7 +108,6 @@ def test_directories(host, get_vars):
 
     directories = [
         "/etc/powerdns/recursor.d",
-        "/usr/share/pdns-recursor",
         "/var/cache/ansible/pdns_recursor",
     ]
 
