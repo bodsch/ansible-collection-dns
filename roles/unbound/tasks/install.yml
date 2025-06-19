@@ -86,3 +86,32 @@
         mode: "0666"
       when:
         - not __unbound_logfile_exists.stat.exists
+
+# -----------------------------------------------------------------
+
+- name: systemd
+  when:
+    - ansible_service_mgr == "systemd"
+  block:
+    - name: populate service facts
+      ansible.builtin.service_facts:
+      register: systemd_facts
+      no_log: true
+      tags:
+        - unbound
+        - install
+
+    - name: set systemd unit name
+      ansible.builtin.set_fact:
+        resolved_unit_file: "{{ ansible_facts.services | bodsch.systemd.service('systemd-resolved', state='running') }}"
+      tags:
+        - unbound
+        - install
+
+    - name: disable systemd-resolved
+      service:
+        name: "{{ resolved_unit_file }}"
+        state: stopped
+        enabled: false
+      when:
+        - resolved_unit_file | default('') | string | length > 0
