@@ -1,5 +1,6 @@
 
-COLLECTION_DIR="${HOME}/.ansible/collections/ansible_collections/${COLLECTION_NAMESPACE}/${COLLECTION_NAME}"
+USER_COLLECTION_DIR="${HOME}/.ansible/collections/ansible_collections"
+COLLECTION_DIR="${USER_COLLECTION_DIR}/${COLLECTION_NAMESPACE}/${COLLECTION_NAME}"
 
 TOX_ARGS=
 

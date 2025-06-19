@@ -1,0 +1,65 @@
+---
+
+- name: download
+  when:
+    - not running_in_check_mode
+    - pihole_arch.install_type == "archive"
+  block:
+    - name: create download directory
+      become: false
+      delegate_to: "{{ pihole_delegate_to }}"
+      run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+      ansible.builtin.file:
+        path: "{{ pihole_local_tmp_directory }}"
+        state: directory
+        mode: "0750"
+
+    - name: detect the downloaded pihole archive
+      become: false
+      delegate_to: "{{ pihole_delegate_to }}"
+      run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+      ansible.builtin.stat:
+        path: "{{ pihole_local_tmp_directory }}/{{ pihole_arch.archive | basename }}"
+      register: stat_pihole_archive
+
+    - name: download pihole binary archive
+      when:
+        - stat_pihole_archive.stat is defined
+        - not stat_pihole_archive.stat.exists | default('false')
+      become: false
+      delegate_to: "{{ pihole_delegate_to }}"
+      run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+      ansible.builtin.get_url:
+        url: "{{ pihole_arch.archive }}"
+        dest: "{{ pihole_local_tmp_directory }}/{{ pihole_arch.archive | basename }}"
+        mode: "0640"
+      register: _download_archive
+      until: _download_archive is succeeded
+      retries: 5
+      delay: 2
+      check_mode: false
+
+- name: detect extracted binary
+  become: false
+  delegate_to: "{{ pihole_delegate_to }}"
+  run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+  ansible.builtin.stat:
+    path: "{{ pihole_local_tmp_directory }}/pihole"
+  register: stat_pihole_binary
+
+- name: extract archive
+  become: false
+  delegate_to: "{{ pihole_delegate_to }}"
+  run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+  ansible.builtin.unarchive:
+    src: "{{ pihole_local_tmp_directory }}/{{ pihole_arch.archive | basename }}"
+    dest: "{{ pihole_local_tmp_directory }}/"
+    copy: false
+    extra_opts:
+      - --strip-components=1
+  when:
+    - not running_in_check_mode
+    - stat_pihole_binary.stat is defined
+    - not stat_pihole_binary.stat.exists | default('false')
+
+...

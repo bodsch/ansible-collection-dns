@@ -1,0 +1,9 @@
+---
+
+pihole_dependencies:
+  - jq
+  - curl
+  - wget
+  - ca-certificates
+  - bind-tools  # dnsutils equivalent
+  - net-tools

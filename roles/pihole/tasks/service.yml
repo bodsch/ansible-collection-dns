@@ -1,0 +1,9 @@
+---
+
+- name: ensure pi-hole services are running
+  ansible.builtin.systemd:
+    name: pihole-FTL
+    state: started
+    enabled: true
+
+...

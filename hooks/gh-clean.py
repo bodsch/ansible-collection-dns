@@ -108,7 +108,7 @@ class GitHub:
                 runned_wf = self.remove_elements(workflow_runs, int(self.github_keep_workflows))
 
                 msg_wf = ','.join(str(x) for x in runned_wf)
-                print(f"  - {msg_wf}")
+
                 print("  delete the following workflows:")
                 self.remove_workflows(runned_wf)
 
@@ -139,7 +139,8 @@ class GitHub:
             url = f"{self.github_base_url}/repos/{self.github_username}/{self.github_repository}/actions/runs/{wf_id}"
 
             response = requests.delete(url, headers=self.headers)
-            print(f"  = {response}")
+
+            # print(f"  = {response}")
 
         return result
 

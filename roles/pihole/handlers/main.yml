@@ -1,0 +1,16 @@
+---
+
+- name: restart pihole-FTL
+  ansible.builtin.systemd:
+    name: pihole-FTL
+    state: restarted
+
+- name:  pihole update gravity
+  ansible.builtin.shell: pihole updateGravity
+  register: gravity_result
+  # changed_when: "'[✓] DNS resolution is currently available' in gravity_result.stdout"
+
+- name:  pihole reload lists
+  ansible.builtin.shell: pihole reloadlists
+  register: reload_result
+  # changed_when: "'[✓] DNS resolution is currently available' in gravity_result.stdout"

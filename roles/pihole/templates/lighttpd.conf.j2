@@ -1,0 +1,19 @@
+
+$HTTP["host"] =~ ".*" {
+    server.document-root = "/var/www/html"
+    server.port = {{ pihole_web_port }}
+    
+    # Pi-hole Admin Panel
+    $HTTP["url"] =~ "^/admin/" {
+        server.document-root = "/var/www/html/admin"
+    }
+    
+    # Enable PHP
+    server.modules += ( "mod_fastcgi" )
+    fastcgi.server = ( ".php" =>
+        ((
+            "bin-path" => "/usr/bin/php-cgi",
+            "socket" => "/tmp/php.socket"
+        ))
+    )
+}
