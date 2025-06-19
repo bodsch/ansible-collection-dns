@@ -4,7 +4,6 @@
 # (c) 2021, Bodo Schulz <bodo@boone-schulz.de>
 
 from __future__ import absolute_import, division, print_function
-import re
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.dns.plugins.module_utils.pihole.pihole import PiHole
@@ -67,25 +66,40 @@ class PiholeCustomLists(PiHole):
             full_version="unknown"
         )
 
+        # pihole_status = self.status()
+
+        result_state = []
+
         if len(self.allow_list) > 0:
-            result_allow = self.import_allow_lists(self.allow_list)
+            res = {}
+            result_allow = self.import_allow(self.allow_list)
+            self.module.log(f"{result_allow}")
+
+            res["allow"] = result_allow
+            result_state.append(res)
 
         if len(self.deny_list) > 0:
-            result_deny = self.import_deny_lists(self.deny_list)
+            res = {}
+            result_deny = self.import_deny(self.deny_list)
+            self.module.log(f"{result_deny}")
 
+            res["deny"] = result_deny
+            result_state.append(res)
 
-        # _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
-        #
-        # result = dict(
-        #     changed=_changed,
-        #     failed=failed,
-        #     state=result_state
-        # )
+        _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
+
+        result = dict(
+            changed=_changed,
+            failed=failed,
+            state=result_state
+        )
+
+        return result
 
 
 def main():
 
-    argument_spec=dict(
+    argument_spec = dict(
         allow_list=dict(
             required=False,
             type="list"

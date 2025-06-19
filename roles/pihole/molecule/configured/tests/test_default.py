@@ -104,15 +104,16 @@ def local_facts(host):
     """
       return local facts
     """
-    return host.ansible("setup").get("ansible_facts").get("ansible_local").get("chrony")
+    return host.ansible("setup").get("ansible_facts").get("ansible_local").get("pihole")
 
 
 def test_files(host, get_vars):
     """
     """
     files = [
-        get_vars.get("chrony_config_file"),
-        get_vars.get("chrony_system_config", {}).get("file")
+        "/etc/pihole/pihole.toml",
+        "/opt/pihole/api.sh",
+        "/usr/local/bin/pihole"
     ]
 
     for file in files:
@@ -124,8 +125,8 @@ def test_files(host, get_vars):
 def test_user(host, get_vars):
     """
     """
-    user = get_vars.get("chrony_user")
-    group = get_vars.get("chrony_group")
+    user = "pihole"
+    group = "pihole"
 
     assert host.group(group).exists
     assert host.user(user).exists
@@ -135,11 +136,7 @@ def test_user(host, get_vars):
 def test_service(host, get_vars):
     """
     """
-    print(get_vars.get("chrony_defaults_service", {}))
-    print(get_vars.get("chrony_defaults_service", {}).get("name"))
-    service = host.service(
-        get_vars.get("chrony_defaults_service", {}).get("name")
-    )
+    service = host.service("pihole-FTL")
     assert service.is_enabled
     assert service.is_running
 
@@ -152,9 +149,8 @@ def test_open_port(host, get_vars):
     for i in host.socket.get_listening_sockets():
         print(i)
 
-    service = host.socket("udp://{0}:{1}".format("127.0.0.1", "323"))
+    service = host.socket("udp://0.0.0.0:53")
     assert service.is_listening
 
-    # if int(version) > 3:
-    #     service = host.socket("udp://{0}:{1}".format("0.0.0.0", "123"))
-    #     assert service.is_listening
+    service = host.socket("tcp://0.0.0.0:8080")
+    assert service.is_listening

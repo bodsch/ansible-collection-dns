@@ -89,6 +89,8 @@
         - ansible_distribution | lower == 'archlinux'
 
     - name: install pi-hole
+      # remote_user: pihole
+      become: true
       ansible.builtin.shell: |
         export PIHOLE_SKIP_OS_CHECK=true
         bash {{ pihole_remote_tmp_directory }}/basic-install.sh --unattended

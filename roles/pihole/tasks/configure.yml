@@ -1,24 +1,10 @@
 ---
 
-- name: admin password
+- name: set pi-hole admin password
+  bodsch.dns.pihole_admin_password:
+    password: "{{ pihole_admin_password }}"
   when:
-    - pihole_admin_password is defined
-    - pihole_admin_password != ""
-  block:
-    - name: check current admin password hash
-      ansible.builtin.shell: grep 'WEBPASSWORD=' /etc/pihole/setupVars.conf || echo "WEBPASSWORD="
-      register: current_password_hash
-      changed_when: false
-
-    - name: generate password hash
-      ansible.builtin.shell: echo -n "{{ pihole_admin_password }}" | sha256sum | awk '{print $1}' | sha256sum | awk '{print $1}'
-      register: new_password_hash
-      changed_when: false
-
-    - name: set pi-hole admin password
-      ansible.builtin.shell: pihole setpassword "{{ pihole_admin_password }}"
-      when:
-        - current_password_hash.stdout != "WEBPASSWORD=" + new_password_hash.stdout
+    - pihole_admin_password | default('') | string | length > 0
 
 - name: add custom blocklists
   ansible.builtin.template:

@@ -6,11 +6,15 @@
     state: restarted
 
 - name:  pihole update gravity
-  ansible.builtin.shell: pihole updateGravity
+  bodsch.dns.pihole_command:
+    command: update_gravity
+  # ansible.builtin.shell: pihole updateGravity
   register: gravity_result
   # changed_when: "'[✓] DNS resolution is currently available' in gravity_result.stdout"
 
 - name:  pihole reload lists
-  ansible.builtin.shell: pihole reloadlists
+  bodsch.dns.pihole_command:
+    command: reloadlists
+  # ansible.builtin.shell: pihole reloadlists
   register: reload_result
   # changed_when: "'[✓] DNS resolution is currently available' in gravity_result.stdout"
