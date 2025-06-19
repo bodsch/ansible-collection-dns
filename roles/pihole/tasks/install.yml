@@ -1,0 +1,100 @@
+---
+
+- name: create pihole user
+  ansible.builtin.user:
+    name: pihole
+    system: true
+    shell: /bin/false
+    home: /opt/pihole
+    create_home: false
+
+- name: create remote tmp directory
+  ansible.builtin.file:
+    path: "{{ pihole_remote_tmp_directory }}"
+    state: directory
+    mode: "0755"
+
+- name: detect pihole installer on '{{ pihole_delegate_to }}'
+  become: false
+  delegate_to: "{{ pihole_delegate_to }}"
+  run_once: "{{ 'false' if pihole_direct_download else 'true' }}"
+  ansible.builtin.stat:
+    path: "{{ pihole_local_tmp_directory }}/automated install/basic-install.sh"
+  register: stat_file_installer
+
+- name: fail when pihole installer are missing
+  ansible.builtin.fail:
+    msg: "missing pihole installer on ansible controller"
+  when:
+    - not running_in_check_mode
+    - not stat_file_installer.stat.exists
+
+- name: detect installed pihole installer
+  ansible.builtin.stat:
+    path: "{{ pihole_remote_tmp_directory }}/basic-install.sh"
+  register: stat_pihole_installer
+
+- name: propagate pihole installer
+  when:
+    - not running_in_check_mode
+    - stat_file_installer.stat.exists
+    - stat_pihole_installer.stat is defined and not stat_pihole_installer.stat.exists | default('false')
+  ansible.builtin.copy:
+    src: "{{ pihole_local_tmp_directory }}/automated install/basic-install.sh"
+    dest: "{{ pihole_remote_tmp_directory }}/basic-install.sh"
+    mode: "0755"
+    remote_src: "{{ 'true' if pihole_direct_download else 'false' }}"
+  no_log: true
+
+- name: detect installed pihole
+  ansible.builtin.stat:
+    path: /etc/pihole/pihole.toml
+  register: stat_pihole_toml
+
+- name: run pihole installer
+  when:
+    - not running_in_check_mode
+    - stat_file_installer.stat.exists
+    - stat_pihole_toml.stat is defined and not stat_pihole_toml.stat.exists | default('false')
+  block:
+    - name: create pi-hole directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: pihole
+        group: pihole
+        mode: "0755"
+      loop:
+        - /etc/pihole
+        - /opt/pihole
+        - /var/log/pihole
+
+    - name: create setupVars.conf
+      ansible.builtin.template:
+        src: setupVars.conf.j2
+        dest: /etc/pihole/setupVars.conf
+        owner: pihole
+        group: pihole
+        mode: "0640"
+
+    - name: patch pi-hole installer for arch-linux
+      ansible.builtin.shell: |
+        sed -i \
+          -e '/^[[:space:]]*[^#].*package_manager_detect[[:space:]]*$/s/^/# /' \
+          -e '/^[[:space:]]*[^#].*notify_package_updates_available[[:space:]]*$/s/^/# /' \
+          -e '/^[[:space:]]*[^#].*build_dependency_package[[:space:]]*$/s/^/# /' \
+          -e '/^[[:space:]]*[^#].*install_dependent_packages[[:space:]]*$/s/^/# /' \
+          {{ pihole_remote_tmp_directory }}/basic-install.sh
+      when:
+        - ansible_distribution | lower == 'archlinux'
+
+    - name: install pi-hole
+      # remote_user: pihole
+      become: true
+      ansible.builtin.shell: |
+        export PIHOLE_SKIP_OS_CHECK=true
+        bash {{ pihole_remote_tmp_directory }}/basic-install.sh --unattended
+      register: pihole_install_result
+      changed_when: pihole_install_result.rc == 0
+      notify:
+        - restart pihole-FTL

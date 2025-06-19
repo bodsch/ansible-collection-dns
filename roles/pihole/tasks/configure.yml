@@ -1,0 +1,59 @@
+---
+
+- name: set pi-hole admin password
+  bodsch.dns.pihole_admin_password:
+    password: "{{ pihole_admin_password }}"
+  when:
+    - pihole_admin_password | default('') | string | length > 0
+
+- name: add custom blocklists
+  ansible.builtin.template:
+    src: custom.list.j2
+    dest: /etc/pihole/adlists.list
+    owner: pihole
+    group: pihole
+    mode: '0640'
+  vars:
+    data: "{{ pihole_custom_blocklists | default([]) }}"
+  when:
+    - pihole_custom_blocklists | default([]) | count > 0
+  notify:
+    - pihole update gravity
+
+- name: add custom lists
+  bodsch.dns.pihole_custom_lists:
+    allow_list: "{{ pihole_domain_allowlist | default([]) }}"
+    deny_list: "{{ pihole_domain_denylist | default([]) }}"
+  register: import_result
+  changed_when: false
+  notify:
+    - pihole reload lists
+
+# - name: add custom allowlists
+#   ansible.builtin.template:
+#     src: custom.list.j2
+#     dest: /etc/pihole/allowlists.list
+#     owner: pihole
+#     group: pihole
+#     mode: '0640'
+#   vars:
+#     data: "{{ pihole_domain_allowlist | default([]) }}"
+#   when:
+#     - pihole_domain_allowlist | default([]) | count > 0
+#   # notify:
+#   #   - restart pihole-FTL
+#
+# - name: add custom blocklists
+#   ansible.builtin.template:
+#     src: custom.list.j2
+#     dest: /etc/pihole/blocklists.list
+#     owner: pihole
+#     group: pihole
+#     mode: '0640'
+#   vars:
+#     data: "{{ pihole_domain_blocklist | default([]) }}"
+#   when:
+#     - pihole_domain_blocklist | default([]) | count > 0
+#   # notify:
+#   #   - restart pihole-FTL
+#

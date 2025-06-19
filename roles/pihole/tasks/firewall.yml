@@ -1,0 +1,16 @@
+---
+
+- name: configure firewall for pi-hole
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: "{{ item.split('/')[1] if '/' in item else 'tcp' }}"
+  loop:
+    - "53/tcp"
+    - "53/udp"
+    - "80/tcp"
+    - "{{ pihole_web_port | default('80') }}/tcp"
+  when:
+    - pihole_enable_firewall | default('false')
+
+...

@@ -1,0 +1,46 @@
+---
+
+pihole_admin_password: "SuperSicher2024!"
+pihole_dns_1: "1.1.1.1"          # Cloudflare
+pihole_dns_2: "9.9.9.9"          # Quad9
+pihole_dnssec: true
+configure_firewall: true
+
+# Zusätzliche Blocklisten
+pihole_custom_denylists:
+  - "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+  - "https://someonewhocares.org/hosts/zero/hosts"
+  - "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
+  - "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"
+  - "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"
+
+# Wichtige Domains freigeben
+pihole_domain_allowlist:
+  # Microsoft Updates
+  - "delivery.mp.microsoft.com"
+  - "tlu.dl.delivery.mp.microsoft.com" 
+  - "download.windowsupdate.com"
+  # Google Services (für manche Seiten nötig)
+  - "googleadservices.com"
+  - "googlesyndication.com"
+  # Social Media APIs
+  - "graph.facebook.com"
+  - "scontent.xx.fbcdn.net"
+  # Streaming
+  - "widget-cdn.rpxnow.com"
+  - "secure.netflix.com"
+  # Gaming
+  - "clientconfig.rpx.ol.epicgames.com"
+
+# Zusätzlich blockieren
+pihole_domain_denylist:
+  # Tracking
+  - "google-analytics.com"
+  - "googletagmanager.com"
+  - "hotjar.com"
+  - "mouseflow.com"
+  # Social Media (optional)
+  - "tiktok.com"
+  # Werbung
+  - "outbrain.com"
+  - "taboola.com"

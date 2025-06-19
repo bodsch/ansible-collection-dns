@@ -1,0 +1,30 @@
+---
+pihole_admin_password: "Familie2024"
+
+pihole_custom_denylists:
+  - "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn-social/hosts"
+  - "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
+
+pihole_domain_allowlist:
+  # Bildung
+  - "khan-academy.org"
+  - "khanacademy.org"
+  - "wikipedia.org"
+  - "stackoverflow.com"
+  # Sichere Suchmaschinen
+  - "duckduckgo.com"
+  - "startpage.com"
+
+pihole_domain_denylist:
+  # Social Media komplett blockieren
+  - "facebook.com"
+  - "instagram.com"
+  - "tiktok.com"
+  - "snapchat.com"
+  - "twitter.com"
+  # Gaming/Zeitverschwender
+  - "twitch.tv"
+  - "youtube.com"  # Vorsicht: kann andere Services beeinträchtigen
+  # Glücksspiel
+  - "bet365.com"
+  - "pokerstars.com"

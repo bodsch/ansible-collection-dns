@@ -1,0 +1,24 @@
+---
+
+galaxy_info:
+  role_name: pihole
+  namespace: bodsch
+
+  author: Bodo Schulz
+  description: installs and configure pihole
+
+  license: Apache
+  # min_ansible_version: "2.9"
+
+  platforms:
+    - name: ArchLinux
+    - name: Debian
+      versions:
+        # 12
+        - bookworm
+
+  galaxy_tags: []
+
+dependencies: []
+
+...

@@ -12,7 +12,7 @@ platforms:
   - name: instance
     image: "ghcr.io/bodsch/docker-ansible/ansible-${DISTRIBUTION:-debian:12}"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
-    docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
+    docker_host: "${DOCKER_HOST:-unix:///run/docker.sock}"
     privileged: true
     pre_build_image: true
     cgroupns_mode: host
