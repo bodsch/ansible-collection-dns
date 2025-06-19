@@ -12,18 +12,15 @@ from typing import List, Dict, Any, Optional, Tuple
 
 from ansible_collections.bodsch.core.plugins.module_utils.checksum import Checksum
 
-LINE_RE   = re.compile(r"^\s*-\s+(?P<dom>\S+)(?:\s+\((?P<reason>[^)]+)\))?")
-HEADER_RE = re.compile(r"^\s*\[(?P<flag>✓|✗)]")
-
 
 class PiHole():
     """
     """
     # --- Klassenzustände & Regex ---
-    _LINE_RE    = re.compile(r"^\s*-\s+(?P<domain>\S+)(?:\s+\((?P<reason>[^)]+)\))?")
-    _HEADER_RE  = re.compile(r"^\s*\[\s*(?P<flag>[✓✗])\s*]")
-    _COMMENT    = "Domain already in the specified list"
-    _ACTION_RE  = re.compile(r"^(?P<action>Added|Failed to add)\s+\d+\s+domain\(s\):$")
+    _LINE_RE = re.compile(r"^\s*-\s+(?P<domain>\S+)(?:\s+\((?P<reason>[^)]+)\))?")
+    _HEADER_RE = re.compile(r"^\s*\[\s*(?P<flag>[✓✗])\s*]")
+    _COMMENT = "Domain already in the specified list"
+    _ACTION_RE = re.compile(r"^(?P<action>Added|Failed to add)\s+\d+\s+domain\(s\):$")
 
     def __init__(self, module):
         self.module = module
@@ -203,48 +200,6 @@ class PiHole():
         )
     # -------------------
 
-    def import_allow_lists(self, data, comment="allowlist import"):
-        """
-        """
-        self.module.log(f"PiHole::import_allow_lists({data}, {comment})")
-
-        args = [
-            self.pihole_bin,
-            "allow",
-            *data,
-            "--comment",
-            comment
-        ]
-        rc, out, err = self._exec(args)
-        result = self._filter_output(out, err)
-
-        return dict(
-            changed=bool(result["added"]),
-            added=result["added"],
-            present=result["present"]
-        )
-
-    def import_deny_lists(self, data, comment="denylist import"):
-        """
-        """
-        self.module.log(f"PiHole::import_deny_lists({data}, {comment})")
-
-        args = [
-            self.pihole_bin,
-            "deny",
-            *data,
-            "--comment",
-            comment
-        ]
-        rc, out, err = self._exec(args)
-        result = self._filter_output(out, err)
-
-        return dict(
-            changed=bool(result["added"]),
-            added=result["added"],
-            present=result["present"]
-        )
-
     def set_config(self, config: dict):
         """
             e.g. /usr/bin/pihole-FTL --config dns.hosts '[ "192.168.0.4 matrix.vpn", "192.168.0.4 matrix.lan" ]'
@@ -265,37 +220,6 @@ class PiHole():
             self.module.log(msg=f"  err: '{err}'")
 
         return rc, out, err
-
-    def parse_pihole_output(self, text: str) -> Tuple[List[str], List[str]]:
-        """
-          Zerlegt die Ausgabe von `pihole allow|deny`.
-          Liefert Listen für added, duplicates, invalid.
-        """
-
-        def _classify_failed(line: str) -> str:
-            """
-            Entscheidet, ob die Zeile nur ein Duplikat
-            oder ein echter Fehler ist.
-            """
-            return "duplicate" if ("already" in reason or "exists" in reason) else "invalid"
-
-        added, duplicates, invalid = [], [], []
-        state = None
-
-        for raw_ln in text.splitlines():
-            ln = raw_ln.lstrip()
-            if m := HEADER_RE.match(ln):
-                state = "added" if m.group("flag") == "✓" else "failed"
-                continue
-
-            if m := LINE_RE.match(ln):
-                dom, reason = m.group("dom"), m.group("reason") or ""
-                if state == "added":
-                    added.append(dom)
-                elif state == "failed":
-                    (duplicates if _classify_failed(reason) == "duplicate" else invalid).append(dom)
-
-        return {"added": added, "duplicates": duplicates, "invalid": invalid}
 
     def _filter_output_(self, out: any, err: any):
         """
