@@ -26,3 +26,31 @@
       full_version: "{{ pdns_version.full_version }}"
       version: "{{ pdns_version.version }}"
 
+# -----------------------------------------------------------------
+
+- name: systemd
+  when:
+    - ansible_service_mgr == "systemd"
+  block:
+    - name: populate service facts
+      ansible.builtin.service_facts:
+      register: systemd_facts
+      no_log: true
+      tags:
+        - pdns
+        - install
+
+    - name: set systemd unit name
+      ansible.builtin.set_fact:
+        resolved_unit_file: "{{ ansible_facts.services | bodsch.systemd.service('systemd-resolved', state='running') }}"
+      tags:
+        - pdns
+        - install
+
+    - name: disable systemd-resolved
+      service:
+        name: "{{ resolved_unit_file }}"
+        state: stopped
+        enabled: false
+      when:
+        - resolved_unit_file | default('') | string | length > 0

@@ -107,7 +107,9 @@ def test_directories(host, get_vars):
     pp_json(get_vars)
 
     directories = [
-        get_vars.get("dnsmasq_config_directory"),
+        "/etc/powerdns/recursor.d",
+        "/usr/share/pdns-recursor",
+        "/var/cache/ansible/pdns_recursor",
     ]
 
     for dirs in directories:
@@ -120,7 +122,9 @@ def test_files(host, get_vars):
       created config files
     """
     files = [
-        get_vars.get("dnsmasq_config_file")
+        "/etc/powerdns/recursor.conf",
+        "/usr/lib/systemd/system/pdns-recursor.service",
+        "/usr/sbin/pdns_recursor"
     ]
 
     for _file in files:
@@ -155,7 +159,7 @@ def test_service_running_and_enabled(host, get_vars):
     """
       running service
     """
-    service_name = "dnsmasq"
+    service_name = "pdns-recursor"
 
     service = host.service(service_name)
     assert service.is_running
@@ -170,15 +174,9 @@ def test_listening_socket(host, get_vars):
     for i in listening:
         print(i)
 
-    _conf_global = get_vars.get("dnsmasq_global", {})
-    _conf_interfaces = get_vars.get("dnsmasq_interfaces", {})
-
-    bind_port = _conf_global.get("port", 53)
-    bind_address = _conf_interfaces.get("listen_address", "0.0.0.0")
-
     listen = []
-    listen.append(f"tcp://{bind_address}:{bind_port}")
-    listen.append(f"udp://{bind_address}:{bind_port}")
+    listen.append(f"tcp://127.0.0.1:53")
+    listen.append(f"udp://127.0.0.1:53")
 
     for spec in listen:
         socket = host.socket(spec)
