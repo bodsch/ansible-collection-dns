@@ -4,17 +4,22 @@
   {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 dnssec:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {# ----------------------------------------------------------------------- #}
   {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
+    {% if pdns_recursor_version.full_version is version_compare('4.7', '>=') %}
 aggressive-cache-max-nsec3-hash-cost={{ values.get("aggressive_cache_max_nsec3_hash_cost") }}
+    {% endif %}
 aggressive-nsec-cache-size={{ values.get("aggressive_nsec_cache_size") }}
 dnssec={{ values.get("validation") }}
 dnssec-log-bogus={{ values.get("log_bogus") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if pdns_recursor_version.full_version is version_compare('4.7', '>=') %}
 max-dnskeys={{ values.get("max_dnskeys") }}
 max-ds-per-zone={{ values.get("max_ds_per_zone") }}
 max-nsec3-hash-computations-per-query={{ values.get("max_nsec3_hash_computations_per_query") }}
 max-nsec3s-per-record={{ values.get("max_nsec3s_per_record") }}
 max-rrsigs-per-record={{ values.get("max_rrsigs_per_record") }}
 max-signature-validations-per-query={{ values.get("max_signature_validations_per_query") }}
+    {% endif %}
 allow-trust-anchor-query={{ values.get("allow_trust_anchor_query", False) | bool | bodsch.core.config_bool(true_as='yes', false_as='no') }}
     {% if values.get("x_dnssec_names", []) | count > 0 %}
 x-dnssec-names={{ values.get("x_dnssec_names") | join(', ') }}

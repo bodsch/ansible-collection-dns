@@ -4,6 +4,7 @@
   {% if pdns_recursor_version.full_version is version_compare('5', '>=') %}
 logging:
   {{ values | to_nice_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+  {# ----------------------------------------------------------------------- #}
   {% elif pdns_recursor_version.full_version is version_compare('5', '<') %}
 disable-syslog={{ values.get("disable_syslog") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
 log-common-errors={{ values.get("common_errors") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
@@ -14,7 +15,9 @@ loglevel={{ values.get("loglevel") }}
 quiet={{ values.get("quiet") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
 statistics-interval={{ values.get("statistics_interval") }}
 structured-logging={{ values.get("structured_logging") | bodsch.core.config_bool(true_as='yes', false_as='no') }}
+    {% if pdns_recursor_version.full_version is version_compare('4.7', '>=') %}
 structured-logging-backend={{ values.get("structured_logging_backend") }}
+    {% endif %}
 trace={{ values.get("trace") }}
 
   {% endif %}
