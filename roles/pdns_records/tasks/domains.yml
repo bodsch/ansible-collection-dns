@@ -1,17 +1,13 @@
 ---
 
-# - name: d
-#   debug:
-#     msg: "{{ pdns_zones }}"
-
 - name: create domain zones
   bodsch.dns.pdns_zone_data:
-    # type: "{{ pdns_zones }}"
     zone_data: "{{ pdns_zones }}"
   register: pdns_zone_created
 
-# - name: d
-#   debug:
-#     msg: "{{ pdns_zone_created }}"
-
+- name: created zones
+  ansible.builtin.debug:
+    msg: "{{ pdns_zone_created }}"
+  when:
+    - pdns_zone_created.failed
 ...
