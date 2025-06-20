@@ -60,7 +60,6 @@ jobs:
           - pdns
           - pdns_recursor
           - pihole
-          # - pdns_records
 
     steps:
       - name: check out the codebase.

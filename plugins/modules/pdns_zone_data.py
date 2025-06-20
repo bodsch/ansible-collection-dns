@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# (c) 2023, Bodo Schulz <bodo@boone-schulz.de>
+# (c) 2023-2025, Bodo Schulz <bodo@boone-schulz.de>
 
 from __future__ import absolute_import, division, print_function
-import netaddr
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
@@ -23,10 +22,6 @@ short_description: TBD
 description: TBD
 
 options:
-  zone_directory:
-    description: []
-    type: str
-    required: true
   zone_data:
     description: []
     type: raw
@@ -52,22 +47,6 @@ class PdnsZoneData(object):
         """
         """
         self.module = module
-
-        self.db_type = module.params.get("type")
-
-        if self.db_type == "sqlite3":
-            self.database = module.params.get("database")
-
-        elif self.db_type == "mysql":
-            self.database = module.params.get("database")
-
-            self.db_hostname = self.database.get("hostname", None)
-            self.db_port = self.database.get("port", 3306)
-            self.db_socket = self.database.get("socket", None)
-            self.db_config = self.database.get("config_file", None)
-            self.db_schemaname = self.database.get("schemaname", None)
-            self.db_login_username = self.database.get("login", {}).get("username", None)
-            self.db_login_password = self.database.get("login", {}).get("password", None)
 
         self.zone_data = module.params.get("zone_data")
         self._pdnsutil_bin = module.get_bin_path('pdnsutil', True)
@@ -158,8 +137,6 @@ class PdnsZoneData(object):
 
         return result
 
-    # --------------------
-
     def pdns_config_loader(self):
         """
         """
@@ -207,200 +184,6 @@ class PdnsZoneData(object):
 
         return changed
 
-    def define_zone_forward_names(self):
-        """
-        """
-        return [x.get("name") for x in self.zone_data if x.get("state", "present") and x.get("create_forward_zones", True)]
-
-    def define_zone_reverse_names(self, ipv6=False):
-        """
-        """
-        self.module.log(msg=f"define_zone_reverse_names(ipv6={ipv6})")
-
-        networks = []
-
-        def reverse_zone(network_str):
-            import ipaddress
-            net = ipaddress.ip_network(network_str)
-            result = net.reverse_pointer + "."
-            self.module.log(msg=f" = {networks}")
-            return result
-
-        if not ipv6:
-            networks = [
-                x.get("networks", [])
-                for x in self.zone_data
-                if x.get("state", "present") and x.get("create_reverse_zones", True)
-            ]
-        else:
-            networks = [
-                x.get("ipv6_networks", [])
-                for x in self.zone_data
-                if x.get("state", "present") and x.get("create_reverse_zones", True)
-            ]
-
-        self.module.log(msg=f" - {networks} (type(networks))")
-        if networks:
-            # flatten list of lists
-            networks = [x for row in networks for x in row]
-        else:
-            networks = []
-
-        self.module.log(msg=f" = {networks}")
-
-        return networks
-
-    def define_zone_networks(self):
-        """
-        """
-        networks = [x.get("networks") for x in self.zone_data]
-        # flatten list of lists
-        return [x for row in networks for x in row]
-
-    def _reverse_zone_for_network(self, network):
-        """
-        Erzeugt die Reverse-Zone für das angegebene Subnetz (IPv4 und IPv6).
-        """
-        from ansible_collections.bodsch.dns.plugins.module_utils.network_type import is_valid_ipv4
-
-        reverse_ip = None
-
-        if is_valid_ipv4(network):
-            # Splitte die IP-Adresse und umkehre nur die ersten drei Oktette
-            network_parts = network.split(".")
-
-            # Achte darauf, dass für eine Netzadresse wie 10.11.0.0/24 nur das erste Oktett benötigt wird.
-            reverse_ip = f"{network_parts[0]}.in-addr.arpa"
-
-            result = reverse_ip
-
-        else:
-            import ipaddress
-
-            ipv6_obj = ipaddress.IPv6Address(network)
-            exploded_ip = ipv6_obj.exploded  # Gibt die vollständige IPv6-Adresse zurück
-
-            self.module.log(msg=f"{exploded_ip}")
-
-            # Entfernen der Doppelpunkte, Umkehren der Blöcke
-            reversed_parts = list(reversed(exploded_ip.replace(":", "")))
-
-            # Entfernen von führenden und mittleren Nullen
-            # Die Ziffern, die "0" sind, müssen entfernt werden
-            reversed_parts = [x for x in reversed_parts if x != '0']
-
-            # Die Rückgabe der PTR-Adresse im richtigen Format
-            reverse_ip = ".".join(reversed_parts)
-
-            result = f"{reverse_ip}.ip6.arpa"
-
-        if not result:
-            self.module.log(msg=f"PROBLEM: {network} is neither a valid IPv4 nor a valid IPv6 network.")
-
-        return result
-
-    def _reverse_ip_for_host(self, ip):
-        """
-        Erzeugt den Reverse-DNS-Eintrag (PTR-Record) für eine gegebene Host-IP-Adresse.
-        """
-        reverse_ip = None
-
-        if self.is_valid_ipv4(ip):
-            reverse_ip = ".".join(ip.split('.')[::-1])
-            result = f"{reverse_ip}.in-addr.arpa."
-
-        else:
-            try:
-                _ipaddress = netaddr.IPAddress(ip)
-                reverse_ip = _ipaddress.reverse_dns  # Diese Methode gibt uns den PTR für eine einzelne IP
-
-                # Entfernen der "0"s in IPv6
-                reverse_ip = reverse_ip.replace("0.", "")  # Entfernt führende Nullstellen
-                reverse_ip = ".".join([segment for segment in reverse_ip.split(".") if segment != "0"])
-
-                result = f"{reverse_ip}.ip6.arpa."
-            except Exception as e:
-                self.module.log(msg=f"ERROR: {e}")
-                result = None
-
-        if not result:
-            self.module.log(msg=f"PROBLEM: {ip} is neither a valid IPv4 nor a valid IPv6 address.")
-
-        return result
-
-    def reverse_zone_names(self, network):
-        """
-        """
-        self.module.log(msg=f"reverse_zone_names({network})")
-
-        # ----------------------------------------------------
-        from ansible_collections.bodsch.dns.plugins.module_utils.network_type import is_valid_ipv4
-
-        reverse_ip = None
-
-        if is_valid_ipv4(network):
-            self.module.log(msg="ipv4")
-            reverse_ip = ".".join(network.replace(network + '.', '').split('.')[::-1])
-            # reverse_ip = ".".join(ip.split(".")[::-1])
-
-            result = f"{reverse_ip}.in-addr.arpa"
-
-        else:
-            self.module.log(msg="ipv6")
-            import ipaddress
-
-            ipv6_obj = ipaddress.IPv6Address(network)
-            exploded_ip = ipv6_obj.exploded  # Gibt die vollständige IPv6-Adresse zurück
-
-            self.module.log(msg=f"{exploded_ip}")
-
-            # Entfernen der Doppelpunkte, Umkehren der Blöcke
-            reversed_parts = list(reversed(exploded_ip.replace(":", "")))
-
-            # Entfernen von führenden und mittleren Nullen
-            # Die Ziffern, die "0" sind, müssen entfernt werden
-            reversed_parts = [x for x in reversed_parts if x != '0']
-
-            # Die Rückgabe der PTR-Adresse im richtigen Format
-            reverse_ip = ".".join(reversed_parts)
-
-            result = f"{reverse_ip}.ip6.arpa"
-
-            # return result
-
-            # # Entfernen der Doppelpunkte, Umkehren der Blöcke und Hinzufügen von '.ip6.arpa'
-            # reversed_parts = ".".join(reversed(exploded_ip.replace(":", "")))
-            # return reversed_parts + ".ip6.arpa."
-            #
-            # try:
-            #     _offset = None
-            #     if network.count("/") == 1:
-            #         _prefix = network.split("/")[1]
-            #         _offset = int(9 + int(_prefix) // 2)
-            #         # self.module.log(msg=f" - {_prefix} - {_offset}")
-            #
-            #     _network = netaddr.IPNetwork(str(network))
-            #     _prefix = _network.prefixlen
-            #     _ipaddress = netaddr.IPAddress(_network)
-            #     reverse_ip = _ipaddress.reverse_dns
-            #
-            #     if _offset:
-            #         result = reverse_ip[-_offset:]
-            #
-            #     if result[-1] == ".":
-            #         result = result[:-1]
-            #
-            # except Exception as e:
-            #     self.module.log(msg=f" =>  ERROR: {e}")
-            #     pass
-
-        if not result:
-            self.module.log(msg=f" PROBLEM: {network} is neither a valid IPv4 nor a valid IPv6 network.")
-
-        self.module.log(msg=f" = '{result}'")
-
-        return result
-
 
 def main():
 
@@ -408,10 +191,6 @@ def main():
         zone_data=dict(
             required=True,
             type="raw"
-        ),
-        database=dict(
-            required=False,
-            type='raw'
         ),
     )
 

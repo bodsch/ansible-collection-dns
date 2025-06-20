@@ -33,4 +33,7 @@
   when:
     - pdns_dependencies | default([]) | count > 0
 
+- name: get latest system information
+  ansible.builtin.setup:
+
 ...

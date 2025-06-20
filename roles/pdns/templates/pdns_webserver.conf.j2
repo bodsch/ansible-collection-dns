@@ -4,6 +4,13 @@
 {% if pdns_webserver is defined and
       pdns_webserver.enabled is defined and
       pdns_webserver.enabled %}
+  {% set _ = pdns_webserver.pop("enabled") %}
+  {% if pdns_version.full_version is version_compare('4.8', '<=') %}
+    {% set _ = pdns_webserver.pop("connection-timeout") %}
+  {% endif %}
+  {% if pdns_version.full_version is version_compare('4.6', '<=') %}
+    {% set _ = pdns_webserver.pop("hash-plaintext-credentials") %}
+  {% endif %}
 webserver=yes
   {% for config_item, value in pdns_webserver.items() %}
     {% if config_item not in ["enabled"] %}

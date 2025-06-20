@@ -18,7 +18,7 @@
   when:
     - pdns_config_include is defined
 
-- name: generate the pdns backend configuration
+- name: generate the pdns configuration files
   ansible.builtin.template:
     src: "{{ item }}.conf.j2"
     dest: "{{ pdns_config_include }}/{{ item }}.conf"
