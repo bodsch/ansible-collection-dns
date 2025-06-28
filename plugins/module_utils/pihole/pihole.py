@@ -92,9 +92,9 @@ class PiHole():
 
         if old_checksum == cur_checksum:
             return dict(
-                changed = False,
-                failed = False,
-                msg = "This admin password has already been set."
+                changed=False,
+                failed=False,
+                msg="This admin password has already been set."
             )
 
         args = [
@@ -110,15 +110,15 @@ class PiHole():
                 f.write(cur_checksum)
 
             return dict(
-                changed = True,
-                failed = False,
-                msg = "The admin password has been successfully changed."
+                changed=True,
+                failed=False,
+                msg="The admin password has been successfully changed."
             )
 
         return dict(
-            changed = False,
-            failed = True,
-            msg = err
+            changed=False,
+            failed=True,
+            msg=err
         )
 
     def update_gravity(self):
