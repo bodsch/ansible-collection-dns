@@ -167,6 +167,7 @@ jobs:
         scenario:
           - configured
           - upgrade
+          - zone-transfer
         collection_role:
           - bind
 

@@ -209,6 +209,12 @@ bind_zones:
       - ns1.acme-inc.com.
       - ns2.acme-inc.com.
     hostmaster_email: admin
+    #
+    allow_updates:
+      - "10.0.1.2"
+      - 'key "external-dns"'
+    allow_transfers:
+      - 'key "external-dns"'    
     hosts:
       - name: srv001
         ip: 192.0.2.1

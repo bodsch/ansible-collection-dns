@@ -6,4 +6,8 @@
     "{{ acl.name }}";
     {% endfor %}
   };
+{% else %}
+  allow-transfer {
+    none;
+  };
 {% endif %}
