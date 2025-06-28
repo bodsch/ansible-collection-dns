@@ -34,25 +34,46 @@
 {#// #2: '{{ _type }}'
 // ------------------------------------------------------------
 #}
+
 zone "{{ bind_zone.name }}" IN {
       {% if (_type | string).upper() == 'PRIMARY' %}
   type master;
   file "{{ bind_zone_dir }}/{{ bind_zone.name }}";
   notify yes;
+
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_updates | default([]) | count > 0 %}
+          {% if bind_zone.allow_updates | bodsch.core.type == "list" %}
+  allow-update {
+            {% for u in bind_zone.allow_updates %}
+    {{ u }};
+            {% endfor %}
+  };
+          {% else %}
+  allow-update {
+    none
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_transfers | default([]) | count > 0 %}
+          {% if bind_zone.allow_transfers | bodsch.core.type == "list" %}
+  allow-transfer {
+            {% for u in bind_zone.allow_transfers %}
+    {{ u }};
+            {% endfor %}
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+
         {% if bind_zone.also_notify is defined %}
   also-notify  {
     {{ bind_zone.also_notify| join(';\n') | indent(4) }};
   };
         {% endif %}
-        {% if bind_zone.allow_update is defined %}
-  allow-update {
-    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
-  };
-        {% else %}
-  allow-update {
-    none;
-  };
-        {% endif %}
+
       {% elif (_type | string).upper() == 'SECONDARY' %}
   type slave;
   masters {
@@ -84,15 +105,32 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
     {{ bind_zone.also_notify| join(';\n') | indent(4) }};
   };
             {% endif %}
-            {% if bind_zone.allow_update is defined %}
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_updates | default([]) | count > 0 %}
+          {% if bind_zone.allow_updates | bodsch.core.type == "list" %}
   allow-update {
-    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+            {% for u in bind_zone.allow_updates %}
+    {{ u }};
+            {% endfor %}
   };
-            {% else %}
+          {% else %}
   allow-update {
-    none;
+    none
   };
-            {% endif %}
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_transfers | default([]) | count > 0 %}
+          {% if bind_zone.allow_transfers | bodsch.core.type == "list" %}
+  allow-transfer {
+            {% for u in bind_zone.allow_transfers %}
+    {{ u }};
+            {% endfor %}
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
           {% elif (_type | string).upper() == 'SECONDARY' %}
   type slave;
   masters {
@@ -126,15 +164,32 @@ zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace
     {{ bind_zone.also_notify| join(';\n') | indent(4) }};
   };
             {% endif %}
-            {% if bind_zone.allow_update is defined %}
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_updates | default([]) | count > 0 %}
+          {% if bind_zone.allow_updates | bodsch.core.type == "list" %}
   allow-update {
-    {{ bind_zone.allow_update| join(';\n') | indent(4) }};
+            {% for u in bind_zone.allow_updates %}
+    {{ u }};
+            {% endfor %}
   };
-            {% else %}
+          {% else %}
   allow-update {
-    none;
+    none
   };
-            {% endif %}
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+  {# -------------------------------------------- #}
+        {% if bind_zone.allow_transfers | default([]) | count > 0 %}
+          {% if bind_zone.allow_transfers | bodsch.core.type == "list" %}
+  allow-transfer {
+            {% for u in bind_zone.allow_transfers %}
+    {{ u }};
+            {% endfor %}
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
           {% elif (_type | string).upper() == 'SECONDARY' %}
   type slave;
   masters {
