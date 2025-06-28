@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
 
-class PiholeGroupManager():
+class GroupManager():
     """
     """
 
@@ -21,7 +21,7 @@ class PiholeGroupManager():
         """
         self.module = module
 
-        self.module.log(f"PiholeGroupManager::__init__(module, database={database})")
+        # self.module.log(f"GroupManager::__init__(module, database={database})")
 
         db_file = Path(database)
 
@@ -39,7 +39,7 @@ class PiholeGroupManager():
     def list_groups(self) -> List[Tuple[int, str, int]]:
         """
         """
-        self.module.log("PiholeGroupManager::list_groups()")
+        # self.module.log("GroupManager::list_groups()")
 
         self.cursor.execute("SELECT id, name, enabled FROM 'group'")
 
@@ -48,7 +48,7 @@ class PiholeGroupManager():
     def group_exists(self, name: str) -> bool:
         """
         """
-        self.module.log(f"PiholeGroupManager::group_exists(name={name})")
+        # self.module.log(f"GroupManager::group_exists(name={name})")
 
         self.cursor.execute("SELECT id FROM 'group' WHERE name = ?", (name,))
         return self.cursor.fetchone() is not None
@@ -56,7 +56,7 @@ class PiholeGroupManager():
     def add_group(self, name: str, description: Optional[str] = None, enabled: bool = True):
         """
         """
-        self.module.log(f"PiholeGroupManager::add_group(name={name}, description={description}, enabled={enabled})")
+        # self.module.log(f"GroupManager::add_group(name={name}, description={description}, enabled={enabled})")
 
         if self.group_exists(name):
             return dict(
@@ -85,26 +85,29 @@ class PiholeGroupManager():
             msg="Group successfuly created."
         )
 
-    def sync_groups(self, desired_groups: List[str]) -> Dict[str, Any]:
+    def remove_group(self, name: str) -> Dict[str, Any]:
         """
         """
-        self.module.log(f"PiholeGroupManager::sync_groups(desired_groups={desired_groups})")
-
-        existing_groups = [name for _, name, _ in self.list_groups()]
-        to_remove = set(existing_groups) - set(desired_groups)
-
-        removed = []
-        for name in to_remove:
+        # self.module.log(f"GroupManager::remove_group(name={name})")
+        try:
             self.cursor.execute("DELETE FROM 'group' WHERE name = ?", (name,))
-            removed.append(name)
+            rows_deleted = self.cursor.rowcount
+            self.conn.commit()
 
-        self.conn.commit()
-        return dict(changed=bool(removed), removed=removed)
+            self.module.log(f"Rows deleted: {rows_deleted}")
+
+            if rows_deleted > 0:
+                return dict(changed=True, msg="Group removed.")
+            else:
+                return dict(changed=False, msg="Group did not exist (case mismatch or already removed).")
+
+        except sqlite3.DatabaseError as e:
+            self.module.fail_json(msg=f"Failed to remove adlist: {str(e)}")
 
     def manage_groups(self, groups: List[Dict[str, Any]]) -> List[Dict[str, Dict[str, Any]]]:
         """
         """
-        self.module.log(f"PiholeGroupManager::manage_groups(groups={groups})")
+        # self.module.log(f"GroupManager::manage_groups(groups={groups})")
         result_state = []
 
         for group in groups:
@@ -113,8 +116,10 @@ class PiholeGroupManager():
             description = group.get("description", None)
             enabled = group.get("enabled", True)
 
-            if name:
+            if name and enabled:
                 res[name] = self.add_group(name=name, description=description, enabled=enabled)
+            elif name and not enabled:
+                res[name] = self.remove_group(name=name)
 
             result_state.append(res)
 
@@ -123,5 +128,5 @@ class PiholeGroupManager():
     def close(self):
         """
         """
-        self.module.log("PiholeGroupManager::close()")
+        # self.module.log("GroupManager::close()")
         self.conn.close()

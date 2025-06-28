@@ -14,6 +14,32 @@ pihole_groups:
     description: "Kids only"
     enabled: true
 
+pihole_clients:
+  - ip: 192.168.0.10
+    name: laptop
+    comment: "Kinder Laptop"
+    enabled: true
+    groups:
+      - kids
+
+  - ip: 192.168.0.20
+    name: necromonger
+    enabled: true
+    groups:
+      - admin
+
+  - ip: 192.168.178.1
+    name: router
+    enabled: true
+    groups:
+      - admin
+
+  - ip: 192.168.178.11
+    name: admin-pc
+    enabled: true
+    groups:
+      - admin
+
 # Zusätzliche Blocklisten
 pihole_custom_denylists:
   - address: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
@@ -63,14 +89,6 @@ pihole_custom_denylists:
   - address: https://v.firebog.net/hosts/Prigent-Malware.txt
   - address: https://raw.githubusercontent.com/jarelllama/Scam-Blocklist/main/lists/wildcard_domains/scams.txt
   - address: https://v.firebog.net/hosts/RPiList-Phishing.txt
-  # - address: "https://someonewhocares.org/hosts/zero/hosts"
-  #   enabled: false
-  # - address: "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
-  #   enabled: false
-  # - address: "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"
-  #   enabled: false
-  # - address: "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"
-  #   enabled: false
 
 # Wichtige Domains freigeben
 pihole_domain_allowlist:

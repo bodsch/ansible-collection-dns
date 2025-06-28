@@ -10,10 +10,11 @@ import sqlite3
 
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from urllib.parse import urlparse
 
 
-class PiholeAdlistManager():
+
+
+class AdlistManager():
     """
     """
 
@@ -22,7 +23,7 @@ class PiholeAdlistManager():
         """
         self.module = module
 
-        self.module.log("PiholeAdlistManager::__init__()")
+        # self.module.log("AdlistManager::__init__()")
 
         db_file = Path(database)
 
@@ -38,17 +39,17 @@ class PiholeAdlistManager():
         self.cursor = self.conn.cursor()
 
     def list_adlists(self):
-        self.module.log("PiholeAdlistManager::list_adlists()")
+        # self.module.log("AdlistManager::list_adlists()")
         self.cursor.execute("SELECT id, address, enabled FROM adlist")
         return self.cursor.fetchall()
 
     def adlist_exists(self, address: str) -> bool:
-        self.module.log(f"PiholeAdlistManager::adlist_exists(address={address})")
+        # self.module.log(f"AdlistManager::adlist_exists(address={address})")
         self.cursor.execute("SELECT id FROM adlist WHERE address = ?", (address,))
         return self.cursor.fetchone() is not None
 
     def add_adlist(self, address: str, comment: Optional[str] = None, enabled: bool = True):
-        self.module.log(f"PiholeAdlistManager::add_adlist(address={address}, comment={comment}, enabled={enabled})")
+        # self.module.log(f"AdlistManager::add_adlist(address={address}, comment={comment}, enabled={enabled})")
 
         if self.adlist_exists(address):
             return dict(
@@ -69,12 +70,10 @@ class PiholeAdlistManager():
             self.module.fail_json(msg=f"Failed to insert adlist: {str(e)}")
 
     def manage_adlists(self, adlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        self.module.log(f"PiholeAdlistManager::manage_adlists(adlists={adlists})")
+        # self.module.log(f"AdlistManager::manage_adlists(adlists={adlists})")
         result_state = []
 
-        sanitized = self.sanitize_adlist_config(adlists)
-
-        for ad in sanitized:
+        for ad in adlists:
             address = ad.get("address")
             comment = ad.get("comment", None)
             enabled = ad.get("enabled", True)
@@ -89,7 +88,7 @@ class PiholeAdlistManager():
         return result_state
 
     def remove_adlist(self, address: str):
-        self.module.log(f"PiholeAdlistManager::remove_adlist(address={address})")
+        # self.module.log(f"AdlistManager::remove_adlist(address={address})")
 
         try:
             self.cursor.execute("DELETE FROM adlist WHERE address = ?", (address,))
@@ -110,7 +109,7 @@ class PiholeAdlistManager():
         """
         Remove adlists not in the desired list
         """
-        self.module.log(f"PiholeAdlistManager::sync_adlists(desired={desired})")
+        # self.module.log(f"AdlistManager::sync_adlists(desired={desired})")
         current = [addr for _, addr, _ in self.list_adlists()]
         to_remove = set(current) - set(desired)
 
@@ -122,35 +121,6 @@ class PiholeAdlistManager():
         return result_state
 
     def close(self):
-        self.module.log("PiholeAdlistManager::close()")
+        # self.module.log("AdlistManager::close()")
         self.conn.close()
 
-    def sanitize_adlist_config(self, adlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        seen = set()
-        cleaned = []
-
-        for ad in adlists:
-            address = ad.get("address")
-            if not address:
-                continue
-
-            # normalize (e.g., strip whitespaces, lowercase if needed)
-            address = address.strip()
-
-            # validate URL
-            parsed = urlparse(address)
-            if not parsed.scheme.startswith("http"):
-                continue  # skip invalid
-
-            if address in seen:
-                continue  # skip duplicates
-
-            seen.add(address)
-
-            cleaned.append(dict(
-                address=address,
-                comment=ad.get("comment", ""),
-                enabled=ad.get("enabled", True)
-            ))
-
-        return cleaned

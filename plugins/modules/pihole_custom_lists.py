@@ -63,7 +63,7 @@ class PiholeCustomLists(PiHole):
             rc=127,
             failed=True,
             changed=False,
-            full_version="unknown"
+            msg="unknown"
         )
 
         # pihole_status = self.status()

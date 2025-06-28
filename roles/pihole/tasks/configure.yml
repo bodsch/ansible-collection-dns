@@ -12,6 +12,12 @@
   when:
     - pihole_groups | default([]) | count > 0
 
+- name: create pihole clients
+  bodsch.dns.pihole_clients:
+    clients: "{{ pihole_clients | default([]) }}"
+  when:
+    - pihole_clients | default([]) | count > 0
+
 - name: create pihole adlists
   bodsch.dns.pihole_adlists:
     adlists: "{{ pihole_custom_denylists | default([]) }}"

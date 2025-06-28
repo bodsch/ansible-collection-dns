@@ -6,7 +6,7 @@
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.group_manager import GroupManager
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.client_manager import ClientManager
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
 
 # ---------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ RETURN = """
 # ---------------------------------------------------------------------------------------
 
 
-class PiHoleGroups(GroupManager):
+class PiHoleClients(ClientManager):
     """
     """
     module = None
@@ -51,7 +51,7 @@ class PiHoleGroups(GroupManager):
         """
         self.module = module
 
-        self.groups = module.params.get("groups")
+        self.clients = module.params.get("clients")
 
         super().__init__(module, database="/etc/pihole/gravity.db")
 
@@ -65,7 +65,7 @@ class PiHoleGroups(GroupManager):
             msg="unknown"
         )
 
-        result_state = self.manage_groups(groups=self.groups)
+        result_state = self.manage_clients(clients=self.clients)
 
         _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
 
@@ -81,7 +81,7 @@ class PiHoleGroups(GroupManager):
 def main():
 
     argument_spec = dict(
-        groups=dict(
+        clients=dict(
             required=False,
             type="list"
         ),
@@ -92,7 +92,7 @@ def main():
         supports_check_mode=True,
     )
 
-    p = PiHoleGroups(module)
+    p = PiHoleClients(module)
     result = p.run()
 
     module.log(msg=f"= result: {result}")
