@@ -1,6 +1,6 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 
-PIHOLE_INTERFACE={{ pihole_config.dns.interface }}
+PIHOLE_INTERFACE={{ pihole_config.dns.interface | default('eth0') }}
 {#
 # IPV4_ADDRESS={{ pihole_config.ipv4_address }}
 # IPV6_ADDRESS={{ pihole_config.ipv6_address }}
@@ -22,8 +22,8 @@ PIHOLE_DOMAIN={{ pihole_config.webserver.domain }}
 {#
 # DNS_FQDN_REQUIRED={{ pihole_config.dns.fqdn_required | lower }}
 #}
-DNS_BOGUS_PRIV={{ pihole_config.dns.bogusPriv | lower }}
-DNSSEC={{ pihole_config.dns.dnssec | lower }}
+DNS_BOGUS_PRIV={{ pihole_config.dns.bogusPriv | default('true') | lower }}
+DNSSEC={{ pihole_config.dns.dnssec | default('false') | lower }}
 {#
 # HOSTRECORD=
 
@@ -37,9 +37,8 @@ DNSSEC={{ pihole_config.dns.dnssec | lower }}
 # DHCP_LEASETIME=
 # DHCP_IPv6=
 # DHCP_RAPID_COMMIT=
-#}
 GRAVITY_TMPDIR={{ pihole_config.files.gravity_tmp }}
-{#
+
 TEMPERATURE_UNIT={{ pihole_config.webserver.api.temp.unit | upper }}
 TEMPERATURE_LIMIT={{ pihole_config.webserver.api.temp.limit }}
 

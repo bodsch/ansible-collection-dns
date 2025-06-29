@@ -35,9 +35,11 @@ provisioner:
   config_options:
     defaults:
       deprecation_warnings: true
-      stdout_callback: yaml
+      callback_result_format: yaml
+      callbacks_enabled: profile_tasks
       gathering: smart
       fact_caching_timeout: 320
+
 scenario:
   test_sequence:
     - destroy
@@ -45,8 +47,9 @@ scenario:
     - create
     - prepare
     - converge
-    # - idempotence
+    - idempotence
     - verify
     - destroy
+
 verifier:
   name: testinfra

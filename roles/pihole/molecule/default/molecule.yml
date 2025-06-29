@@ -36,6 +36,7 @@ provisioner:
     defaults:
       deprecation_warnings: true
       callback_result_format: yaml
+      callbacks_enabled: profile_tasks
       gathering: smart
       fact_caching_timeout: 320
 
@@ -46,6 +47,7 @@ scenario:
     - create
     - prepare
     - converge
+    - idempotence
     - verify
     - destroy
 
