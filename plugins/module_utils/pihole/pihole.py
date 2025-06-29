@@ -25,9 +25,10 @@ class PiHole():
     def __init__(self, module):
         self.module = module
 
-        self.module.log("PiHole::__init__()")
+        # self.module.log("PiHole::__init__()")
 
         self.pihole_bin = self.module.get_bin_path('pihole', False)
+        self.pihole_ftl_bin = self.module.get_bin_path("pihole-FTL", False)
 
     def status(self):
         """
@@ -52,7 +53,7 @@ class PiHole():
         :param comment: Kommentar, der an pihole übergeben wird.
         :returns: Dict mit Schlüsseln "changed", "added", "present".
         """
-        self.module.log(f"PiHole::import_list({domains}, {list_type}, {comment})")
+        # self.module.log(f"PiHole::import_list({domains}, {list_type}, {comment})")
 
         if list_type not in ("allow", "deny"):
             raise ValueError("list_type muss 'allow' oder 'deny' sein")
@@ -77,7 +78,7 @@ class PiHole():
     def admin_password(self, password: str):
         """
         """
-        self.module.log(f"PiHole::admin_password({password})")
+        # self.module.log(f"PiHole::admin_password({password})")
         old_checksum = None
         cur_checksum = None
 
@@ -92,9 +93,9 @@ class PiHole():
 
         if old_checksum == cur_checksum:
             return dict(
-                changed = False,
-                failed = False,
-                msg = "This admin password has already been set."
+                changed=False,
+                failed=False,
+                msg="This admin password has already been set."
             )
 
         args = [
@@ -110,15 +111,15 @@ class PiHole():
                 f.write(cur_checksum)
 
             return dict(
-                changed = True,
-                failed = False,
-                msg = "The admin password has been successfully changed."
+                changed=True,
+                failed=False,
+                msg="The admin password has been successfully changed."
             )
 
         return dict(
-            changed = False,
-            failed = True,
-            msg = err
+            changed=False,
+            failed=True,
+            msg=err
         )
 
     def update_gravity(self):
@@ -200,18 +201,10 @@ class PiHole():
         )
     # -------------------
 
-    def set_config(self, config: dict):
-        """
-            e.g. /usr/bin/pihole-FTL --config dns.hosts '[ "192.168.0.4 matrix.vpn", "192.168.0.4 matrix.lan" ]'
-        """
-        self.module.log(f"PiHole::set_config({config})")
-
-        pass
-
     def _exec(self, commands: List[str], check_rc: bool = True) -> Tuple[int, str, str]:
         """
         """
-        self.module.log(f"PiHole::_exec({commands}, {check_rc})")
+        # self.module.log(f"PiHole::_exec({commands}, {check_rc})")
 
         rc, out, err = self.module.run_command(commands, check_rc=check_rc)
 
@@ -221,43 +214,6 @@ class PiHole():
 
         return rc, out, err
 
-    def _filter_output_(self, out: any, err: any):
-        """
-        """
-        raw = "\n".join(filter(None, (out, err)))
-        raw = re.sub(r"Logout attempt.*?Unauthorized!\n?", "", raw, flags=re.S)
-        raw = re.sub(r"(?m)^/opt/pihole/api\.sh:.*readonly variable\n?", "", raw)
-        raw = raw.split("\n")
-        # strip entries
-        raw = [x.strip().replace("- ", "") for x in raw]
-        # remove empty elements
-        raw = list(filter(None, raw))
-        # filter comment
-        filtered = [e for e in raw if e != 'Domain already in the specified list']
-
-        header_re = re.compile(r'^(Added|Failed to add) \d+ domain\(s\):$')
-
-        added, failed = [], []
-        current = None
-
-        for e in filtered:
-            # entferne optional das führende "[✓] " bzw. "[✗] "
-            text = re.sub(r'^\[.\]\s*', '', e)
-            m = header_re.match(text)
-            if m:
-                # m.group(1) ist entweder "Added" oder "Failed to add"
-                current = added if m.group(1) == 'Added' else failed
-                continue
-            # alles andere ist eine Domain
-            if current is not None:
-                current.append(text)
-
-        return {
-            "added": added,
-            "present": failed,
-            "filtered": filtered
-        }
-
     def _parse_output(self, raw: str) -> Dict[str, List[str]]:
         """
         Parst die kombinierte Ausgabe aus stdout+stderr von `pihole allow|deny`.
@@ -266,7 +222,7 @@ class PiHole():
         raw = re.sub(r"Logout attempt.*?Unauthorized!\n?", "", raw, flags=re.S)
         raw = re.sub(r"(?m)^/opt/pihole/api\.sh:.*readonly variable\n?", "", raw)
 
-        self.module.log(f"PiHole::_parse_output({raw})")
+        # # self.module.log(f"PiHole::_parse_output({raw})")
 
         added: List[str] = []
         duplicates: List[str] = []

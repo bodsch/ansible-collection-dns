@@ -33,4 +33,8 @@
   when:
     - pihole_dependencies | default([]) | count > 0
 
+- name: merge pihole configuration between defaults and custom
+  ansible.builtin.set_fact:
+    pihole_config: "{{ pihole_defaults_config | combine(pihole_config, recursive=True) }}"
+
 ...
