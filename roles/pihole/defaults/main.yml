@@ -10,46 +10,53 @@ pihole_arch:
   archive: https://github.com/pi-hole/pi-hole/archive/refs/tags/v{{ pihole_version }}.tar.gz
 
 pihole_config_setup:
-  interface: "{{ ansible_default_ipv4.interface }}"
-  ipv4_address: "{{ ansible_default_ipv4.address }}/24"
-  ipv6_address: ""
-  query_logging: true
-  install_web:
-    server: true
-    interface: true
-  blocking_enabled: true
-  dnsmasq_listening: ""
   dns:
-    upstream:
+    interface: "{{ ansible_default_ipv4.interface }}"
+    domain: pi.hole
+    cache:
+      size: 10000
+      optimizer: 3600
+    upstreams:
       - "1.1.1.1"
       - "1.0.0.1"
       - "9.9.9.9"
-    fqdn_required: true
-    bogus_priv: true
+    bogusPriv: true
     dnssec: false
   dhcp: {}
-  domain: pi.hole
-  gravity_tmpdir: /var/tmp
-  temperature:
-    unit: c
-    limit: ""
-  web:
-    ui_boxed_layout: boxed
-    theme: default-light
-    # Leer lassen für zufälliges Passwort
-    password: "fooo-bar"
-    ports:
-      - 8080
-  api:
-    exclude:
-      domains: []
-      clients: []
-    query_log_show: all
-    privacy_mode: false
+  ntp: {}
+  resolver: {}
+  database: {}
+  files:
+    gravity_tmp: /var/tmp
+  webserver:
+    domain: pi.hole
+    port: 8080
+    session:
+      timeout: 1600
+    interface:
+      boxed: true
+      theme: default-light
+    api:
+      prettyJSON: true
+      temp:
+        limit: "60.0"
+        unit: C
+  misc:
+    delay_startup: 10
+  debug: {}
 
-#   custom_hosts: []
-#     # - domain: matrix.lan
-#     #   host: 172.0.16.0.1
+pihole_groups: []
+#   - name: admin
+#     description: "Admin Group"
+#     enabled: true
+
+pihole_clients: []
+#   - ip: 192.168.0.10
+#     name: laptop
+#     comment: "Kids Laptop"
+#     enabled: true
+#     groups:
+#       - kids
 
 # Custom lists (optional)
 pihole_custom_denylists: []
@@ -61,6 +68,9 @@ pihole_custom_denylists: []
   # - "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
   # - "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"  # Krypto-Mining Blocker
   # - "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"  # Smart TV Telemetrie
+#   - address: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+#     comment: "default list"
+#     enabled: true
 
 pihole_domain_allowlist: []
   # Beispiele für Domains die NICHT blockiert werden sollen

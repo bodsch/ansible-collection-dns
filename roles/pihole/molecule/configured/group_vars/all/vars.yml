@@ -1,10 +1,41 @@
 ---
 
 pihole_admin_password: "SuperSicher2024!"
-pihole_dns_1: "1.1.1.1"          # Cloudflare
-pihole_dns_2: "9.9.9.9"          # Quad9
-pihole_dnssec: true
-configure_firewall: true
+
+pihole_config_setup:
+  dns:
+    interface: "{{ ansible_default_ipv4.interface }}"
+    domain: pi.hole
+    cache:
+      size: 10000
+      optimizer: 3600
+    upstreams:
+      - "1.1.1.1"
+      - "9.9.9.9"
+    bogusPriv: true
+    dnssec: false
+  # dhcp: {}
+  # ntp: {}
+  # resolver: {}
+  # database: {}
+  # files:
+  #   gravity_tmp: /var/tmp
+  webserver:
+    domain: pi.hole
+    port: 80
+    session:
+      timeout: 1600
+    # interface:
+    #   boxed: true
+    #   theme: default-light
+    # api:
+    #   prettyJSON: true
+    #   temp:
+    #     limit: "60.0"
+    #     unit: C
+  misc:
+    delay_startup: 10
+  debug: {}
 
 pihole_groups:
   - name: admin
@@ -94,7 +125,7 @@ pihole_custom_denylists:
 pihole_domain_allowlist:
   # Microsoft Updates
   - "delivery.mp.microsoft.com"
-  - "tlu.dl.delivery.mp.microsoft.com" 
+  - "tlu.dl.delivery.mp.microsoft.com"
   - "download.windowsupdate.com"
   # Google Services (für manche Seiten nötig)
   - "googleadservices.com"

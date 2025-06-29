@@ -7,3 +7,4 @@ pihole_dependencies:
   - ca-certificates
   - bind-tools  # dnsutils equivalent
   - net-tools
+  - python-toml

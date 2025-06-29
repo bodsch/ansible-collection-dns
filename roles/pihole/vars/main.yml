@@ -11,10 +11,11 @@ pihole_cache_directory: /var/cache/ansible/pihole
 pihole_remote_tmp_directory: "{{ pihole_cache_directory }}/{{ pihole_version }}"
 
 pihole_dependencies:
-  - curl
-  - wget
-  - ca-certificates
+  #- curl
+  #- wget
+  #- ca-certificates
   - dnsutils
   - net-tools
+  - python-toml
 
 ...

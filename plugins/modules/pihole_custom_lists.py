@@ -73,7 +73,7 @@ class PiholeCustomLists(PiHole):
         if len(self.allow_list) > 0:
             res = {}
             result_allow = self.import_allow(self.allow_list)
-            self.module.log(f"{result_allow}")
+            # self.module.log(f"{result_allow}")
 
             res["allow"] = result_allow
             result_state.append(res)
@@ -81,7 +81,7 @@ class PiholeCustomLists(PiHole):
         if len(self.deny_list) > 0:
             res = {}
             result_deny = self.import_deny(self.deny_list)
-            self.module.log(f"{result_deny}")
+            # self.module.log(f"{result_deny}")
 
             res["deny"] = result_deny
             result_state.append(res)
@@ -118,7 +118,7 @@ def main():
     p = PiholeCustomLists(module)
     result = p.run()
 
-    module.log(msg=f"= result: {result}")
+    # module.log(msg=f"= result: {result}")
 
     module.exit_json(**result)
 

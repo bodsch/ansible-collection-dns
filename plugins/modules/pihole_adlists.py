@@ -99,7 +99,7 @@ def main():
     p = PiHoleAdlist(module)
     result = p.run()
 
-    module.log(msg=f"= result: {result}")
+    # module.log(msg=f"= result: {result}")
 
     module.exit_json(**result)
 
