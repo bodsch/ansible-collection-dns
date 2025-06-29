@@ -12,8 +12,6 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 
-
-
 class AdlistManager():
     """
     """
@@ -123,4 +121,3 @@ class AdlistManager():
     def close(self):
         # self.module.log("AdlistManager::close()")
         self.conn.close()
-

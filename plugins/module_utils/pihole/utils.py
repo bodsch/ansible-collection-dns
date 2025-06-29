@@ -2,6 +2,7 @@
 from urllib.parse import urlparse
 from typing import List, Dict, Any
 
+
 def sanitize_adlist(adlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     seen = set()
     cleaned = []
