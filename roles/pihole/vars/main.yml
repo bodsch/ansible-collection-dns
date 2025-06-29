@@ -16,6 +16,6 @@ pihole_dependencies:
   #- ca-certificates
   - dnsutils
   - net-tools
-  - python-toml
+  - python3-toml
 
 ...

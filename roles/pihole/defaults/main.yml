@@ -60,14 +60,14 @@ pihole_clients: []
 
 # Custom lists (optional)
 pihole_custom_denylists: []
-  # Beispiele für zusätzliche Blocklisten
-  # - "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-  # - "https://someonewhocares.org/hosts/zero/hosts"
-  # - "https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/BaseFilter/sections/adservers.txt"
-  # - "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
-  # - "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
-  # - "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"  # Krypto-Mining Blocker
-  # - "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"  # Smart TV Telemetrie
+# Beispiele für zusätzliche Blocklisten
+#   - address: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+#   - address: "https://someonewhocares.org/hosts/zero/hosts"
+#   - address: "https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/BaseFilter/sections/adservers.txt"
+#   - address: "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
+#   - address: "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
+#   - address: "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"  # Krypto-Mining Blocker
+#   - address: "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"  # Smart TV Telemetrie
 #   - address: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 #     comment: "default list"
 #     enabled: true
