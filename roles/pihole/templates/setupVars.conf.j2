@@ -1,33 +1,33 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 
-PIHOLE_INTERFACE={{ pihole_config_setup.dns.interface }}
+PIHOLE_INTERFACE={{ pihole_config.dns.interface }}
 {#
-# IPV4_ADDRESS={{ pihole_config_setup.ipv4_address }}
-# IPV6_ADDRESS={{ pihole_config_setup.ipv6_address }}
+# IPV4_ADDRESS={{ pihole_config.ipv4_address }}
+# IPV6_ADDRESS={{ pihole_config.ipv6_address }}
 #}
-QUERY_LOGGING={{ pihole_config_setup.query_logging | default('true') | lower }}
+QUERY_LOGGING={{ pihole_config.query_logging | default('true') | lower }}
 {#
-# INSTALL_WEB_SERVER={{ pihole_config_setup.install_web.server | lower }}
-# INSTALL_WEB_INTERFACE={{ pihole_config_setup.install_web.interface | lower }}
+# INSTALL_WEB_SERVER={{ pihole_config.install_web.server | lower }}
+# INSTALL_WEB_INTERFACE={{ pihole_config.install_web.interface | lower }}
 
-# BLOCKING_ENABLED={{ pihole_config_setup.blocking_enabled | lower }}
+# BLOCKING_ENABLED={{ pihole_config.blocking_enabled | lower }}
 #}
-{% if pihole_config_setup.dns.upstream | default([]) | count > 0 %}
-  {% for i in pihole_config_setup.dns.upstreams %}
+{% if pihole_config.dns.upstream | default([]) | count > 0 %}
+  {% for i in pihole_config.dns.upstreams %}
 PIHOLE_DNS_{{ loop.index }}={{ i }}
   {% endfor %}
 {% endif %}
 
-PIHOLE_DOMAIN={{ pihole_config_setup.webserver.domain }}
+PIHOLE_DOMAIN={{ pihole_config.webserver.domain }}
 {#
-# DNS_FQDN_REQUIRED={{ pihole_config_setup.dns.fqdn_required | lower }}
+# DNS_FQDN_REQUIRED={{ pihole_config.dns.fqdn_required | lower }}
 #}
-DNS_BOGUS_PRIV={{ pihole_config_setup.dns.bogusPriv | lower }}
-DNSSEC={{ pihole_config_setup.dns.dnssec | lower }}
+DNS_BOGUS_PRIV={{ pihole_config.dns.bogusPriv | lower }}
+DNSSEC={{ pihole_config.dns.dnssec | lower }}
 {#
 # HOSTRECORD=
 
-# DNSMASQ_LISTENING={{ pihole_config_setup.dnsmasq_listening }}
+# DNSMASQ_LISTENING={{ pihole_config.dnsmasq_listening }}
 
 # REV_SERVER=
 # DHCP_ACTIVE=
@@ -38,19 +38,19 @@ DNSSEC={{ pihole_config_setup.dns.dnssec | lower }}
 # DHCP_IPv6=
 # DHCP_RAPID_COMMIT=
 #}
-GRAVITY_TMPDIR={{ pihole_config_setup.files.gravity_tmp }}
+GRAVITY_TMPDIR={{ pihole_config.files.gravity_tmp }}
 {#
-TEMPERATURE_UNIT={{ pihole_config_setup.webserver.api.temp.unit | upper }}
-TEMPERATURE_LIMIT={{ pihole_config_setup.webserver.api.temp.limit }}
+TEMPERATURE_UNIT={{ pihole_config.webserver.api.temp.unit | upper }}
+TEMPERATURE_LIMIT={{ pihole_config.webserver.api.temp.limit }}
 
-WEBUIBOXEDLAYOUT={{ pihole_config_setup.webserver.interface.boxed }}
-WEBTHEME={{ pihole_config_setup.webserver.interface.theme }}
+WEBUIBOXEDLAYOUT={{ pihole_config.webserver.interface.boxed }}
+WEBTHEME={{ pihole_config.webserver.interface.theme }}
 #}
-# WEBPASSWORD={{ pihole_config_setup.web.password | default('') }}
-WEB_PORTS={{ pihole_config_setup.webserver.port }}
+# WEBPASSWORD={{ pihole_config.web.password | default('') }}
+WEB_PORTS={{ pihole_config.webserver.port }}
 {#
-#API_EXCLUDE_DOMAINS={{ pihole_config_setup.api.exclude.domains | join(",") }}
-#API_EXCLUDE_CLIENTS={{ pihole_config_setup.api.exclude.clients | join(",") }}
-#API_QUERY_LOG_SHOW={{ pihole_config_setup.api.query_log_show | lower }}
-#API_PRIVACY_MODE={{ pihole_config_setup.api.privacy_mode | lower }}
+#API_EXCLUDE_DOMAINS={{ pihole_config.api.exclude.domains | join(",") }}
+#API_EXCLUDE_CLIENTS={{ pihole_config.api.exclude.clients | join(",") }}
+#API_QUERY_LOG_SHOW={{ pihole_config.api.query_log_show | lower }}
+#API_PRIVACY_MODE={{ pihole_config.api.privacy_mode | lower }}
 #}

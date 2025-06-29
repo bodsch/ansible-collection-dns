@@ -2,7 +2,7 @@
 
 pihole_admin_password: "SuperSicher2024!"
 
-pihole_config_setup:
+pihole_config:
   dns:
     interface: "{{ ansible_default_ipv4.interface }}"
     domain: pi.hole
@@ -14,28 +14,13 @@ pihole_config_setup:
       - "9.9.9.9"
     bogusPriv: true
     dnssec: false
-  # dhcp: {}
-  # ntp: {}
-  # resolver: {}
-  # database: {}
-  # files:
-  #   gravity_tmp: /var/tmp
   webserver:
     domain: pi.hole
-    port: 80
+    port: 8080
     session:
       timeout: 1600
-    # interface:
-    #   boxed: true
-    #   theme: default-light
-    # api:
-    #   prettyJSON: true
-    #   temp:
-    #     limit: "60.0"
-    #     unit: C
   misc:
     delay_startup: 10
-  debug: {}
 
 pihole_groups:
   - name: admin

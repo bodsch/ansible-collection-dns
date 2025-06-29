@@ -2,9 +2,9 @@
 
 - name: configure pihole
   bodsch.dns.pihole_config:
-    config: "{{ pihole_config_setup | default({}) }}"
+    config: "{{ pihole_config | default({}) }}"
   when:
-    - pihole_config_setup | default({}) | count > 0
+    - pihole_config | default({}) | count > 0
   notify:
     - restart pihole-FTL
 
