@@ -109,12 +109,22 @@ class PdnsZoneData(object):
             rrset_changes = pdns_api.compare_rrsets(zone_rrsets, zone_new_rrsets)
 
             if len(rrset_changes) > 0:
-                pdns_api.patch_zone(zone, rrset_changes)
+
+                status_code, msg, json_resp = pdns_api.patch_zone(zone, rrset_changes)
+
+                if status_code in [200, 201, 204]:
+                    _failed = False
+                    _changed = True
+                    _msg = "zone succesfully updated."
+                else:
+                    _failed = True
+                    _changed = False
+                    _msg = json_resp
 
                 res[zone] = dict(
-                    failed=False,
-                    changed=True,
-                    msg="zone succesfully updated."
+                    failed=_failed,
+                    changed=_changed,
+                    msg=msg
                 )
             else:
                 res[zone] = dict(
@@ -140,6 +150,8 @@ class PdnsZoneData(object):
     def pdns_config_loader(self):
         """
         """
+        self.module.log(msg="PdnsZoneData::pdns_config_loader()")
+
         config_loader = PowerDNSConfigLoader(module=self.module)
         pdns_cfg = config_loader.load()
 
@@ -151,7 +163,7 @@ class PdnsZoneData(object):
             'webserver_port': pdns_cfg.get('webserver-port')
         }
 
-        self.module.log(msg=f" config_values: '{config_values}'")
+        # self.module.log(msg=f" config_values: '{config_values}'")
 
         missing_keys = [key for key, value in config_values.items() if value is None]
 
@@ -165,6 +177,8 @@ class PdnsZoneData(object):
     def create_zone(self, pdns_api, zone, nameservers):
         """
         """
+        self.module.log(msg=f"PdnsZoneData::create_zone(pdns_api={pdns_api}, zone={zone}, nameservers={nameservers})")
+
         if isinstance(nameservers, list):
             ns = nameservers[0]
         else:
