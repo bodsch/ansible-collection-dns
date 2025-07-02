@@ -39,11 +39,11 @@ class PowerDNSWebApi:
             Check if zone is configured in PowerDNS.
             Return kind of zone (native, master, slave) uppercased or None
         """
-        # self.module.log(msg=f"PowerDNSWebApi::zone_data({zone})")
+        self.module.log(msg=f"PowerDNSWebApi::zone_data({zone})")
 
         url = f"{self.base_url}/{zone}."
 
-        # self.module.log(msg=f"  - {url}")
+        self.module.log(msg=f"  - {url}")
 
         (status_code, response, json_response) = self.__call_url(url=url)
 
@@ -57,7 +57,7 @@ class PowerDNSWebApi:
             Check if zone is configured in PowerDNS.
             Return kind of zone (native, master, slave) uppercased or None
         """
-        # self.module.log(msg=f"PowerDNSWebApi::zone_exists({zone})")
+        self.module.log(msg=f"PowerDNSWebApi::zone_exists({zone})")
 
         data = self.zone_data(zone)
 
@@ -75,7 +75,7 @@ class PowerDNSWebApi:
         """
             Return list of existing zones
         """
-        # self.module.log(msg=f"PowerDNSWebApi::zone_list({zone})")
+        self.module.log(msg=f"PowerDNSWebApi::zone_list({zone})")
         zone_fqdn = zone if zone.endswith('.') else f"{zone}."
 
         list = []
@@ -87,7 +87,7 @@ class PowerDNSWebApi:
         if status_code != 200:
             self.module.log(msg=f"failed to enumerate zones at {url}: {json_response}")
 
-        # self.module.log(msg=f"-> {json_response}")
+        self.module.log(msg=f"-> {json_response}")
 
         for z in json_response:
             if zone is None or fnmatch.fnmatch(z.get('name'), zone_fqdn):
@@ -104,7 +104,7 @@ class PowerDNSWebApi:
     def extract_existing_rrsets(self, zone_data):
         """
         """
-        # self.module.log(msg=f"PowerDNSWebApi::extract_existing_rrsets({zone_data})")
+        self.module.log(msg=f"PowerDNSWebApi::extract_existing_rrsets({zone_data})")
 
         rrsets = {}
         for rr in zone_data.get('rrsets'):
@@ -121,7 +121,7 @@ class PowerDNSWebApi:
     def build_full_rrsets(self, zone, data):
         """
         """
-        # self.module.log(msg=f"PowerDNSWebApi::build_full_rrsets({zone}, data)")
+        self.module.log(msg=f"PowerDNSWebApi::build_full_rrsets({zone}, data)")
 
         rrsets = []
         rrsets += host_records(zone=zone, records=data.get('hosts', []))
@@ -133,7 +133,7 @@ class PowerDNSWebApi:
 
     def compare_rrsets(self, existing, desired):
 
-        # self.module.log("PowerDNSWebApi::compare_rrsets(existing, desired)")
+        self.module.log("PowerDNSWebApi::compare_rrsets(existing, desired)")
 
         to_update = []
 
@@ -215,7 +215,7 @@ class PowerDNSWebApi:
         """
             Add a new Master/Native zone to PowerDNS
         """
-        # self.module.log(msg=f"PowerDNSWebApi::zone_primary({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})")
+        self.module.log(msg=f"PowerDNSWebApi::zone_primary({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})")
 
         kind = self.zone_exists(zone)
 
@@ -239,7 +239,7 @@ class PowerDNSWebApi:
     def create_zone(self, zone, nameservers, kind="Native", masters=None):
         """
         """
-        # self.module.log(msg=f"PowerDNSWebApi::create_zone({zone}, {nameservers}, {masters}, {kind})")
+        self.module.log(msg=f"PowerDNSWebApi::create_zone({zone}, {nameservers}, {masters}, {kind})")
 
         zone_fqdn = zone if zone.endswith('.') else f"{zone}."
 
@@ -266,19 +266,29 @@ class PowerDNSWebApi:
     def patch_zone(self, zone, rrsets):
         """
         """
-        # self.module.log(msg=f"PowerDNSWebApi::patch_zone({zone}, {rrsets})")
+        self.module.log(msg=f"PowerDNSWebApi::patch_zone({zone}, {rrsets})")
+
         zone_fqdn = zone if zone.endswith('.') else f"{zone}."
 
         url = f"{self.base_url}/{zone_fqdn}"
 
         payload = {"rrsets": rrsets}
 
-        (status_code, response, json_response) = self.__call_url(url=url, method='PATCH', payload=payload)
+        (status_code, response, json_response) = self.__call_url(
+            url=url,
+            method='PATCH',
+            payload=payload
+        )
 
-        if status_code not in [200, 201, 204]:
-            msg = f"Failed to update zone {zone} at {url}: {json_response}."
-        else:
+        self.module.log("------------------------------")
+        self.module.log(f"  status  : {status_code}")
+        self.module.log(f"  response: {json_response}")
+        self.module.log("------------------------------")
+
+        if status_code in [200, 201, 204]:
             msg = f"Zone {zone} at {url} successfully updated."
+        else:
+            msg = f"Failed to update zone {zone} at {url}: {json_response}."
 
         return status_code, msg, json_response
 
@@ -343,6 +353,8 @@ class PowerDNSWebApi:
         except requests.exceptions.HTTPError as e:
             self.module.log(msg="ERROR (HTTPError)")
             self.module.log(msg=f"  - {e}")
+            self.module.log(msg=f"  - url: {url}")
+            self.module.log(msg=f"  - payload: {payload}")
 
             return (response.status_code, response.text, response.json())
 
