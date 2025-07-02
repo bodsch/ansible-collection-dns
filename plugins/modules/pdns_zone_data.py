@@ -110,7 +110,7 @@ class PdnsZoneData(object):
 
             if len(rrset_changes) > 0:
 
-                status_code, msg, json_resp = pdns_api.patch_zone(zone, rrset_changes)
+                status_code, _, json_resp = pdns_api.patch_zone(zone, rrset_changes)
 
                 if status_code in [200, 201, 204]:
                     _failed = False
@@ -124,7 +124,7 @@ class PdnsZoneData(object):
                 res[zone] = dict(
                     failed=_failed,
                     changed=_changed,
-                    msg=msg
+                    msg= _msg
                 )
             else:
                 res[zone] = dict(
@@ -185,6 +185,9 @@ class PdnsZoneData(object):
             ns = "nsX"
 
         serial = generate_serial()
+
+        # wenn der DNS ein FQDN ist, muss die zone entfernt werden.
+
         soa = f"{ns}.{zone}. hostmaster.{zone}. {serial} 3600 1800 604800 86400"
 
         changed = pdns_api.zone_primary(
