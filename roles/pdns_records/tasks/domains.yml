@@ -9,5 +9,6 @@
   ansible.builtin.debug:
     msg: "{{ pdns_zone_created }}"
   when:
-    - pdns_zone_created.failed
+    - pdns_zone_created.failed or
+      pdns_zone_created.changed
 ...
