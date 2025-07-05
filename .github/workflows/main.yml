@@ -19,12 +19,18 @@ on:
       - 'feature/**'
       - 'fix/**'
       - '!doc/**'
+    paths:
+      - "!Makefile"
+      - "!README.md"
   pull_request:
     branches:
       - 'main'
       - 'feature/**'
       - 'fix/**'
       - '!doc/**'
+    paths:
+      - "!Makefile"
+      - "!README.md"
 
 env:
   COLLECTION_NAMESPACE: bodsch
@@ -39,7 +45,6 @@ defaults:
 jobs:
   arch:
     name: "${{ matrix.image }}: ${{ matrix.collection_role }} (ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }})"
-    if: github.event_name != 'push' || steps.check_pr.outputs.has_pr == 'false'
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
