@@ -4,5 +4,6 @@ pihole_dependencies:
   - bind-tools  # dnsutils equivalent
   - net-tools
   - python-toml
+  - jq
 
 ...

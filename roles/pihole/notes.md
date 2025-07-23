@@ -24,3 +24,6 @@ fi
 
 # Listen neu laden
 pihole reloadlists
+
+
+git config --global --add safe.directory /var/www/html/admin
