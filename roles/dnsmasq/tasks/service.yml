@@ -8,7 +8,7 @@
   changed_when: false
   register: _systemd_resolved
   when:
-    - ansible_service_mgr | lower == "systemd"
+    - ansible_facts.service_mgr | lower == "systemd"
 
 - name: stop and disable (systemd-resolved) service
   ansible.builtin.service:
@@ -18,7 +18,7 @@
   when:
     - not ansible_check_mode
     - dnsmasq_resolved_disabled | default('true') | bool
-    - ansible_service_mgr | lower == "systemd"
+    - ansible_facts.service_mgr | lower == "systemd"
     - not _systemd_resolved.stdout_lines | count == 0
   tags:
     - configuration

@@ -33,7 +33,7 @@ pdns_config:
 
 pdns_webserver:
   enabled: true
-  address: "{{ ansible_default_ipv4.address }}"
+  address: "{{ ansible_facts.default_ipv4.address }}"
   allow-from:
     - "127.0.0.1"
     - "::1"

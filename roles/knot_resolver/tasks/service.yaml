@@ -7,7 +7,7 @@
     state: started
     enabled: true
   when:
-    - ansible_service_mgr | lower == 'systemd'
+    - ansible_facts.service_mgr | lower == 'systemd'
 
 - name: start and enable Knot Resolver service (openrc)
   ansible.builtin.service:
@@ -15,6 +15,6 @@
     state: started
     enabled: true
   when:
-    - ansible_service_mgr | lower == 'openrc'
+    - ansible_facts.service_mgr | lower == 'openrc'
 
 ...

@@ -33,11 +33,11 @@ knot_zones:
       minimum: 1d
     name_servers:
       dns.molecule.lan:
-        ip: '{{ ansible_default_ipv4.address }}'
+        ip: '{{ ansible_facts.default_ipv4.address }}'
     records:
       this.molecule.lan:
         type: 'A'
-        ip: '{{ ansible_default_ipv4.address }}'
+        ip: '{{ ansible_facts.default_ipv4.address }}'
       docker.molecule.lan:
         type: 'A'
         ip: 192.168.110.10

@@ -2,7 +2,7 @@
 
 - name: debain based
   when:
-    - ansible_os_family | lower == 'debian'
+    - ansible_facts.os_family | lower == 'debian'
   block:
     - name: download CZ.NIC gpg key and save as keyring
       ansible.builtin.get_url:

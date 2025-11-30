@@ -5,7 +5,7 @@
   {% for bind_zone in bind_zones %}
     {% if bind_zone.create_forward_zones | default('true') | bool %}
 {# Start: set zone type  #}
-{# {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+{# {% set _all_addresses = ansible_facts.all_ipv4_addresses | union(ansible_facts.all_ipv6_addresses) %} #}
 {#// -- {{ bind_zone.name }} ---------------------------------------
 // type      : {{ bind_zone.type | default('') }}
 // primaries : {{ bind_zone.primaries | default([]) }}
@@ -29,7 +29,7 @@
 // #1: '{{ _type }}'
 // ------------------------------------------------------------
 #}
-{#       {% set _all_addresses = ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) %} #}
+{#       {% set _all_addresses = ansible_facts.all_ipv4_addresses | union(ansible_facts.all_ipv6_addresses) %} #}
       {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=host_all_addresses) %}
 {#// #2: '{{ _type }}'
 // ------------------------------------------------------------

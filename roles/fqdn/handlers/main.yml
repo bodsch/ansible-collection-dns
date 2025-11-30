@@ -2,14 +2,14 @@
 
 - name: restart hostname
   ansible.builtin.service:
-    name: "hostname{{ '.sh' if (ansible_distribution_release == 'wheezy') else '' }}"
+    name: "hostname{{ '.sh' if (ansible_facts.distribution_release == 'wheezy') else '' }}"
     state: restarted
   when:
-    - not ansible_service_mgr == 'systemd'
+    - not ansible_facts.service_mgr == 'systemd'
 
 - name: restart systemd-logind
   ansible.builtin.service:
     name: systemd-logind
     state: restarted
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_facts.service_mgr == 'systemd'

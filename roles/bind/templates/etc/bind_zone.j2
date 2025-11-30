@@ -4,7 +4,7 @@
  #  from it, that it can be compared with subsequent task executions. In this
  #  way the serial will only be updated if there are some content changes.
  #}
-{% set _data = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_hostname) %}
+{% set _data = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_facts.hostname) %}
 {% set _zone_data = _data.get("forward_zone_data", None) %}
 {% set _zone_hash = _data.get("zone_hash", None) %}
 {% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, bind_zone_data) %}
@@ -97,7 +97,7 @@ $ORIGIN {{ _zone_data['domain'] }}.
     {% endif %}
   {% endfor %}
 {% else %}
-{{ ansible_hostname.ljust(26) }} IN  A     {{ ansible_default_ipv4.address }}
+{{ ansible_facts.hostname.ljust(26) }} IN  A     {{ ansible_facts.default_ipv4.address }}
 {% endif %}
 ; --------------------------------------------------------------------------------------
 ; services

@@ -76,7 +76,7 @@
 #       when: not pdns_recursor_disable_handlers
 #         and _pdns_recursor_override_unit.changed
 #
-#   when: ansible_service_mgr == "systemd"
+#   when: ansible_facts.service_mgr == "systemd"
 #
 # - name: Ensure that the PowerDNS Recursor configuration directory exists
 #   file:

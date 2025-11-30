@@ -21,7 +21,7 @@ bind_listen:
   # ipv6:
   #   - port: 53
   #     addresses:
-  #       - "{{ ansible_default_ipv6.address }}"
+  #       - "{{ ansible_facts.default_ipv6.address }}"
 
 bind_acls:
   - name: acl1
@@ -184,7 +184,7 @@ bind_zones:
     # create_forward_zones: true
     # create_reverse_zones: true  # Skip creation of reverse zones
     primaries:
-      - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
+      - "{{ ansible_facts.default_ipv4.address }}" # Primary server(s) for this zone
     name_servers:
       - 'dns'
     networks:
@@ -192,9 +192,9 @@ bind_zones:
     hosts:
       - name: '@'
         name_servers: 'dns.cm.local.'
-        ip: "{{ ansible_default_ipv4.address }}"
+        ip: "{{ ansible_facts.default_ipv4.address }}"
       - name: dns
-        ip: "{{ ansible_default_ipv4.address }}"
+        ip: "{{ ansible_facts.default_ipv4.address }}"
       - name: cms
         ip: 192.168.124.21
         aliases:
@@ -212,7 +212,7 @@ bind_zones:
   #   type: primary
   #   create_reverse_zones: true  # Skip creation of reverse zones
   #   primaries:
-  #     - "{{ ansible_default_ipv4.address }}" # Primary server(s) for this zone
+  #     - "{{ ansible_facts.default_ipv4.address }}" # Primary server(s) for this zone
   #   name_servers:
   #     - 'dns'
   #   networks:
@@ -222,6 +222,6 @@ bind_zones:
   #   hosts:
   #     - name: '@'
   #       name_servers: 'dns.cm.local.'
-  #       ip: "{{ ansible_default_ipv4.address }}"
+  #       ip: "{{ ansible_facts.default_ipv4.address }}"
 
 ...

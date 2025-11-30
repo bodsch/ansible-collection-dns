@@ -5,7 +5,7 @@ pihole_admin_password: "Familie2024"
 pihole_config:
   dns:
     domain: pi.hole
-    interface: "{{ ansible_default_ipv4.interface }}"
+    interface: "{{ ansible_facts.default_ipv4.interface }}"
   webserver:
     domain: pi.hole
     port: 8080

@@ -7,7 +7,7 @@
     name: "kresd@{{ item }}.service"
     state: restarted
   when:
-    - ansible_service_mgr | lower == 'systemd'
+    - ansible_facts.service_mgr | lower == 'systemd'
 
 - name: restart kresd (openrc)
   listen: "restart kresd"
@@ -15,7 +15,7 @@
     name: kresd
     state: restarted
   when:
-    - ansible_service_mgr | lower == 'openrc'
+    - ansible_facts.service_mgr | lower == 'openrc'
 
 - name: restart kres-cache-gc (openrc)
   listen: "restart kres-cache-gc"
@@ -23,6 +23,6 @@
     name: kres-cache-gc
     state: restarted
   when:
-    - ansible_service_mgr | lower == 'openrc'
+    - ansible_facts.service_mgr | lower == 'openrc'
 
 ...

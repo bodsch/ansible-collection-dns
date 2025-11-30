@@ -68,7 +68,7 @@ pdns_backends:
 #   forward-zones:
 #     - matrix.lan=10.0.4.1:5300
 #   webserver: true
-#   webserver-address: "{{ ansible_default_ipv4.address }}"
+#   webserver-address: "{{ ansible_facts.default_ipv4.address }}"
 #   webserver-port: 8082
 #   webserver-allow-from:
 #     - 127.0.0.1/32

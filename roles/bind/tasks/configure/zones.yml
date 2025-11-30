@@ -9,7 +9,7 @@
 
 - name: define a list of all host IP addresses
   ansible.builtin.set_fact:
-    host_all_addresses: "{{ ansible_all_ipv4_addresses | union(ansible_all_ipv6_addresses) }}"
+    host_all_addresses: "{{ ansible_facts.all_ipv4_addresses | union(ansible_facts.all_ipv6_addresses) }}"
   tags: bind
 
 - name: read zone data

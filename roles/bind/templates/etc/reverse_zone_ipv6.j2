@@ -1,5 +1,5 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
-{% set _data = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_hostname) %}
+{% set _data = item | bodsch.dns.reverse_zone_data(bind_zone_soa, ansible_facts.hostname) %}
 {% set _zone_data = _data.get("reverse_zone_data", None) %}
 {% set _zone_hash = _data.get("zone_hash", None) %}
 {% set _zone = _zone_data['domain'] | bodsch.dns.zone_serial(_zone_hash, bind_zone_data, network=item.1) %}

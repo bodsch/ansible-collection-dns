@@ -2,7 +2,7 @@
 
 - name: debain based
   when:
-    - ansible_distribution | lower == 'debian'
+    - ansible_facts.distribution | lower == 'debian'
   block:
     - name: add apt signing key (debian)
       become: true
@@ -20,12 +20,12 @@
 
 - name: ubuntu
   when:
-    - ansible_distribution | lower == 'ubuntu'
+    - ansible_facts.distribution | lower == 'ubuntu'
   block:
-    - name: add knot ppa for ubuntu {{ ansible_distribution_release }}
+    - name: add knot ppa for ubuntu {{ ansible_facts.distribution_release }}
       ansible.builtin.apt_repository:
         repo: ppa:cz.nic-labs/knot-dns-latest
-        codename: "{{ ansible_distribution_release }}"
+        codename: "{{ ansible_facts.distribution_release }}"
         state: present
         update_cache: true
         validate_certs: false

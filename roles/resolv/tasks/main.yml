@@ -12,8 +12,8 @@
 - name: detect docker environment
   ansible.builtin.set_fact:
     is_docker_guest: "{{
-      ansible_virtualization_role | default('host') == 'guest' and
-      ansible_virtualization_type | default('none') == 'docker' }}"
+      ansible_facts.virtualization_role | default('host') == 'guest' and
+      ansible_facts.virtualization_type | default('none') == 'docker' }}"
 
 - name: configure resolv.conf
   become: true

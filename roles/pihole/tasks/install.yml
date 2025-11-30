@@ -86,7 +86,7 @@
           -e '/^[[:space:]]*[^#].*install_dependent_packages[[:space:]]*$/s/^/# /' \
           {{ pihole_remote_tmp_directory }}/basic-install.sh
       when:
-        - ansible_distribution | lower == 'archlinux'
+        - ansible_facts.distribution | lower == 'archlinux'
 
     - name: install pi-hole
       # remote_user: pihole

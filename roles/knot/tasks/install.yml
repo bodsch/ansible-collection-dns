@@ -26,7 +26,7 @@
       ansible.builtin.pip:
         state: present
         requirements: "{{ pip_requirements.requirements_file }}"
-        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
+        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_facts.python.version) | default(omit) }}"
       register: pip_install
       ignore_errors: true
       no_log: true

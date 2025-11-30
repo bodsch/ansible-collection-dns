@@ -11,7 +11,7 @@
 
 - name: openrc
   when:
-    - ansible_service_mgr | lower == 'openrc'
+    - ansible_facts.service_mgr | lower == 'openrc'
   block:
     - name: create kres-cache-gc config
       ansible.builtin.template:

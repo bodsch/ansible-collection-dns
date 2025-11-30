@@ -36,7 +36,7 @@ pihole_defaults_config:
     domain: pi.hole
     bogusPriv: ""                                                 # true
     dnssec: ""                                                    # false
-    interface: ""  # "{{ ansible_default_ipv4.interface }}"
+    interface: ""  # "{{ ansible_facts.default_ipv4.interface }}"
     listeningMode: ""                                             # LOCAL
     queryLogging: ""                                              # true
     port: ""                                                      # 53

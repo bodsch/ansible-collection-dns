@@ -4,7 +4,7 @@ pihole_admin_password: "SuperSicher2024!"
 
 pihole_config:
   dns:
-    interface: "{{ ansible_default_ipv4.interface }}"
+    interface: "{{ ansible_facts.default_ipv4.interface }}"
     domain: pi.hole
     cache:
       size: 10000
