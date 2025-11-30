@@ -19,6 +19,12 @@ bind_dns_keys: []
 #    algorithm: hmac-sha256
 #    secret: "azertyAZERTY123456"
 
+# Key binding for DDNS hosts
+bind_update_keys: []
+#  - name: ddns_host_key
+#    algorithm: hmac-sha256
+#    secret: "azertyAZERTY123456"
+
 # List of IPv4 address of the network interface(s) to listen on. Set to "any"
 # to listen on all interfaces
 bind_listen:

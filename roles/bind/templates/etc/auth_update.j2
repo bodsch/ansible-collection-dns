@@ -1,0 +1,13 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# Authentication definitions to allow DDNS update
+#
+# Copyright 2025 Buo-ren Lin <buo.ren.lin@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+#
+# {{ ansible_managed }}
+{% for mykey in bind_update_keys %}
+key {{ mykey.name }} {
+  algorithm {{ mykey.algorithm }};
+  secret "{{ mykey.secret }}";
+};
+{% endfor %}

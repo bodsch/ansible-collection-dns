@@ -56,6 +56,22 @@
   tags:
     - bind
 
+- name: create extra config for authenticated DDNS updates
+  become: true
+  ansible.builtin.template:
+    src: etc/auth_update.j2
+    dest: "{{ bind_auth_update_file }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: '0640'
+  when:
+    - bind_update_keys is defined
+    - bind_update_keys | length > 0
+  notify:
+    - reload bind
+  tags:
+    - bind
+
 - name: configure
   ansible.builtin.include_tasks: configure/zones.yml
 
