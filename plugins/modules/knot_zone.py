@@ -5,19 +5,22 @@
 # BSD 2-clause (see LICENSE or https://opensource.org/licenses/BSD-2-Clause)
 
 from __future__ import absolute_import, division, print_function
-import os
-import json
+
 import hashlib
+import json
+import os
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
+from ansible_collections.bodsch.core.plugins.module_utils.directory import (
+    create_directory,
+)
 
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
-    'metadata_version': '0.1',
-    'status': ['preview'],
-    'supported_by': 'community'
+    "metadata_version": "0.1",
+    "status": ["preview"],
+    "supported_by": "community",
 }
 
 DOCUMENTATION = """
@@ -90,13 +93,12 @@ RETURN = """
 
 
 class KnotZoneConfig(object):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module):
-        """
-        """
+        """ """
         self.module = module
 
         self.state = module.params.get("state")
@@ -126,11 +128,11 @@ class KnotZoneConfig(object):
 
     def run(self):
         """
-            run
+        run
         """
-        if self.state == 'absent':
+        if self.state == "absent":
             """
-                remove created zone directory
+            remove created zone directory
             """
             _changed = False
             for f in [self.config_file, self.config_checksum, self.config_serial]:
@@ -138,27 +140,25 @@ class KnotZoneConfig(object):
                     _changed = True
                     os.remove(f)
 
-            return dict(
-                changed=_changed,
-                failed=False,
-                msg="zone removed"
-            )
+            return dict(changed=_changed, failed=False, msg="zone removed")
 
         create_directory(directory=self.zone_path, mode="0750")
 
-        _checksum = ''
-        _old_checksum = ''
+        _checksum = ""
+        _old_checksum = ""
         _data_changed = False
 
         data = dict()
 
-        data.update({
-            "zone": self.zone,
-            "zone_ttl": self.zone_ttl,
-            "soa": self.zone_soa,
-            "name_servers": self.name_servers,
-            "records": self.records
-        })
+        data.update(
+            {
+                "zone": self.zone,
+                "zone_ttl": self.zone_ttl,
+                "soa": self.zone_soa,
+                "name_servers": self.name_servers,
+                "records": self.records,
+            }
+        )
 
         # self.module.log(msg="---------------------------------------------")
         # self.module.log(msg="data      : {}".format(json.dumps(data, sort_keys=True)))
@@ -174,7 +174,7 @@ class KnotZoneConfig(object):
             return dict(
                 changed=False,
                 failed=False,
-                msg=f"zone file {self.zone} has no changes."
+                msg=f"zone file {self.zone} has no changes.",
             )
         else:
             if os.path.isfile(self.config_file):
@@ -195,24 +195,17 @@ class KnotZoneConfig(object):
         with open(self.config_checksum, "w") as fp:
             fp.write(_checksum)
 
-        return dict(
-            changed=_data_changed,
-            failed=False,
-            soa_serial=soa_serial,
-            msg=msg
-        )
+        return dict(changed=_data_changed, failed=False, soa_serial=soa_serial, msg=msg)
 
     def __zone_serial(self):
-        """
-
-        """
+        """ """
         from datetime import datetime
 
         now = datetime.now().strftime("%Y%m%d")
         id = "01"
 
         if os.path.isfile(self.config_serial):
-            with open(self.config_serial, 'r') as fp:
+            with open(self.config_serial, "r") as fp:
                 _serial = fp.read()
 
             # self.module.log(msg="serial    : {}".format(_serial))
@@ -232,16 +225,15 @@ class KnotZoneConfig(object):
 
     def __checksum(self, plaintext):
         """
-            create checksum from string
+        create checksum from string
         """
-        _bytes = plaintext.encode('utf-8')
+        _bytes = plaintext.encode("utf-8")
         _hash = hashlib.sha256(_bytes)
 
         return _hash.hexdigest()
 
     def __write_template(self, file_name, data):
-        """
-        """
+        """ """
         tpl = """
 $ORIGIN {{ item.zone }}.
 $TTL {{ item.zone_ttl }}
@@ -308,57 +300,22 @@ $TTL {{ item.zone_ttl }}
 # Module execution.
 #
 
+
 def main():
-    """
-    """
+    """ """
     args = dict(
-        state=dict(
-            default="present",
-            choices=["absent", "present"]
-        ),
+        state=dict(default="present", choices=["absent", "present"]),
         #
-        zone=dict(
-            required=True,
-            type='str'
-        ),
-        zone_ttl=dict(
-            required=True,
-            type='int'
-        ),
-        zone_soa=dict(
-            required=True,
-            type='dict'
-        ),
-        name_servers=dict(
-            required=True,
-            type='dict'
-        ),
-        records=dict(
-            required=True,
-            type='dict'
-        ),
-        debug=dict(
-            required=False,
-            type="bool",
-            default=False
-        ),
-        database_path=dict(
-            required=True,
-            type='str'
-        ),
-        owner=dict(
-            required=False,
-            type='str'
-        ),
-        group=dict(
-            required=False,
-            type='str'
-        ),
-        mode=dict(
-            required=False,
-            type='str',
-            default="0666"
-        ),
+        zone=dict(required=True, type="str"),
+        zone_ttl=dict(required=True, type="int"),
+        zone_soa=dict(required=True, type="dict"),
+        name_servers=dict(required=True, type="dict"),
+        records=dict(required=True, type="dict"),
+        debug=dict(required=False, type="bool", default=False),
+        database_path=dict(required=True, type="str"),
+        owner=dict(required=False, type="str"),
+        group=dict(required=False, type="str"),
+        mode=dict(required=False, type="str", default="0666"),
     )
 
     module = AnsibleModule(
@@ -373,5 +330,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

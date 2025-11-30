@@ -53,21 +53,22 @@ RETURN = """
 
 class PdnsBackendMariadb(Database):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
         """
-          Initialize all needed Variables
+        Initialize all needed Variables
         """
         self.module = module
 
-        self.state = module.params.get('state')
+        self.state = module.params.get("state")
         self.database = module.params.get("database")
         self.schema_file = module.params.get("schema_file")
-        self.owner = module.params.get('owner')
-        self.group = module.params.get('group')
+        self.owner = module.params.get("owner")
+        self.group = module.params.get("group")
         self.mode = module.params.get("mode")
 
         self.db_hostname = self.database.get("hostname", None)
@@ -80,14 +81,9 @@ class PdnsBackendMariadb(Database):
 
     def run(self):
         """
-          runner
+        runner
         """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            full_version="unknown"
-        )
+        result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         result = self._mariadb()
 
@@ -95,39 +91,31 @@ class PdnsBackendMariadb(Database):
 
     def _mariadb(self):
         """
-            mysql / mariadb support
+        mysql / mariadb support
         """
 
         valid, msg = self.validate()
 
         if not valid:
-            return dict(
-                failed=True,
-                msg=msg
-            )
+            return dict(failed=True, msg=msg)
 
-        self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
+        self.db_credentials(
+            self.db_login_username, self.db_login_password, self.db_schemaname
+        )
 
         (db_connect_error, db_message) = self.db_connect()
 
         if db_connect_error:
-            return dict(
-                failed=True,
-                msg=db_message
-            )
+            return dict(failed=True, msg=db_message)
 
         (state, db_error, db_error_message) = self.check_table_schema("domains")
 
         if state:
-            return dict(
-                changed=False,
-                msg=db_error_message
-            )
+            return dict(changed=False, msg=db_error_message)
 
         # import DB schema
         if os.path.exists(self.schema_file):
-            """
-            """
+            """ """
             # file_name = os.path.basename(self.schema_file)
             # self.module.log(msg=f"import schema from '{file_name}'")
 
@@ -135,43 +123,23 @@ class PdnsBackendMariadb(Database):
                 sql_file=self.schema_file,
                 commit=True,
                 rollback=True,
-                close_cursor=False
+                close_cursor=False,
             )
 
-            return dict(
-                failed=False,
-                changed=(not state),
-                msg=_msg
-            )
+            return dict(failed=False, changed=(not state), msg=_msg)
 
 
 def main():
 
     arguments = dict(
-        state=dict(
-            default="create",
-            choices=["create", "delete"]
-        ),
-        database=dict(
-            required=True,
-            type='dict'
-        ),
-        owner=dict(
-            required=False,
-            type='str'
-        ),
-        group=dict(
-            required=False,
-            type='str'
-        ),
-        mode=dict(
-            required=False,
-            type='str',
-            default="0644"
-        ),
+        state=dict(default="create", choices=["create", "delete"]),
+        database=dict(required=True, type="dict"),
+        owner=dict(required=False, type="str"),
+        group=dict(required=False, type="str"),
+        mode=dict(required=False, type="str", default="0644"),
         schema_file=dict(
             required=True,
-            type='str',
+            type="str",
         ),
     )
 
@@ -189,5 +157,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

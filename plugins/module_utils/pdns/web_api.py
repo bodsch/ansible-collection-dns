@@ -5,19 +5,27 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
 
 import fnmatch
-import requests
-# from collections import defaultdict
 
-from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import fqdn, build_rrset
-from ansible_collections.bodsch.dns.plugins.module_utils.pdns.records import host_records, srv_records, mx_records, txt_records
+import requests
+from ansible_collections.bodsch.dns.plugins.module_utils.pdns.records import (
+    host_records,
+    mx_records,
+    srv_records,
+    txt_records,
+)
+from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import (
+    build_rrset,
+    fqdn,
+)
+
+# from collections import defaultdict
 
 
 class PowerDNSWebApi:
-    """
-    """
+    """ """
 
     def __init__(self, module, config):
         self.module = module
@@ -32,12 +40,12 @@ class PowerDNSWebApi:
             "X-API-Key": api_key,
         }
 
-        self.base_url = f'http://{webserver_address}:{webserver_port}/api/v1/servers/{server_id}/zones'
+        self.base_url = f"http://{webserver_address}:{webserver_port}/api/v1/servers/{server_id}/zones"
 
     def zone_data(self, zone):
         """
-            Check if zone is configured in PowerDNS.
-            Return kind of zone (native, master, slave) uppercased or None
+        Check if zone is configured in PowerDNS.
+        Return kind of zone (native, master, slave) uppercased or None
         """
         self.module.log(msg=f"PowerDNSWebApi::zone_data({zone})")
 
@@ -54,15 +62,15 @@ class PowerDNSWebApi:
 
     def zone_exists(self, zone):
         """
-            Check if zone is configured in PowerDNS.
-            Return kind of zone (native, master, slave) uppercased or None
+        Check if zone is configured in PowerDNS.
+        Return kind of zone (native, master, slave) uppercased or None
         """
         self.module.log(msg=f"PowerDNSWebApi::zone_exists({zone})")
 
         data = self.zone_data(zone)
 
         if isinstance(data, dict):
-            kind = data.get('kind', None)
+            kind = data.get("kind", None)
 
             if kind is not None:
                 kind = kind.upper()
@@ -73,10 +81,10 @@ class PowerDNSWebApi:
 
     def zone_list(self, zone=None):
         """
-            Return list of existing zones
+        Return list of existing zones
         """
         self.module.log(msg=f"PowerDNSWebApi::zone_list({zone})")
-        zone_fqdn = zone if zone.endswith('.') else f"{zone}."
+        zone_fqdn = zone if zone.endswith(".") else f"{zone}."
 
         list = []
         url = f"{self.base_url}"
@@ -90,44 +98,43 @@ class PowerDNSWebApi:
         self.module.log(msg=f"-> {json_response}")
 
         for z in json_response:
-            if zone is None or fnmatch.fnmatch(z.get('name'), zone_fqdn):
-                list.append({
-                    'name': z.get('name'),
-                    'kind': z.get('kind').lower(),
-                    'serial': z.get('serial'),
-                })
+            if zone is None or fnmatch.fnmatch(z.get("name"), zone_fqdn):
+                list.append(
+                    {
+                        "name": z.get("name"),
+                        "kind": z.get("kind").lower(),
+                        "serial": z.get("serial"),
+                    }
+                )
 
         self.module.log(msg=f"= {list}")
 
         return list
 
     def extract_existing_rrsets(self, zone_data):
-        """
-        """
+        """ """
         self.module.log(msg=f"PowerDNSWebApi::extract_existing_rrsets({zone_data})")
 
         rrsets = {}
-        for rr in zone_data.get('rrsets'):
-            key = (rr.get('name'), rr.get('type'))
+        for rr in zone_data.get("rrsets"):
+            key = (rr.get("name"), rr.get("type"))
 
-            contents = sorted([r.get('content') for r in rr.get('records') if not r.get('disabled')])
+            contents = sorted(
+                [r.get("content") for r in rr.get("records") if not r.get("disabled")]
+            )
 
-            rrsets[key] = {
-                'ttl': rr.get('ttl'),
-                'records': contents
-            }
+            rrsets[key] = {"ttl": rr.get("ttl"), "records": contents}
         return rrsets
 
     def build_full_rrsets(self, zone, data):
-        """
-        """
+        """ """
         self.module.log(msg=f"PowerDNSWebApi::build_full_rrsets({zone}, data)")
 
         rrsets = []
-        rrsets += host_records(zone=zone, records=data.get('hosts', []))
-        rrsets += srv_records(zone=zone, records=data.get('services', []))
-        rrsets += mx_records(zone=zone, records=data.get('mail_servers', []))
-        rrsets += txt_records(zone=zone, records=data.get('text', []))
+        rrsets += host_records(zone=zone, records=data.get("hosts", []))
+        rrsets += srv_records(zone=zone, records=data.get("services", []))
+        rrsets += mx_records(zone=zone, records=data.get("mail_servers", []))
+        rrsets += txt_records(zone=zone, records=data.get("text", []))
 
         return rrsets
 
@@ -138,14 +145,14 @@ class PowerDNSWebApi:
         to_update = []
 
         for rr in desired:
-            key = (rr.get('name'), rr.get('type'))
+            key = (rr.get("name"), rr.get("type"))
             existing_rr = existing.get(key)
 
             # self.module.log(f"  - {key}")
             # self.module.log(f"    `- {existing_rr}")
 
-            new_contents = sorted([r.get('content') for r in rr.get('records')])
-            existing_contents = existing_rr.get('records') if existing_rr else []
+            new_contents = sorted([r.get("content") for r in rr.get("records")])
+            existing_contents = existing_rr.get("records") if existing_rr else []
 
             # self.module.log(f"    `- {new_contents} vs. {existing_contents}")
 
@@ -153,21 +160,21 @@ class PowerDNSWebApi:
             if set(new_contents) != set(existing_contents):
                 # Baue das minimal nötige rrset (nicht pauschal desired übernehmen)
                 rrset = {
-                    'name': rr.get('name'),
-                    'type': rr.get('type'),
-                    'ttl': rr.get('ttl'),
-                    'changetype': 'REPLACE',
-                    'records': [
-                        {'content': content, 'disabled': False}
+                    "name": rr.get("name"),
+                    "type": rr.get("type"),
+                    "ttl": rr.get("ttl"),
+                    "changetype": "REPLACE",
+                    "records": [
+                        {"content": content, "disabled": False}
                         for content in new_contents
-                    ]
+                    ],
                 }
                 to_update.append(rrset)
 
         return to_update
 
     def zone_delete(self, base_url, zone):
-        ''' Delete a zone in PowerDNS '''
+        """Delete a zone in PowerDNS"""
 
         # url = "{0}/{1}".format(base_url, zone)
         #
@@ -182,8 +189,8 @@ class PowerDNSWebApi:
 
     def zone_secondary(self, base_url, zone, masters, comment):
         """
-            Add a new secondary zone to PowerDNS
-        """        # kind = self.zone_exists(zone)
+        Add a new secondary zone to PowerDNS
+        """  # kind = self.zone_exists(zone)
         # if kind == 'SLAVE':
         #     return False
         #
@@ -211,25 +218,29 @@ class PowerDNSWebApi:
 
         return False
 
-    def zone_primary(self, zone, soa, nameservers, comment, ttl=60, wantkind='Master'):
+    def zone_primary(self, zone, soa, nameservers, comment, ttl=60, wantkind="Master"):
         """
-            Add a new Master/Native zone to PowerDNS
+        Add a new Master/Native zone to PowerDNS
         """
-        self.module.log(msg=f"PowerDNSWebApi::zone_primary({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})")
+        self.module.log(
+            msg=f"PowerDNSWebApi::zone_primary({zone}, {soa}, {nameservers}, {comment}, {ttl}, {wantkind})"
+        )
 
         kind = self.zone_exists(zone)
 
-        zone_fqdn = zone if zone.endswith('.') else f"{zone}."
+        zone_fqdn = zone if zone.endswith(".") else f"{zone}."
 
-        if kind in ['MASTER', 'NATIVE']:
+        if kind in ["MASTER", "NATIVE"]:
             return False
 
-        status_code, msg, json_response = self.create_zone(zone, nameservers, kind=wantkind, masters=None)
+        status_code, msg, json_response = self.create_zone(
+            zone, nameservers, kind=wantkind, masters=None
+        )
 
         if status_code in [200, 201]:
             rrsets = [
                 build_rrset(zone_fqdn, "SOA", ttl, [soa]),
-                build_rrset(zone_fqdn, "NS", ttl, [fqdn(zone, x) for x in nameservers])
+                build_rrset(zone_fqdn, "NS", ttl, [fqdn(zone, x) for x in nameservers]),
             ]
 
             status_code, msg, json_response = self.patch_zone(zone, rrsets)
@@ -237,24 +248,27 @@ class PowerDNSWebApi:
         return True
 
     def create_zone(self, zone, nameservers, kind="Native", masters=None):
-        """
-        """
-        self.module.log(msg=f"PowerDNSWebApi::create_zone({zone}, {nameservers}, {masters}, {kind})")
+        """ """
+        self.module.log(
+            msg=f"PowerDNSWebApi::create_zone({zone}, {nameservers}, {masters}, {kind})"
+        )
 
-        zone_fqdn = zone if zone.endswith('.') else f"{zone}."
+        zone_fqdn = zone if zone.endswith(".") else f"{zone}."
 
         msg = None
 
         data = {
-            'kind': str(kind).lower().title(),
-            'masters': [],
-            'name': zone_fqdn,
-            'nameservers': [],
+            "kind": str(kind).lower().title(),
+            "masters": [],
+            "name": zone_fqdn,
+            "nameservers": [],
         }
 
         url = f"{self.base_url}"
 
-        (status_code, response, json_response) = self.__call_url(url=url, method='POST', payload=data)
+        (status_code, response, json_response) = self.__call_url(
+            url=url, method="POST", payload=data
+        )
 
         if status_code not in [200, 201]:
             msg = f"Failed to create zone {zone} at {url}: {json_response}."
@@ -264,20 +278,17 @@ class PowerDNSWebApi:
         return status_code, msg, json_response
 
     def patch_zone(self, zone, rrsets):
-        """
-        """
+        """ """
         self.module.log(msg=f"PowerDNSWebApi::patch_zone({zone}, {rrsets})")
 
-        zone_fqdn = zone if zone.endswith('.') else f"{zone}."
+        zone_fqdn = zone if zone.endswith(".") else f"{zone}."
 
         url = f"{self.base_url}/{zone_fqdn}"
 
         payload = {"rrsets": rrsets}
 
         (status_code, response, json_response) = self.__call_url(
-            url=url,
-            method='PATCH',
-            payload=payload
+            url=url, method="PATCH", payload=payload
         )
 
         self.module.log("------------------------------")
@@ -294,47 +305,36 @@ class PowerDNSWebApi:
 
     # ---------------------------------------------------------------------------
 
-    def __call_url(self, url, method='GET', payload=None):
-        """
-        """
+    def __call_url(self, url, method="GET", payload=None):
+        """ """
         response = None
 
         try:
             authentication = ()  # self.github_username, self.github_password)
 
             if method == "GET":
-                response = requests.get(
-                    url,
-                    headers=self.headers,
-                    auth=authentication
-                )
+                response = requests.get(url, headers=self.headers, auth=authentication)
 
-            elif method == 'POST':
+            elif method == "POST":
                 response = requests.post(
-                    url,
-                    headers=self.headers,
-                    json=payload,
-                    verify=False
+                    url, headers=self.headers, json=payload, verify=False
                 )
 
-            elif method == 'PATCH':
+            elif method == "PATCH":
                 response = requests.patch(
-                    url,
-                    headers=self.headers,
-                    json=payload,
-                    verify=False
+                    url, headers=self.headers, json=payload, verify=False
                 )
 
             elif method == "DELETE":
-                response = requests.delete(
-                    url,
-                    headers=self.headers,
-                    verify=False
-                )
+                response = requests.delete(url, headers=self.headers, verify=False)
 
             else:
                 self.module.log(msg=f"unsupported method: {method}")
-                return (500, f"unsupported method: '{method}'", dict(error=f"unsupported method: {method}"))
+                return (
+                    500,
+                    f"unsupported method: '{method}'",
+                    dict(error=f"unsupported method: {method}"),
+                )
                 # pass
 
             response.raise_for_status()
@@ -361,7 +361,9 @@ class PowerDNSWebApi:
         except ConnectionError as e:
             self.module.log(msg="ERROR (ConnectionError)")
 
-            error_text = f"{type(e).__name__} {(str(e) if len(e.args) == 0 else str(e.args[0]))}"
+            error_text = (
+                f"{type(e).__name__} {(str(e) if len(e.args) == 0 else str(e.args[0]))}"
+            )
             self.module.log(msg=f"  - {error_text}")
 
             return (500, error_text, {})

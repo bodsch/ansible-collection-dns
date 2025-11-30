@@ -6,10 +6,13 @@
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
-
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.utils import sanitize_adlist
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.adlist_manager import AdlistManager
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.adlist_manager import (
+    AdlistManager,
+)
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.utils import (
+    sanitize_adlist,
+)
 
 # ---------------------------------------------------------------------------------------
 
@@ -44,13 +47,12 @@ RETURN = """
 
 
 class PiHoleAdlist(AdlistManager):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
 
         self.adlists = module.params.get("adlists")
@@ -58,26 +60,18 @@ class PiHoleAdlist(AdlistManager):
         super().__init__(module, database="/etc/pihole/gravity.db")
 
     def run(self):
-        """
-        """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            msg="unknown"
-        )
+        """ """
+        result = dict(rc=127, failed=True, changed=False, msg="unknown")
 
         sanitized = sanitize_adlist(self.adlists)
 
         result_state = self.manage_adlists(adlists=sanitized)
 
-        _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
-
-        result = dict(
-            changed=_changed,
-            failed=failed,
-            state=result_state
+        _state, _changed, _failed, state, changed, failed = results(
+            self.module, result_state
         )
+
+        result = dict(changed=_changed, failed=failed, state=result_state)
 
         return result
 
@@ -85,10 +79,7 @@ class PiHoleAdlist(AdlistManager):
 def main():
 
     argument_spec = dict(
-        adlists=dict(
-            required=False,
-            type="list"
-        ),
+        adlists=dict(required=False, type="list"),
     )
 
     module = AnsibleModule(
@@ -105,5 +96,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

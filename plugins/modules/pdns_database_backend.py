@@ -6,11 +6,12 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import sqlite3
 import shutil
+import sqlite3
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.dns.plugins.module_utils.database import Database
+
 # from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 
 # ---------------------------------------------------------------------------------------
@@ -56,22 +57,23 @@ RETURN = """
 
 class PdnsDatabaseBackend(Database):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
         """
-          Initialize all needed Variables
+        Initialize all needed Variables
         """
         self.module = module
 
-        self.state = module.params.get('state')
+        self.state = module.params.get("state")
         self.db_type = module.params.get("type")
         self.database = module.params.get("database")
         self.schemas = module.params.get("schemas")
-        self.owner = module.params.get('owner')
-        self.group = module.params.get('group')
+        self.owner = module.params.get("owner")
+        self.group = module.params.get("group")
         self.mode = module.params.get("mode")
 
         self.db_hostname = self.database.get("hostname", None)
@@ -84,14 +86,9 @@ class PdnsDatabaseBackend(Database):
 
     def run(self):
         """
-          runner
+        runner
         """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            full_version="unknown"
-        )
+        result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         if self.db_type == "sqlite3":
             result = self._sqlite(None)
@@ -102,8 +99,7 @@ class PdnsDatabaseBackend(Database):
         return result
 
     def _sqlite(self, dbname):
-        """
-        """
+        """ """
         self.module.log(msg=f"_sqlite({dbname})")
 
         database_file = dbname
@@ -113,15 +109,14 @@ class PdnsDatabaseBackend(Database):
         _msg = ""
 
         if self.state == "create":
-            """
-            """
+            """ """
             conn = None
 
             try:
                 conn = sqlite3.connect(
                     database_file,
                     isolation_level=None,
-                    detect_types=sqlite3.PARSE_COLNAMES
+                    detect_types=sqlite3.PARSE_COLNAMES,
                 )
                 conn.row_factory = lambda cursor, row: row[0]
 
@@ -134,11 +129,11 @@ class PdnsDatabaseBackend(Database):
 
                 if len(schemas) == 0:
                     """
-                      import sql schema
+                    import sql schema
                     """
                     self.module.log(msg="import database schemas")
 
-                    with open(self.schemas, 'r') as f:
+                    with open(self.schemas, "r") as f:
                         cursor.executescript(f.read())
 
                     _changed = True
@@ -157,7 +152,7 @@ class PdnsDatabaseBackend(Database):
                 self.module.log(msg=f"Exception class is '{er.__class__}'")
 
                 _failed = True
-                _msg = (' '.join(er.args))
+                _msg = " ".join(er.args)
 
             # exception sqlite3.Warning
             # # A subclass of Exception.
@@ -190,16 +185,10 @@ class PdnsDatabaseBackend(Database):
                 if conn:
                     conn.close()
 
-            return dict(
-                rc=0,
-                failed=_failed,
-                changed=_changed,
-                msg=_msg
-            )
+            return dict(rc=0, failed=_failed, changed=_changed, msg=_msg)
 
         elif self.state == "delete":
-            """
-            """
+            """ """
             if isinstance(self.databases, list):
                 for db in self.databases:
                     dbname = db.get("database")
@@ -211,29 +200,23 @@ class PdnsDatabaseBackend(Database):
                     else:
                         _msg = f"The database file '{dbname}' does not exist."
 
-            return dict(
-                rc=0,
-                failed=_failed,
-                changed=_changed,
-                msg=_msg
-            )
+            return dict(rc=0, failed=_failed, changed=_changed, msg=_msg)
 
         return []
 
     def _mariadb(self):
         """
-            mysql / mariadb support
+        mysql / mariadb support
         """
 
         valid, msg = self.validate()
 
         if not valid:
-            return dict(
-                failed=True,
-                msg=msg
-            )
+            return dict(failed=True, msg=msg)
 
-        self.config = self.db_credentials(self.db_login_username, self.db_login_password, self.db_schemaname)
+        self.config = self.db_credentials(
+            self.db_login_username, self.db_login_password, self.db_schemaname
+        )
 
         self.module.log(msg=f"  config: '{self.config}'")
 
@@ -242,75 +225,42 @@ class PdnsDatabaseBackend(Database):
         self.module.log(msg=f"  '{db_connect_error}' - '{db_message}'")
 
         if db_connect_error:
-            return dict(
-                failed=True,
-                msg=db_message
-            )
+            return dict(failed=True, msg=db_message)
 
         (state, db_error, db_error_message) = self.check_table_schema("domains")
 
         self.module.log(msg=f"  '{state}' - '{db_error}' - '{db_error_message}'")
 
         if state:
-            return dict(
-                changed=False,
-                msg=db_error_message
-            )
+            return dict(changed=False, msg=db_error_message)
 
         # import DB schema
         if os.path.exists(self.schemas):
-            """
-            """
+            """ """
             # result_state = {}
 
             file_name = os.path.basename(self.schemas)
             self.module.log(msg=f"import schema from '{file_name}'")
 
             (state, _msg) = self.db_import_sqlfile(
-                sql_file=self.schemas,
-                commit=True,
-                rollback=True,
-                close_cursor=False
+                sql_file=self.schemas, commit=True, rollback=True, close_cursor=False
             )
 
-            return dict(
-                failed=False,
-                changed=(not state),
-                msg=_msg
-            )
+            return dict(failed=False, changed=(not state), msg=_msg)
 
 
 def main():
 
     arguments = dict(
-        state=dict(
-            default="create",
-            choices=["create", "delete"]
-        ),
-        type=dict(
-            default="sqlite3",
-            choices=["sqlite3", "mariadb"]
-        ),
-        database=dict(
-            required=True,
-            type='dict'
-        ),
-        owner=dict(
-            required=False,
-            type='str'
-        ),
-        group=dict(
-            required=False,
-            type='str'
-        ),
-        mode=dict(
-            required=False,
-            type='str',
-            default="0644"
-        ),
+        state=dict(default="create", choices=["create", "delete"]),
+        type=dict(default="sqlite3", choices=["sqlite3", "mariadb"]),
+        database=dict(required=True, type="dict"),
+        owner=dict(required=False, type="str"),
+        group=dict(required=False, type="str"),
+        mode=dict(required=False, type="str", default="0644"),
         schemas=dict(
             required=True,
-            type='str',
+            type="str",
         ),
     )
 
@@ -328,5 +278,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

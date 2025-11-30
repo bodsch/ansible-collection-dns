@@ -37,32 +37,26 @@ RETURN = """
 
 
 class PiholeAdminPassword(PiHole):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
         self.password = module.params.get("password")
 
         super().__init__(module)
 
     def run(self):
-        """
-        """
+        """ """
         return self.admin_password(self.password)
 
 
 def main():
 
     argument_spec = dict(
-        password=dict(
-            required=True,
-            type="str",
-            no_log=True
-        ),
+        password=dict(required=True, type="str", no_log=True),
     )
 
     module = AnsibleModule(
@@ -79,5 +73,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -5,10 +5,10 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
 
-import os
 import glob
+import os
 
 
 class PowerDNSConfigLoader:
@@ -65,7 +65,9 @@ class PowerDNSConfigLoader:
                 if lowered_key == "launch":
                     self.backends.clear()
                     if value:
-                        self.backends.extend([v.strip() for v in value.split(",") if v.strip()])
+                        self.backends.extend(
+                            [v.strip() for v in value.split(",") if v.strip()]
+                        )
 
                 elif lowered_key.startswith("launch+"):
                     if value:
@@ -76,7 +78,9 @@ class PowerDNSConfigLoader:
                     for backend in self.backends:
                         # z. B. backend = gsqlite3 → prefix
                         if lowered_key.startswith(f"{backend}-"):
-                            self.backend_configs.setdefault(backend, {})[key] = self._convert_value(value)
+                            self.backend_configs.setdefault(backend, {})[key] = (
+                                self._convert_value(value)
+                            )
                             is_backend_key = True
                             break
 

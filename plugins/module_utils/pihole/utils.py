@@ -1,7 +1,6 @@
-
 # import math
+from typing import Any, Dict, Generator, List
 from urllib.parse import urlparse
-from typing import List, Dict, Any, Generator
 
 
 def sanitize_adlist(adlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -26,16 +25,20 @@ def sanitize_adlist(adlists: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
         seen.add(address)
 
-        cleaned.append(dict(
-            address=address,
-            comment=ad.get("comment", ""),
-            enabled=ad.get("enabled", True)
-        ))
+        cleaned.append(
+            dict(
+                address=address,
+                comment=ad.get("comment", ""),
+                enabled=ad.get("enabled", True),
+            )
+        )
 
     return cleaned
 
 
-def flatten_config_dict(data: Dict[str, Any], prefix: str = "") -> Generator[tuple[str, Any], None, None]:
+def flatten_config_dict(
+    data: Dict[str, Any], prefix: str = ""
+) -> Generator[tuple[str, Any], None, None]:
     for key, value in data.items():
         full_key = f"{prefix}.{key}" if prefix else key
 

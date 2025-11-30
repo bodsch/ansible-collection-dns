@@ -4,6 +4,7 @@
 # (c) 2021, Bodo Schulz <bodo@boone-schulz.de>
 
 from __future__ import absolute_import, division, print_function
+
 import re
 
 from ansible.module_utils.basic import AnsibleModule
@@ -51,41 +52,32 @@ RETURN = """
 
 class PdnsVersion(object):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
         """
-          Initialize all needed Variables
+        Initialize all needed Variables
         """
         self.module = module
 
         self.validate_version = module.params.get("validate_version")
-        self.pdns_bin = module.get_bin_path('pdns_server', False)
+        self.pdns_bin = module.get_bin_path("pdns_server", False)
 
     def run(self):
         """
-          runner
+        runner
         """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            full_version="unknown"
-        )
+        result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         if not self.pdns_bin:
-            return dict(
-                rc=0,
-                failed=False,
-                changed=False,
-                msg="no pdns installed"
-            )
+            return dict(rc=0, failed=False, changed=False, msg="no pdns installed")
 
         args = []
         args.append(self.pdns_bin)
-        args.append('--version')
+        args.append("--version")
 
         # self.module.log(msg=f"  args : '{args}'")
 
@@ -98,12 +90,15 @@ class PdnsVersion(object):
         msg = "unknown message"
 
         pattern = re.compile(
-            r".*PowerDNS Authoritative Server (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
+            r".*PowerDNS Authoritative Server (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*"
+        )
 
-        version = next((m.groupdict() for s in _output if (m := pattern.search(s))), None)
+        version = next(
+            (m.groupdict() for s in _output if (m := pattern.search(s))), None
+        )
 
         if version and isinstance(version, dict):
-            version_full_string = version.get('version')
+            version_full_string = version.get("version")
             version_major_string = version.get("major")
             version_minor_string = version.get("minor")
             version_patch_string = version.get("patch")
@@ -127,9 +122,9 @@ class PdnsVersion(object):
             version=dict(
                 major=int(version_major_string),
                 minor=int(version_minor_string),
-                patch=int(version_patch_string)
+                patch=int(version_patch_string),
             ),
-            excutable=self.pdns_bin
+            excutable=self.pdns_bin,
         )
 
         return result
@@ -156,12 +151,7 @@ class PdnsVersion(object):
 
 def main():
 
-    arguments = dict(
-        validate_version=dict(
-            required=False,
-            type="str"
-        )
-    )
+    arguments = dict(validate_version=dict(required=False, type="str"))
 
     module = AnsibleModule(
         argument_spec=arguments,
@@ -177,5 +167,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

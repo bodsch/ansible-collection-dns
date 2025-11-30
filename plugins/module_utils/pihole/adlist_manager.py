@@ -5,20 +5,19 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
-import sqlite3
+from __future__ import absolute_import, print_function
 
-from typing import List, Dict, Any, Optional
+import sqlite3
+from typing import Any, Dict, List, Optional
+
 from ansible_collections.bodsch.dns.plugins.module_utils.pihole.database import DataBase
 
 
 class AdlistManager(DataBase):
-    """
-    """
+    """ """
 
     def __init__(self, module: any, database: str):
-        """
-        """
+        """ """
         self.module = module
 
         super().__init__(module, database)
@@ -30,7 +29,9 @@ class AdlistManager(DataBase):
     def adlist_exists(self, address: str) -> bool:
         return self.get_id_by_column("adlist", "address", address) is not None
 
-    def add_adlist(self, address: str, comment: Optional[str] = None, enabled: bool = True) -> Dict[str, Any]:
+    def add_adlist(
+        self, address: str, comment: Optional[str] = None, enabled: bool = True
+    ) -> Dict[str, Any]:
         if self.adlist_exists(address):
             return dict(changed=False, msg="Adlist already exists.")
 
@@ -39,7 +40,7 @@ class AdlistManager(DataBase):
         try:
             self.execute(
                 "INSERT INTO adlist (address, enabled, comment, date_added) VALUES (?, ?, ?, strftime('%s','now'))",
-                (address, enabled_int, comment)
+                (address, enabled_int, comment),
             )
             self.commit()
             return dict(changed=True, msg="Adlist successfully added.")

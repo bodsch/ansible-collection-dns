@@ -4,19 +4,18 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
 
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 from ansible_collections.bodsch.dns.plugins.module_utils.pihole.database import DataBase
 
 
 class ClientManager(DataBase):
-    """
-    """
+    """ """
 
     def __init__(self, module: any, database: str):
-        """
-        """
+        """ """
         self.module = module
 
         super().__init__(module, database)
@@ -28,7 +27,9 @@ class ClientManager(DataBase):
     def client_by_ip(self, ip: str) -> Optional[int]:
         return self.get_id_by_column("client", "ip", ip)
 
-    def add_or_update_client(self, ip: str, comment: str = "", groups: List[str] = []) -> Dict[str, Any]:
+    def add_or_update_client(
+        self, ip: str, comment: str = "", groups: List[str] = []
+    ) -> Dict[str, Any]:
         changed = False
         client_id = self.client_by_ip(ip)
 
@@ -36,10 +37,14 @@ class ClientManager(DataBase):
             # Check ob Kommentar sich geändert hat
             current_comment = self.get_client_comment(client_id)
             if current_comment != comment:
-                self.execute("UPDATE client SET comment = ? WHERE id = ?", (comment, client_id))
+                self.execute(
+                    "UPDATE client SET comment = ? WHERE id = ?", (comment, client_id)
+                )
                 changed = True
         else:
-            self.execute("INSERT INTO client (ip, comment) VALUES (?, ?)", (ip, comment))
+            self.execute(
+                "INSERT INTO client (ip, comment) VALUES (?, ?)", (ip, comment)
+            )
             client_id = self.cursor.lastrowid
             changed = True
 
@@ -56,18 +61,23 @@ class ClientManager(DataBase):
         target_group_ids.sort()
 
         if current_group_ids != target_group_ids:
-            self.execute("DELETE FROM client_by_group WHERE client_id = ?", (client_id,))
+            self.execute(
+                "DELETE FROM client_by_group WHERE client_id = ?", (client_id,)
+            )
             for gid in target_group_ids:
                 self.execute(
                     "INSERT INTO client_by_group (client_id, group_id) VALUES (?, ?)",
-                    (client_id, gid)
+                    (client_id, gid),
                 )
             changed = True
 
         if changed:
             self.commit()
 
-        return dict(changed=changed, msg=f"Client '{ip}' {'updated' if changed else 'unchanged'}.")
+        return dict(
+            changed=changed,
+            msg=f"Client '{ip}' {'updated' if changed else 'unchanged'}.",
+        )
 
     def remove_client(self, ip: str) -> Dict[str, Any]:
         client_id = self.client_by_ip(ip)
@@ -95,5 +105,7 @@ class ClientManager(DataBase):
         return row[0] if row else None
 
     def get_client_groups(self, client_id: int) -> List[int]:
-        self.execute("SELECT group_id FROM client_by_group WHERE client_id = ?", (client_id,))
+        self.execute(
+            "SELECT group_id FROM client_by_group WHERE client_id = ?", (client_id,)
+        )
         return sorted(row[0] for row in self.fetchall())

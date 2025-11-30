@@ -5,29 +5,25 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
-from ansible.module_utils._text import to_native
-from ansible.module_utils.mysql import (
-    mysql_driver,
-    mysql_driver_fail_msg,
-)
+from __future__ import absolute_import, print_function
 
 import os
-import sqlite3
 import shutil
+import sqlite3
 import warnings
 
+from ansible.module_utils._text import to_native
+from ansible.module_utils.mysql import mysql_driver, mysql_driver_fail_msg
 
-class Database():
+
+class Database:
 
     def __init__(self, module):
-        """
-        """
+        """ """
         self.module = module
 
     def sqlite_create(self, database_file):
-        """
-        """
+        """ """
         self.module.log(msg=f"Database::sqlite_create({database_file})")
 
         _failed = False
@@ -38,9 +34,7 @@ class Database():
 
         try:
             conn = sqlite3.connect(
-                database_file,
-                isolation_level=None,
-                detect_types=sqlite3.PARSE_COLNAMES
+                database_file, isolation_level=None, detect_types=sqlite3.PARSE_COLNAMES
             )
             conn.row_factory = lambda cursor, row: row[0]
 
@@ -53,11 +47,11 @@ class Database():
 
             if len(schemas) == 0:
                 """
-                  import sql schema
+                import sql schema
                 """
                 self.module.log(msg="import database schemas")
 
-                with open(self.schema_file, 'r') as f:
+                with open(self.schema_file, "r") as f:
                     cursor.executescript(f.read())
 
                 _changed = True
@@ -76,7 +70,7 @@ class Database():
             self.module.log(msg=f"Exception class is '{er.__class__}'")
 
             _failed = True
-            _msg = (' '.join(er.args))
+            _msg = " ".join(er.args)
 
         # exception sqlite3.Warning
         # # A subclass of Exception.
@@ -109,15 +103,10 @@ class Database():
             if conn:
                 conn.close()
 
-        return dict(
-            failed=_failed,
-            changed=_changed,
-            msg=_msg
-        )
+        return dict(failed=_failed, changed=_changed, msg=_msg)
 
     def sqlite_remove(self, database_file):
-        """
-        """
+        """ """
         self.module.log(msg=f"Database::sqlite_remove({database_file})")
 
         _failed = False
@@ -130,15 +119,11 @@ class Database():
         else:
             _msg = f"The database file '{database_file}' does not exist."
 
-        return dict(
-            failed=_failed,
-            changed=_changed,
-            msg=_msg
-        )
+        return dict(failed=_failed, changed=_changed, msg=_msg)
 
     def validate(self):
         """
-            validate mysql/mariad database informations
+        validate mysql/mariad database informations
         """
         msg = ""
         errors = []
@@ -162,42 +147,41 @@ class Database():
         return (result, msg)
 
     def db_credentials(self, db_username, db_password, db_schema_name):
-        """
-        """
+        """ """
         # self.module.log(f"Database::db_credentials({db_username}, {db_password}, {db_schema_name})")
 
         config = {}
 
         if self.db_config and os.path.exists(self.db_config):
-            config['read_default_file'] = self.db_config
+            config["read_default_file"] = self.db_config
 
         if self.db_socket:
-            config['unix_socket'] = self.db_socket
+            config["unix_socket"] = self.db_socket
         else:
-            config['host'] = self.db_hostname
-            config['port'] = self.db_port
+            config["host"] = self.db_hostname
+            config["port"] = self.db_port
 
         # If login_user or login_password are given, they should override the
         # config file
         if db_username is not None:
-            config['user'] = db_username
+            config["user"] = db_username
         if db_password is not None:
-            config['passwd'] = db_password
+            config["passwd"] = db_password
 
-        config['db'] = db_schema_name
+        config["db"] = db_schema_name
 
         self.config = config
 
     def db_connect(self):
         """
-            connect to Database
+        connect to Database
         """
         # self.module.log(f"Database::db_connect()")
 
         if mysql_driver is None:
             self.module.fail_json(msg=mysql_driver_fail_msg)
         else:
-            warnings.filterwarnings('error', category=mysql_driver.Warning)
+            warnings.filterwarnings("error", category=mysql_driver.Warning)
 
         db_connect_error = True
 
@@ -228,7 +212,7 @@ class Database():
 
     def db_execute(self, query, commit=True, rollback=True, close_cursor=False):
         """
-            execute Query
+        execute Query
         """
         # self.module.log(f"Database::db_execute(query={query}, commit={commit}, rollback={rollback}, close_cursor={close_cursor})")
 
@@ -286,9 +270,11 @@ class Database():
 
     def import_sqlfile(self, sql_file, commit=True, rollback=True, close_cursor=False):
         """
-            import complete SQL script
+        import complete SQL script
         """
-        self.module.log(f"Database::import_sqlfile(sql_file={sql_file}, commit={commit}, rollback={rollback}, close_cursor={close_cursor})")
+        self.module.log(
+            f"Database::import_sqlfile(sql_file={sql_file}, commit={commit}, rollback={rollback}, close_cursor={close_cursor})"
+        )
 
         if not os.path.exists(sql_file):
             return (False, f"The file {sql_file} does not exist.")
@@ -298,13 +284,17 @@ class Database():
         db_message = None
         _msg = None
 
-        with open(sql_file, encoding='utf8') as f:
+        with open(sql_file, encoding="utf8") as f:
             sql_data = f.read()
             f.close()
-            sql_commands = sql_data.split(';\n')
+            sql_commands = sql_data.split(";\n")
             # remove all lines with '--' prefix (SQL comments)
             # replace \n and strip lines
-            sql_commands = [x.replace("\n", "").strip() for x in sql_commands if not x.replace("\n", "").strip().startswith("--")]
+            sql_commands = [
+                x.replace("\n", "").strip()
+                for x in sql_commands
+                if not x.replace("\n", "").strip().startswith("--")
+            ]
 
             for command in sql_commands:
                 state = False
@@ -313,7 +303,9 @@ class Database():
 
                 if command:
                     # self.module.log(f"execute statement: '{command}'")
-                    (state, db_error, db_message) = self.db_execute(query=command, commit=commit)
+                    (state, db_error, db_message) = self.db_execute(
+                        query=command, commit=commit
+                    )
                     if db_error:
                         break
 
@@ -337,10 +329,10 @@ class Database():
 
     def check_table_schema(self, database_table_name):
         """
-            :return:
-                - state (bool)
-                - db_error(bool)
-                - db_error_message = (str|none)
+        :return:
+            - state (bool)
+            - db_error(bool)
+            - db_error_message = (str|none)
         """
         state = False
         db_error = False
@@ -383,6 +375,8 @@ class Database():
         if number_of_rows == 1:
             state = True
             db_error = False
-            db_error_message = f"The database schema '{database_table_name}' has already been created."
+            db_error_message = (
+                f"The database schema '{database_table_name}' has already been created."
+            )
 
         return (state, db_error, db_error_message)

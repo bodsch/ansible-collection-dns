@@ -6,8 +6,10 @@
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.group_manager import GroupManager
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.group_manager import (
+    GroupManager,
+)
 
 # ---------------------------------------------------------------------------------------
 
@@ -42,13 +44,12 @@ RETURN = """
 
 
 class PiHoleGroups(GroupManager):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
 
         self.groups = module.params.get("groups")
@@ -56,24 +57,16 @@ class PiHoleGroups(GroupManager):
         super().__init__(module, database="/etc/pihole/gravity.db")
 
     def run(self):
-        """
-        """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            msg="unknown"
-        )
+        """ """
+        result = dict(rc=127, failed=True, changed=False, msg="unknown")
 
         result_state = self.manage_groups(groups=self.groups)
 
-        _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
-
-        result = dict(
-            changed=_changed,
-            failed=failed,
-            state=result_state
+        _state, _changed, _failed, state, changed, failed = results(
+            self.module, result_state
         )
+
+        result = dict(changed=_changed, failed=failed, state=result_state)
 
         return result
 
@@ -81,10 +74,7 @@ class PiHoleGroups(GroupManager):
 def main():
 
     argument_spec = dict(
-        groups=dict(
-            required=False,
-            type="list"
-        ),
+        groups=dict(required=False, type="list"),
     )
 
     module = AnsibleModule(
@@ -101,5 +91,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

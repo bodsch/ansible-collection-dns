@@ -5,17 +5,18 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
+
 import re
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from ansible_collections.bodsch.core.plugins.module_utils.checksum import Checksum
 
 
-class PiHole():
-    """
-    """
+class PiHole:
+    """ """
+
     # --- Klassenzustände & Regex ---
     _LINE_RE = re.compile(r"^\s*-\s+(?P<domain>\S+)(?:\s+\((?P<reason>[^)]+)\))?")
     _HEADER_RE = re.compile(r"^\s*\[\s*(?P<flag>[✓✗])\s*]")
@@ -27,12 +28,11 @@ class PiHole():
 
         # self.module.log("PiHole::__init__()")
 
-        self.pihole_bin = self.module.get_bin_path('pihole', False)
+        self.pihole_bin = self.module.get_bin_path("pihole", False)
         self.pihole_ftl_bin = self.module.get_bin_path("pihole-FTL", False)
 
     def status(self):
-        """
-        """
+        """ """
         args = [self.pihole_bin]
         args.append("status")
         rc, out, err = self._exec(args)
@@ -40,10 +40,7 @@ class PiHole():
         return rc
 
     def import_list(
-        self,
-        domains: List[str],
-        list_type: str,
-        comment: str
+        self, domains: List[str], list_type: str, comment: str
     ) -> Dict[str, Any]:
         """
         Importiert eine Allow- oder Deny-Liste.
@@ -76,8 +73,7 @@ class PiHole():
         return self.import_list(domains, "deny", comment)
 
     def admin_password(self, password: str):
-        """
-        """
+        """ """
         # self.module.log(f"PiHole::admin_password({password})")
         old_checksum = None
         cur_checksum = None
@@ -89,20 +85,16 @@ class PiHole():
 
         if _file.exists():
             with open(_file, "r") as f:
-                old_checksum = f.read().rstrip('\n')
+                old_checksum = f.read().rstrip("\n")
 
         if old_checksum == cur_checksum:
             return dict(
                 changed=False,
                 failed=False,
-                msg="This admin password has already been set."
+                msg="This admin password has already been set.",
             )
 
-        args = [
-            self.pihole_bin,
-            "setpassword",
-            password
-        ]
+        args = [self.pihole_bin, "setpassword", password]
 
         rc, out, err = self._exec(args)
 
@@ -113,47 +105,31 @@ class PiHole():
             return dict(
                 changed=True,
                 failed=False,
-                msg="The admin password has been successfully changed."
+                msg="The admin password has been successfully changed.",
             )
 
-        return dict(
-            changed=False,
-            failed=True,
-            msg=err
-        )
+        return dict(changed=False, failed=True, msg=err)
 
     def update_gravity(self):
-        """
-        """
+        """ """
         _changed = False
 
-        args = [
-            self.pihole_bin,
-            "updateGravity"
-        ]
+        args = [self.pihole_bin, "updateGravity"]
 
         rc, out, err = self._exec(args)
 
         if rc == 0:
 
             # 'Status: No changes detected'
-            m = re.search(r'(?m)(?<=Status:\s).*', out)
+            m = re.search(r"(?m)(?<=Status:\s).*", out)
             if m:
                 status = m.group(0)
 
             _changed = "no changes detected" not in status.strip().casefold()
 
-            return dict(
-                changed=_changed,
-                failed=False,
-                msg=status
-            )
+            return dict(changed=_changed, failed=False, msg=status)
 
-        return dict(
-            changed=_changed,
-            failed=True,
-            msg="An error has occurred."
-        )
+        return dict(changed=_changed, failed=True, msg="An error has occurred.")
 
     def reload_lists(self):
         return self.reload(command="reloadlists")
@@ -163,47 +139,36 @@ class PiHole():
 
     def reload(self, command: str = "reloadlists"):
         """
-            reloaddns  : Update the lists and flush the cache without restarting the DNS server
-            reloadlists: Update the lists WITHOUT flushing the cache or restarting the DNS server
+        reloaddns  : Update the lists and flush the cache without restarting the DNS server
+        reloadlists: Update the lists WITHOUT flushing the cache or restarting the DNS server
         """
         _changed = False
 
-        args = [
-            self.pihole_bin,
-            command
-        ]
+        args = [self.pihole_bin, command]
 
         rc, out, err = self._exec(args)
 
         if rc == 0:
             if command == "reloadlists":
-                m = re.search(r'(?m)Reloading DNS lists.*', out)
+                m = re.search(r"(?m)Reloading DNS lists.*", out)
                 if m:
                     _changed = True
                     status = "DNS lists have been successfully reloaded."
 
             if command == "reloaddns":
-                m = re.search(r'(?m)Flushing DNS cache.*', out)
+                m = re.search(r"(?m)Flushing DNS cache.*", out)
                 if m:
                     _changed = True
                     status = "Lists have been successfully reloaded."
 
-            return dict(
-                changed=_changed,
-                failed=False,
-                msg=status
-            )
+            return dict(changed=_changed, failed=False, msg=status)
 
-        return dict(
-            changed=_changed,
-            failed=True,
-            msg="An error has occurred."
-        )
+        return dict(changed=_changed, failed=True, msg="An error has occurred.")
+
     # -------------------
 
     def _exec(self, commands: List[str], check_rc: bool = True) -> Tuple[int, str, str]:
-        """
-        """
+        """ """
         # self.module.log(f"PiHole::_exec({commands}, {check_rc})")
 
         rc, out, err = self.module.run_command(commands, check_rc=check_rc)
@@ -239,7 +204,7 @@ class PiHole():
             hmatch = self._HEADER_RE.match(line)
             if hmatch:
                 # Strip "[✓]" oder "[✗]" vor dem Text
-                text = line[hmatch.end():].strip()
+                text = line[hmatch.end() :].strip()
                 m = self._ACTION_RE.match(text)
                 if not m:
                     continue

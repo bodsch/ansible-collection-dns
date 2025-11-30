@@ -4,6 +4,7 @@
 # (c) 2021, Bodo Schulz <bodo@boone-schulz.de>
 
 from __future__ import absolute_import, division, print_function
+
 import re
 
 from ansible.module_utils.basic import AnsibleModule
@@ -51,39 +52,30 @@ RETURN = """
 
 class BindVersion(object):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
         """
-          Initialize all needed Variables
+        Initialize all needed Variables
         """
         self.module = module
 
         self.validate_version = module.params.get("validate_version")
-        self.named_bin = module.get_bin_path('named', False)
+        self.named_bin = module.get_bin_path("named", False)
 
     def run(self):
         """
-          runner
+        runner
         """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            full_version="unknown"
-        )
+        result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         if not self.named_bin:
-            return dict(
-                rc=0,
-                failed=False,
-                changed=False,
-                msg="no named installed"
-            )
+            return dict(rc=0, failed=False, changed=False, msg="no named installed")
 
-        rc, out, err = self._exec(['-v'])
+        rc, out, err = self._exec(["-v"])
 
         if rc == 0:
             _failed = True
@@ -93,10 +85,11 @@ class BindVersion(object):
             # named -v
             # BIND 9.18.19-1~deb12u1-Debian (Extended Support Version) <id:>
             pattern = re.compile(
-                r"^BIND (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*")
+                r"^BIND (?P<version>(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)).*"
+            )
             version = re.search(pattern, out)
             if version:
-                version_full_string = version.group('version')
+                version_full_string = version.group("version")
                 version_major_string = version.group("major")
                 version_minor_string = version.group("minor")
                 version_patch_string = version.group("patch")
@@ -120,15 +113,15 @@ class BindVersion(object):
                 version=dict(
                     major=int(version_major_string),
                     minor=int(version_minor_string),
-                    patch=int(version_patch_string)
+                    patch=int(version_patch_string),
                 ),
-                excutable=self.named_bin
+                excutable=self.named_bin,
             )
 
         return result
 
     def _exec(self, args):
-        '''   '''
+        """ """
         cmd = [self.named_bin] + args
 
         rc, out, err = self.module.run_command(cmd, check_rc=True)
@@ -146,12 +139,7 @@ class BindVersion(object):
 def main():
 
     module = AnsibleModule(
-        argument_spec=dict(
-            validate_version=dict(
-                required=False,
-                type="str"
-            )
-        ),
+        argument_spec=dict(validate_version=dict(required=False, type="str")),
         supports_check_mode=True,
     )
 
@@ -164,5 +152,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,9 +7,15 @@ from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
-from ansible_collections.bodsch.dns.plugins.module_utils.pdns.config_loader import PowerDNSConfigLoader
-from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import generate_serial
-from ansible_collections.bodsch.dns.plugins.module_utils.pdns.web_api import PowerDNSWebApi
+from ansible_collections.bodsch.dns.plugins.module_utils.pdns.config_loader import (
+    PowerDNSConfigLoader,
+)
+from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import (
+    generate_serial,
+)
+from ansible_collections.bodsch.dns.plugins.module_utils.pdns.web_api import (
+    PowerDNSWebApi,
+)
 
 # ---------------------------------------------------------------------------------------
 
@@ -39,36 +45,28 @@ RETURN = """
 
 class PdnsZoneData(object):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
-        """
-        """
+        """ """
         self.module = module
 
         self.zone_data = module.params.get("zone_data")
-        self._pdnsutil_bin = module.get_bin_path('pdnsutil', True)
+        self._pdnsutil_bin = module.get_bin_path("pdnsutil", True)
 
     def run(self):
-        """
-        """
+        """ """
 
         if not self._pdnsutil_bin:
-            return dict(
-                failed=False,
-                changed=False,
-                msg="no pdns installed."
-            )
+            return dict(failed=False, changed=False, msg="no pdns installed.")
 
         cfg_invalid, pdns_cfg, msg = self.pdns_config_loader()
 
         if cfg_invalid:
-            return dict(
-                failed=True,
-                msg=msg
-            )
+            return dict(failed=True, msg=msg)
 
         config = dict(
             server_id=pdns_cfg.get("server-id", "localhost"),
@@ -77,16 +75,12 @@ class PdnsZoneData(object):
             webserver_port=pdns_cfg.get("webserver_port"),
         )
 
-        pdns_api = PowerDNSWebApi(
-            module=self.module,
-            config=config
-        )
+        pdns_api = PowerDNSWebApi(module=self.module, config=config)
 
         result_state = []
 
         for d in self.zone_data:
-            """
-            """
+            """ """
             res = {}
 
             zone = d.get("name")
@@ -100,7 +94,7 @@ class PdnsZoneData(object):
                 zone_rrsets = pdns_api.extract_existing_rrsets(zone_data)
             else:
                 """
-                    keine zone vorhanden
+                keine zone vorhanden
                 """
                 changed = self.create_zone(pdns_api, zone, nameservers)
 
@@ -121,46 +115,35 @@ class PdnsZoneData(object):
                     _changed = False
                     _msg = json_resp
 
-                res[zone] = dict(
-                    failed=_failed,
-                    changed=_changed,
-                    msg= _msg
-                )
+                res[zone] = dict(failed=_failed, changed=_changed, msg=_msg)
             else:
-                res[zone] = dict(
-                    failed=False,
-                    changed=False,
-                    msg="zone is up-to-date."
-                )
+                res[zone] = dict(failed=False, changed=False, msg="zone is up-to-date.")
 
             # self.module.log(msg="------------------------------------------------------------------")
 
             result_state.append(res)
 
-        _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
-
-        result = dict(
-            changed=_changed,
-            failed=_failed,
-            msg=result_state
+        _state, _changed, _failed, state, changed, failed = results(
+            self.module, result_state
         )
+
+        result = dict(changed=_changed, failed=_failed, msg=result_state)
 
         return result
 
     def pdns_config_loader(self):
-        """
-        """
+        """ """
         self.module.log(msg="PdnsZoneData::pdns_config_loader()")
 
         config_loader = PowerDNSConfigLoader(module=self.module)
         pdns_cfg = config_loader.load()
 
         config_values = {
-            'api': pdns_cfg.get('api'),
-            'webserver': pdns_cfg.get('webserver'),
-            'api_key': pdns_cfg.get('api-key'),
-            'webserver_address': pdns_cfg.get('webserver-address'),
-            'webserver_port': pdns_cfg.get('webserver-port')
+            "api": pdns_cfg.get("api"),
+            "webserver": pdns_cfg.get("webserver"),
+            "api_key": pdns_cfg.get("api-key"),
+            "webserver_address": pdns_cfg.get("webserver-address"),
+            "webserver_port": pdns_cfg.get("webserver-port"),
         }
 
         # self.module.log(msg=f" config_values: '{config_values}'")
@@ -168,16 +151,17 @@ class PdnsZoneData(object):
         missing_keys = [key for key, value in config_values.items() if value is None]
 
         if missing_keys:
-            _keys = ', '.join(missing_keys)
+            _keys = ", ".join(missing_keys)
 
             return (True, None, f"Missing configuration(s): {_keys}")
         else:
             return (False, config_values, "configuration are valid.")
 
     def create_zone(self, pdns_api, zone, nameservers):
-        """
-        """
-        self.module.log(msg=f"PdnsZoneData::create_zone(pdns_api={pdns_api}, zone={zone}, nameservers={nameservers})")
+        """ """
+        self.module.log(
+            msg=f"PdnsZoneData::create_zone(pdns_api={pdns_api}, zone={zone}, nameservers={nameservers})"
+        )
 
         if isinstance(nameservers, list):
             ns = nameservers[0]
@@ -196,7 +180,7 @@ class PdnsZoneData(object):
             nameservers=nameservers,
             ttl=640,
             comment="ansible automation",
-            wantkind='native'
+            wantkind="native",
         )
 
         return changed
@@ -205,10 +189,7 @@ class PdnsZoneData(object):
 def main():
 
     arguments = dict(
-        zone_data=dict(
-            required=True,
-            type="raw"
-        ),
+        zone_data=dict(required=True, type="raw"),
     )
 
     module = AnsibleModule(
@@ -225,5 +206,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

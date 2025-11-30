@@ -9,7 +9,8 @@ filter plugin file for knot_resolver filters: resolver_listener
 
 
 # python 3 headers, required if submitting to Ansible
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 from ansible.utils.display import Display
@@ -39,17 +40,15 @@ display = Display()
 
 
 class FilterModule(object):
-    """
-    """
+    """ """
 
     def filters(self):
         return {
-            'resolver_listener': self.listener,
+            "resolver_listener": self.listener,
         }
 
     def listener(self, data):
-        """
-        """
+        """ """
         result = ""
         # count = len(data)
         # display.v("found: {} entries in {} {}".format(count, data, type(data)))
@@ -60,16 +59,16 @@ class FilterModule(object):
             _port = 0
             _options = []
 
-            interfaces = data.get('interfaces', [])
-            ips = data.get('ips', [])
-            port = data.get('port', '')
-            options = data.get('options', {})
+            interfaces = data.get("interfaces", [])
+            ips = data.get("ips", [])
+            port = data.get("port", "")
+            options = data.get("options", {})
 
             if len(interfaces) > 0:
-                _interfaces = ("net." + ",net.".join(interfaces)).split(',')
+                _interfaces = ("net." + ",net.".join(interfaces)).split(",")
 
             if len(ips) > 0:
-                _ips = ("'" + "','".join(ips) + "'").split(',')
+                _ips = ("'" + "','".join(ips) + "'").split(",")
 
             if int(port) > 0:
                 _port = [str(port)]
@@ -77,9 +76,9 @@ class FilterModule(object):
             if len(options) > 0:
                 for k, v in options.items():
                     # -- {{ k }} - {{ v }}
-                    if k.lower() == 'tls' and v:
+                    if k.lower() == "tls" and v:
                         _options = ["{ tls = true }"]
-                    elif k.lower() == 'kind' and v:
+                    elif k.lower() == "kind" and v:
                         _options = [f"{{ {k.lower()} = '{v}' }}"]
 
             _listen = ["{ " + ", ".join(_interfaces + _ips) + " }"]

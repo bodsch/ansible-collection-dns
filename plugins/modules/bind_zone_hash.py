@@ -4,10 +4,11 @@
 # (c) 2023, Bodo Schulz <bodo@boone-schulz.de>
 
 from __future__ import absolute_import, division, print_function
+
 import os
 import re
-import netaddr
 
+import netaddr
 from ansible.module_utils.basic import AnsibleModule
 
 # ---------------------------------------------------------------------------------------
@@ -61,13 +62,13 @@ RETURN = """
 
 class BindZoneHash(object):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
-        """
-        """
+        """ """
         self.module = module
 
         self.zone_directory = module.params.get("zone_directory")
@@ -81,7 +82,7 @@ class BindZoneHash(object):
 
     def run(self):
         """
-          runner
+        runner
         """
         _hash = []
 
@@ -100,28 +101,13 @@ class BindZoneHash(object):
             line = self.read_zone_file(name)
 
             if not self.reverse_zone:
-                _hash.append(
-                    dict(
-                        name=str(name),
-                        hash=line
-                    )
-                )
+                _hash.append(dict(name=str(name), hash=line))
             else:
-                _hash.append(
-                    dict(
-                        name=str(name),
-                        hash=line,
-                        network=str(network)
-                    )
-                )
+                _hash.append(dict(name=str(name), hash=line, network=str(network)))
 
         self.module.log(msg=f" = '{_hash}'")
 
-        result = dict(
-            failed=False,
-            changed=False,
-            hash=_hash
-        )
+        result = dict(failed=False, changed=False, hash=_hash)
 
         return result
 
@@ -143,7 +129,9 @@ class BindZoneHash(object):
                 # self.module.log(msg=f" - '{zone_data}'")
 
                 pattern = re.compile(
-                    r'; Hash:.*(?P<hash>[0-9A-Za-z]{64}) (?P<timestamp>[0-9]+)', re.MULTILINE)
+                    r"; Hash:.*(?P<hash>[0-9A-Za-z]{64}) (?P<timestamp>[0-9]+)",
+                    re.MULTILINE,
+                )
 
                 # find regex in list
                 # [0]  # Read Note
@@ -185,25 +173,24 @@ class BindZoneHash(object):
         # return result
 
     def define_zone_names(self):
-        """
-        """
+        """ """
         return [x.get("name") for x in self.zone_data]
 
     def define_zone_networks(self):
-        """
-        """
+        """ """
         networks = [x.get("networks") for x in self.zone_data]
         # flatten list of lists
         return [x for row in networks for x in row]
 
     def reverse_zone_names(self, network):
-        """
-        """
+        """ """
         result = None
         # create reverse names
         if not self.ipv6:
-            result = ".".join(network.replace(
-                network + '.', '').split('.')[::-1]) + ".in-addr.arpa"
+            result = (
+                ".".join(network.replace(network + ".", "").split(".")[::-1])
+                + ".in-addr.arpa"
+            )
         else:
             # (item.1 | ansible.utils.ipaddr('revdns'))[-(9+(item.1|regex_replace('^.*/','')|int)//2):-1] }}
             _network = netaddr.IPNetwork(str(network))
@@ -219,31 +206,12 @@ class BindZoneHash(object):
 def main():
 
     arguments = dict(
-        zone_directory=dict(
-            required=True,
-            type="str"
-        ),
-        zone_file=dict(
-            required=False,
-            type="str"
-        ),
-        zone_data=dict(
-            required=True,
-            type="raw"
-        ),
-        reverse_zone=dict(
-            required=False,
-            type="bool",
-            default=False
-        ),
-        networks=dict(
-            required=False,
-            type="raw"
-        ),
-        ipv6=dict(
-            default=False,
-            type="bool"
-        )
+        zone_directory=dict(required=True, type="str"),
+        zone_file=dict(required=False, type="str"),
+        zone_data=dict(required=True, type="raw"),
+        reverse_zone=dict(required=False, type="bool", default=False),
+        networks=dict(required=False, type="raw"),
+        ipv6=dict(default=False, type="bool"),
     )
 
     module = AnsibleModule(
@@ -260,5 +228,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

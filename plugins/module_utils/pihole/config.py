@@ -5,31 +5,32 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
+
 import json
-import toml
-
 from pathlib import Path
-from typing import Dict, Any, Tuple, Generator
+from typing import Any, Dict, Generator, Tuple
 
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.utils import (flatten_config_dict, normalize_value, is_equal)
+import toml
 from ansible_collections.bodsch.dns.plugins.module_utils.pihole.pihole import PiHole
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.utils import (
+    flatten_config_dict,
+    is_equal,
+    normalize_value,
+)
 
 
 class ConfigManager(PiHole):
-    """
-    """
+    """ """
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
 
         super().__init__(module)
 
     def load_toml(self, path: str) -> Dict[str, Any]:
-        """
-        """
+        """ """
         # self.module.log(f"ConfigManager::load_toml(path={path})")
 
         toml_path = Path(path)
@@ -47,7 +48,7 @@ class ConfigManager(PiHole):
 
     def set_config(self, config: dict):
         """
-            e.g. /usr/bin/pihole-FTL --config dns.hosts '[ "192.168.0.4 matrix.vpn", "192.168.0.4 matrix.lan" ]'
+        e.g. /usr/bin/pihole-FTL --config dns.hosts '[ "192.168.0.4 matrix.vpn", "192.168.0.4 matrix.lan" ]'
         """
         # self.module.log("ConfigManager::set_config(config)")
         results = []
@@ -77,8 +78,7 @@ class ConfigManager(PiHole):
         return results
 
     def _config(self, param: str, value: Any):
-        """
-        """
+        """ """
         # self.module.log(f"ConfigManager::set_config(param={param}, value={value})")
 
         if isinstance(value, bool):
@@ -112,10 +112,9 @@ class ConfigManager(PiHole):
     def changed_entries(
         self,
         current_gen: Generator[Tuple[str, Any], None, None],
-        desired_gen: Generator[Tuple[str, Any], None, None]
+        desired_gen: Generator[Tuple[str, Any], None, None],
     ) -> Dict[str, Any]:
-        """
-        """
+        """ """
         # self.module.log("ConfigManager::changed_entries(current_gen, desired_gen)")
 
         current = dict(current_gen)
@@ -134,10 +133,9 @@ class ConfigManager(PiHole):
     def changed_entries_older(
         self,
         current_gen: Generator[Tuple[str, Any], None, None],
-        desired_gen: Generator[Tuple[str, Any], None, None]
+        desired_gen: Generator[Tuple[str, Any], None, None],
     ) -> Dict[str, Any]:
-        """
-        """
+        """ """
         # self.module.log("ConfigManager::changed_entries(current_gen, desired_gen)")
 
         current = dict(current_gen)

@@ -37,21 +37,19 @@ RETURN = """
 
 
 class PiholeCommand(PiHole):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
         self.command = module.params.get("command")
 
         super().__init__(module)
 
     def run(self):
-        """
-        """
+        """ """
         if self.command == "update_gravity":
             return self.update_gravity()
         if self.command == "reloadlists":
@@ -65,7 +63,7 @@ def main():
     argument_spec = dict(
         command=dict(
             default="reloadlists",
-            choices=["update_gravity", "reloaddns", "reloadlists"]
+            choices=["update_gravity", "reloaddns", "reloadlists"],
         ),
     )
 
@@ -83,5 +81,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

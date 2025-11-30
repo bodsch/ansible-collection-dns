@@ -8,8 +8,10 @@ from __future__ import absolute_import, division, print_function
 import os
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.bodsch.core.plugins.module_utils.directory import (
+    create_directory,
+)
 from ansible_collections.bodsch.dns.plugins.module_utils.database import Database
-from ansible_collections.bodsch.core.plugins.module_utils.directory import create_directory
 
 # ---------------------------------------------------------------------------------------
 
@@ -54,33 +56,29 @@ RETURN = """
 
 class PdnsBackendSqlite(Database):
     """
-      Main Class
+    Main Class
     """
+
     module = None
 
     def __init__(self, module):
         """
-          Initialize all needed Variables
+        Initialize all needed Variables
         """
         self.module = module
 
-        self.state = module.params.get('state')
+        self.state = module.params.get("state")
         self.database = module.params.get("database")
         self.schema_file = module.params.get("schema_file")
-        self.owner = module.params.get('owner')
-        self.group = module.params.get('group')
+        self.owner = module.params.get("owner")
+        self.group = module.params.get("group")
         self.mode = module.params.get("mode")
 
     def run(self):
         """
-          runner
+        runner
         """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            full_version="unknown"
-        )
+        result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         res = []
 
@@ -93,7 +91,9 @@ class PdnsBackendSqlite(Database):
 
                 self.module.log(msg=f"  dirname: '{dirname}'")
 
-                create_directory(directory=dirname, owner=self.owner, group=self.group, mode="0750")
+                create_directory(
+                    directory=dirname, owner=self.owner, group=self.group, mode="0750"
+                )
 
                 result = self._sqlite(dbname)
 
@@ -106,7 +106,9 @@ class PdnsBackendSqlite(Database):
 
             self.module.log(msg=f"  dirname: '{dirname}'")
 
-            create_directory(directory=dirname, owner=self.owner, group=self.group, mode="0750")
+            create_directory(
+                directory=dirname, owner=self.owner, group=self.group, mode="0750"
+            )
 
             result = self._sqlite(dbname)
 
@@ -115,60 +117,38 @@ class PdnsBackendSqlite(Database):
         return result
 
     def _sqlite(self, dbname):
-        """
-        """
+        """ """
         self.module.log(msg=f"_sqlite({dbname})")
 
         if self.state == "create":
-            """
-            """
+            """ """
             return self.sqlite_create(dbname)
 
         elif self.state == "delete":
-            """
-            """
+            """ """
             return self.sqlite_remove(dbname)
 
         elif self.state == "recreate":
-            """
-            """
+            """ """
             self.sqlite_remove(dbname)
             self.sqlite_create(dbname)
 
             return dict(
-                failed=False,
-                changed=True,
-                msg="Database successfully recreated."
+                failed=False, changed=True, msg="Database successfully recreated."
             )
 
 
 def main():
 
     arguments = dict(
-        state=dict(
-            default="create",
-            choices=["create", "delete", "recreate"]
-        ),
-        database=dict(
-            required=True,
-            type='dict'
-        ),
-        owner=dict(
-            required=False,
-            type='str'
-        ),
-        group=dict(
-            required=False,
-            type='str'
-        ),
-        mode=dict(
-            required=False,
-            type='str',
-            default="0644"
-        ),
+        state=dict(default="create", choices=["create", "delete", "recreate"]),
+        database=dict(required=True, type="dict"),
+        owner=dict(required=False, type="str"),
+        group=dict(required=False, type="str"),
+        mode=dict(required=False, type="str", default="0644"),
         schema_file=dict(
             required=True,
-            type='str',
+            type="str",
         ),
     )
 
@@ -186,5 +166,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

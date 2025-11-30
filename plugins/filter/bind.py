@@ -1,14 +1,16 @@
 # python 3 headers, required if submitting to Ansible
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
+
+# import netaddr
+import hashlib
+import json
+import time
 
 from ansible.utils.display import Display
 from ansible_collections.bodsch.dns.plugins.module_utils.network_type import reverse_dns
 
-import json
-# import netaddr
-import hashlib
-import time
 # import re
 
 display = Display()
@@ -34,21 +36,19 @@ RETURN = """
 
 
 class FilterModule(object):
-    """
-    """
+    """ """
 
     def filters(self):
         return {
-            'zone_type': self.zone_type,
-            'zone_serial': self.zone_serial,
-            'forward_zone_data': self.forward_zone_data,
-            'reverse_zone_data': self.reverse_zone_data,
-            'zone_filename': self.zone_filename,
+            "zone_type": self.zone_type,
+            "zone_serial": self.zone_serial,
+            "forward_zone_data": self.forward_zone_data,
+            "reverse_zone_data": self.reverse_zone_data,
+            "zone_filename": self.zone_filename,
         }
 
     def zone_type(self, data, all_addresses):
-        """
-        """
+        """ """
         # display.v(f"zone_type({data}, {all_addresses})")
         result = None
         _type = data.get("type", None)
@@ -92,51 +92,48 @@ class FilterModule(object):
 
     def zone_serial(self, domain, zone_hash, exists_hashes, network=None):
         """
-            define serial for zone data or take existing serial when hash are equal
+        define serial for zone data or take existing serial when hash are equal
 
-            input:
-                domain:
-                    - 'acme-inc.com'
-                zone_hash:
-                    - '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d'
-                exists_hashes:
-                    - '{
-                          'zone_data': {
-                            'forward': [{
-                              'example.com': {
-                                'filename': 'example.com',
-                                'hash': '; Hash: 8d591afa6aa30ca0ea7b0293a2468b57b81f591681cd932a7e7a42de5a2a0004 1702835325',
-                                'sha256': '8d591afa6aa30ca0ea7b0293a2468b57b81f591681cd932a7e7a42de5a2a0004',
-                                'serial': '1702835325'
-                               }
-                            }, {
-                              'acme-inc.com': {
-                                'filename': 'acme-inc.com',
-                                'hash': '; Hash: 79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d 1702835326',
-                                'sha256': '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d',
-                                'serial': '1702835326'
-                               }
-                            }],
-                            'reverse': [{
-                              '192.0.2': {
-                                'filename': '2.0.192.in-addr.arpa',
-                                'hash': None,
-                                'sha256': 'None',
-                                'serial': 'None',
-                                'network': '192.0.2'
-                              }
-                            }],
-                          },
-                       }'
-                network:
-                    - None or
-                    - 'acme-inc.com'
+        input:
+            domain:
+                - 'acme-inc.com'
+            zone_hash:
+                - '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d'
+            exists_hashes:
+                - '{
+                      'zone_data': {
+                        'forward': [{
+                          'example.com': {
+                            'filename': 'example.com',
+                            'hash': '; Hash: 8d591afa6aa30ca0ea7b0293a2468b57b81f591681cd932a7e7a42de5a2a0004 1702835325',
+                            'sha256': '8d591afa6aa30ca0ea7b0293a2468b57b81f591681cd932a7e7a42de5a2a0004',
+                            'serial': '1702835325'
+                           }
+                        }, {
+                          'acme-inc.com': {
+                            'filename': 'acme-inc.com',
+                            'hash': '; Hash: 79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d 1702835326',
+                            'sha256': '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d',
+                            'serial': '1702835326'
+                           }
+                        }],
+                        'reverse': [{
+                          '192.0.2': {
+                            'filename': '2.0.192.in-addr.arpa',
+                            'hash': None,
+                            'sha256': 'None',
+                            'serial': 'None',
+                            'network': '192.0.2'
+                          }
+                        }],
+                      },
+                   }'
+            network:
+                - None or
+                - 'acme-inc.com'
         """
         # display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
-        result = dict(
-            hash=zone_hash,
-            serial=int(time.time())
-        )
+        result = dict(hash=zone_hash, serial=int(time.time()))
         domain_data = None
 
         if isinstance(exists_hashes, str):
@@ -169,8 +166,7 @@ class FilterModule(object):
         return result
 
     def forward_zone_data(self, data, soa, ansible_hostname):
-        """
-        """
+        """ """
         # display.v(f"forward_zone_data({data}, {soa}, {ansible_hostname})")
 
         domain = data.get("name")
@@ -222,27 +218,24 @@ class FilterModule(object):
 
         result_hash = self.__hash(result)
 
-        return dict(
-            forward_zone_data=result,
-            zone_hash=result_hash
-        )
+        return dict(forward_zone_data=result, zone_hash=result_hash)
 
     def reverse_zone_data(self, data, soa, ansible_hostname):
         """
-            input:
-                data: [
-                {
-                  'name': 'molecule.lan', 'primaries': ['172.17.0.2'], 'name_servers': ['ns1.acme-inc.com.', 'ns2.acme-inc.com.'],
-                  'hostmaster_email': 'admin',
-                  'hosts': [
-                    {'name': 'srv001', 'ip': '172.17.2.1', 'aliases': ['www']},
-                    {'name': 'srv002', 'ip': '172.17.2.2'}
-                  ]
-                },
-                '172.17'
-            ],
-                soa: {'ttl': '1W', 'time_to_refresh': '1D', 'time_to_retry': '1H', 'time_to_expire': '1W', 'minimum_ttl': '1D'},
-                ansible_hostname: instance
+        input:
+            data: [
+            {
+              'name': 'molecule.lan', 'primaries': ['172.17.0.2'], 'name_servers': ['ns1.acme-inc.com.', 'ns2.acme-inc.com.'],
+              'hostmaster_email': 'admin',
+              'hosts': [
+                {'name': 'srv001', 'ip': '172.17.2.1', 'aliases': ['www']},
+                {'name': 'srv002', 'ip': '172.17.2.2'}
+              ]
+            },
+            '172.17'
+        ],
+            soa: {'ttl': '1W', 'time_to_refresh': '1D', 'time_to_retry': '1H', 'time_to_expire': '1W', 'minimum_ttl': '1D'},
+            ansible_hostname: instance
 
         """
         # display.v(f"reverse_zone_data({data}, {soa}, {ansible_hostname})")
@@ -299,14 +292,11 @@ class FilterModule(object):
 
         # display.v(f"  = {result} - {result_hash}")
 
-        return dict(
-            reverse_zone_data=result,
-            zone_hash=result_hash
-        )
+        return dict(reverse_zone_data=result, zone_hash=result_hash)
 
     def zone_filename(self, data, zone_data):
         """
-            append to every list element
+        append to every list element
         """
         # display.v(f"zone_filename({data}, {zone_data})")
         result = None
@@ -315,7 +305,13 @@ class FilterModule(object):
 
         # display.v(f"  - zone_data: {zone_data}")
 
-        item = {k: v for key, values in zone_data.items() for x in values for k, v in x.items() if k == data}
+        item = {
+            k: v
+            for key, values in zone_data.items()
+            for x in values
+            for k, v in x.items()
+            if k == data
+        }
 
         # display.v(f"  - item     : {item}")
 
@@ -328,7 +324,7 @@ class FilterModule(object):
 
     def __append(self, data, domain=None):
         """
-            append to evvery list element
+        append to evvery list element
         """
         # display.v(f"__append_dot({data})")
         # display.v(f"  - {type(data)}")
@@ -392,10 +388,9 @@ class FilterModule(object):
     #     return None
 
     def __hash(self, data):
-        """
-        """
+        """ """
         result_str = str(data)
-        _bytes = result_str.encode('utf-8')
+        _bytes = result_str.encode("utf-8")
 
         return hashlib.sha256(_bytes).hexdigest()
 

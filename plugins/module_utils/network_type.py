@@ -5,11 +5,12 @@
 # Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import (absolute_import, print_function)
+from __future__ import absolute_import, print_function
 
-import re
-import netaddr
 import logging
+import re
+
+import netaddr
 
 # from dns.resolver import Resolver
 # import dns.exception
@@ -20,8 +21,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def reverse_dns(data):
-    """
-    """
+    """ """
     # logging.info(f"__reverse_dns({data})")
 
     reverse_ip = None
@@ -29,7 +29,7 @@ def reverse_dns(data):
 
     # display.v(f"__reverse_dns({data})")
     if is_valid_ipv4(data):
-        reverse_ip = ".".join(data.replace(data + '.', '').split('.')[::-1])
+        reverse_ip = ".".join(data.replace(data + ".", "").split(".")[::-1])
         result = f"{reverse_ip}.in-addr.arpa"
 
     else:
@@ -61,7 +61,9 @@ def reverse_dns(data):
             pass
 
     if not result:
-        logging.error(f" PROBLEM: {data} is neither a valid IPv4 nor a valid IPv6 network.")
+        logging.error(
+            f" PROBLEM: {data} is neither a valid IPv4 nor a valid IPv6 network."
+        )
 
     logging.info(f" = {result}")
 
@@ -70,9 +72,10 @@ def reverse_dns(data):
 
 def is_valid_ipv4(ip):
     """
-        Validates IPv4 addresses.
+    Validates IPv4 addresses.
     """
-    pattern = re.compile(r"""
+    pattern = re.compile(
+        r"""
         ^
         (?:
           # Dotted variants:
@@ -105,16 +108,19 @@ def is_valid_ipv4(ip):
           4[01]\d{8}|[1-3]\d{0,9}|[4-9]\d{0,8}
         )
         $
-    """, re.VERBOSE | re.IGNORECASE)
+    """,
+        re.VERBOSE | re.IGNORECASE,
+    )
 
     return pattern.match(ip) is not None
 
 
 def is_valid_ipv6(ip):
     """
-        Validates IPv6 addresses.
+    Validates IPv6 addresses.
     """
-    pattern = re.compile(r"""
+    pattern = re.compile(
+        r"""
         ^
         \s*                         # Leading whitespace
         (?!.*::.*::)                # Only a single whildcard allowed
@@ -139,6 +145,8 @@ def is_valid_ipv6(ip):
         )
         \s*                         # Trailing whitespace
         $
-    """, re.VERBOSE | re.IGNORECASE | re.DOTALL)
+    """,
+        re.VERBOSE | re.IGNORECASE | re.DOTALL,
+    )
 
     return pattern.match(ip) is not None

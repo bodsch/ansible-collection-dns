@@ -6,8 +6,10 @@
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.bodsch.dns.plugins.module_utils.pihole.config import ConfigManager
 from ansible_collections.bodsch.core.plugins.module_utils.module_results import results
+from ansible_collections.bodsch.dns.plugins.module_utils.pihole.config import (
+    ConfigManager,
+)
 
 # ---------------------------------------------------------------------------------------
 
@@ -42,13 +44,12 @@ RETURN = """
 
 
 class PiHoleConfig(ConfigManager):
-    """
-    """
+    """ """
+
     module = None
 
     def __init__(self, module: any):
-        """
-        """
+        """ """
         self.module = module
 
         self.config = module.params.get("config")
@@ -56,24 +57,16 @@ class PiHoleConfig(ConfigManager):
         super().__init__(module)
 
     def run(self):
-        """
-        """
-        result = dict(
-            rc=127,
-            failed=True,
-            changed=False,
-            msg="unknown"
-        )
+        """ """
+        result = dict(rc=127, failed=True, changed=False, msg="unknown")
 
         result_state = self.set_config(config=self.config)
 
-        _state, _changed, _failed, state, changed, failed = results(self.module, result_state)
-
-        result = dict(
-            changed=_changed,
-            failed=failed,
-            state=result_state
+        _state, _changed, _failed, state, changed, failed = results(
+            self.module, result_state
         )
+
+        result = dict(changed=_changed, failed=failed, state=result_state)
 
         return result
 
@@ -81,10 +74,7 @@ class PiHoleConfig(ConfigManager):
 def main():
 
     argument_spec = dict(
-        config=dict(
-            required=True,
-            type="dict"
-        ),
+        config=dict(required=True, type="dict"),
     )
 
     module = AnsibleModule(
@@ -101,5 +91,5 @@ def main():
 
 
 # import module snippets
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
