@@ -10,6 +10,7 @@ from ansible_collections.bodsch.core.plugins.module_utils.module_results import 
 from ansible_collections.bodsch.dns.plugins.module_utils.pihole.config import (
     ConfigManager,
 )
+from packaging.version import Version
 
 # ---------------------------------------------------------------------------------------
 
@@ -59,6 +60,29 @@ class PiHoleConfig(ConfigManager):
     def run(self):
         """ """
         result = dict(rc=127, failed=True, changed=False, msg="unknown")
+
+        version = self.version()
+        # self.module.log(f"{version}")
+        version = version.get("full_version")
+
+        if Version(version) >= Version("6.3"):
+            # self.module.log(f"{version}")
+            # self.module.log(f"{self.config}")
+
+            dns = self.config.get("dns", {})
+            dns_domain = dns.get("domain", None)
+
+            # self.module.log(f"{type(dns_domain)}")
+
+            if dns_domain and isinstance(dns_domain, dict):
+                pass
+                # dns_domain_name = dns_domain.get("name")
+            else:
+                self.config["dns"].pop("domain")
+                self.config["dns"]["domain"] = {}
+                self.config["dns"]["domain"]["name"] = dns_domain
+
+        # self.module.log(f"{self.config}")
 
         result_state = self.set_config(config=self.config)
 

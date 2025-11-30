@@ -98,3 +98,17 @@
       changed_when: pihole_install_result.rc == 0
       notify:
         - restart pihole-FTL
+
+- name: detect pihole version
+  become: true
+  bodsch.dns.pihole_version:
+  register: pihole_version
+  check_mode: false
+  ignore_errors: true
+
+- name: create custom fact file
+  bodsch.core.facts:
+    name: pihole
+    facts:
+      full_version: "{{ pihole_version.full_version }}"
+      version: "{{ pihole_version.version }}"

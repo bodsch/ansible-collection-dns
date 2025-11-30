@@ -39,6 +39,48 @@ class PiHole:
 
         return rc
 
+    def version(self):
+        """ """
+        args = [self.pihole_ftl_bin]
+        args.append("--version")
+
+        rc, out, err = self._exec(args)
+
+        _output = []
+        _output += out.splitlines()
+        _output += err.splitlines()
+
+        msg = "unknown message"
+
+        pattern = re.compile(r".*v(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)$")
+
+        version = next(
+            (m.groupdict() for s in _output if (m := pattern.search(s))), None
+        )
+
+        if version and isinstance(version, dict):
+            # version_full_string = version.get("version")
+            version_major_string = version.get("major")
+            version_minor_string = version.get("minor")
+            version_patch_string = version.get("patch")
+
+            version_full_string = (
+                f"{version_major_string}.{version_minor_string}.{version_patch_string}"
+            )
+
+        result = dict(
+            msg=msg,
+            full_version=version_full_string,
+            version=dict(
+                major=int(version_major_string),
+                minor=int(version_minor_string),
+                patch=int(version_patch_string),
+            ),
+            excutable=self.pihole_ftl_bin,
+        )
+
+        return result
+
     def import_list(
         self, domains: List[str], list_type: str, comment: str
     ) -> Dict[str, Any]:

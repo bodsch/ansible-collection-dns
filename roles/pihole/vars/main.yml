@@ -16,6 +16,7 @@ pihole_dependencies:
   - python3-toml
   - jq
 
+# config: https://github.com/pi-hole/FTL/blob/master/test/pihole.toml
 pihole_defaults_config:
   dns:
     upstreams:
@@ -33,7 +34,10 @@ pihole_defaults_config:
     blockTTL: ""                                                  # 2
     domainNeeded: ""                                              # false
     expandHosts: ""                                               # false
+    # changed: https://github.com/pi-hole/FTL/pull/2531
     domain: pi.hole
+      # name: pi.hole
+      # local: true
     bogusPriv: ""                                                 # true
     dnssec: ""                                                    # false
     interface: ""  # "{{ ansible_facts.default_ipv4.interface }}"
