@@ -2,6 +2,10 @@
 
 pdns_zones:
   - name: 'acme-inc.com'
+
+    create_forward_zones: true
+    create_reverse_zones: true
+
     name_servers:
       - ns1
       - ns2

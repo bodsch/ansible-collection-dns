@@ -59,6 +59,7 @@ class PdnsZoneData(object):
 
     def run(self):
         """ """
+        self.module.log("PdnsZoneData::run()")
 
         if not self._pdnsutil_bin:
             return dict(failed=False, changed=False, msg="no pdns installed.")
@@ -85,9 +86,22 @@ class PdnsZoneData(object):
 
             zone = d.get("name")
             nameservers = d.get("name_servers")
+            create_forward_zones = d.get("create_forward_zones", False)
 
             res[zone] = dict()
             zone_rrsets = {}
+
+            if create_forward_zones:
+                # PTR
+                zone = "in-addr.arpa"
+                zone_data = pdns_api.zone_data(zone)
+                if zone_data:
+                    zone_rrsets = pdns_api.extract_existing_rrsets(zone_data)
+                else:
+                    """
+                    keine zone vorhanden
+                    """
+                    changed = self.create_zone(pdns_api, zone, nameservers)
 
             zone_data = pdns_api.zone_data(zone)
             if zone_data:
@@ -119,7 +133,7 @@ class PdnsZoneData(object):
             else:
                 res[zone] = dict(failed=False, changed=False, msg="zone is up-to-date.")
 
-            # self.module.log(msg="------------------------------------------------------------------")
+            # self.module.log("------------------------------------------------------------------")
 
             result_state.append(res)
 
@@ -133,7 +147,7 @@ class PdnsZoneData(object):
 
     def pdns_config_loader(self):
         """ """
-        self.module.log(msg="PdnsZoneData::pdns_config_loader()")
+        self.module.log("PdnsZoneData::pdns_config_loader()")
 
         config_loader = PowerDNSConfigLoader(module=self.module)
         pdns_cfg = config_loader.load()
@@ -160,7 +174,7 @@ class PdnsZoneData(object):
     def create_zone(self, pdns_api, zone, nameservers):
         """ """
         self.module.log(
-            msg=f"PdnsZoneData::create_zone(pdns_api={pdns_api}, zone={zone}, nameservers={nameservers})"
+            f"PdnsZoneData::create_zone(pdns_api={pdns_api}, zone={zone}, nameservers={nameservers})"
         )
 
         if isinstance(nameservers, list):

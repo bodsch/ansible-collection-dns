@@ -23,10 +23,14 @@ class PowerDNSConfigLoader:
         self.backends = []
         self.backend_configs = {}
 
+        self.module.log("PowerDNSConfigLoader::__init__()")
+
     def load(self, main_config="/etc/powerdns/pdns.conf"):
         """
         Lädt die Hauptkonfigurationsdatei sowie alle Dateien im include-dir.
         """
+        self.module.log(f"PowerDNSConfigLoader::load(main_config={main_config})")
+
         self._load_file(main_config)
 
         include_dir = self.config.get("include-dir")
@@ -50,6 +54,8 @@ class PowerDNSConfigLoader:
         """
         Liest eine Konfigurationsdatei ein und verarbeitet sie.
         """
+        self.module.log(f"PowerDNSConfigLoader::_load_file(file_path={file_path})")
+
         with open(file_path, "r") as f:
             for line in f:
                 line = line.strip()

@@ -40,6 +40,10 @@
         - pdns
         - install
 
+    - name: d
+      debug:
+        msg: "{{ ansible_facts.services }}"
+
     - name: set systemd unit name
       ansible.builtin.set_fact:
         resolved_unit_file: "{{ ansible_facts.services | bodsch.systemd.service('systemd-resolved', state='running') }}"
@@ -47,10 +51,17 @@
         - pdns
         - install
 
+    - name: d
+      debug:
+        msg: "{{ resolved_unit_file | default('') }}"
+
+    # BUG
+    #  when resolved_unit_file is 'null' this task fail
     - name: disable systemd-resolved
       service:
-        name: "{{ resolved_unit_file }}"
+        name: "{{ resolved_unit_file | default('systemd-resolved') }}"
         state: stopped
         enabled: false
       when:
-        - resolved_unit_file | default('') | string | length > 0
+        - not resolved_unit_file | default('') == 'null' or
+          resolved_unit_file | default('') | string | length > 0

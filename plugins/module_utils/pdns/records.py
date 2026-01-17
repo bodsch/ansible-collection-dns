@@ -2,6 +2,10 @@
 
 from collections import defaultdict
 
+from ansible_collections.bodsch.dns.plugins.module_utils.utils import (
+    reverse_zone_names,
+)
+
 from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import (
     build_rrset,
     fqdn,
@@ -167,19 +171,43 @@ def txt_records(zone, records, comment=None, account=None):
     return rrsets
 
 
-def ptr_records(zone, records, comment=None, account=None):
+def ptr_records(module, zone, records, comment=None, account=None):
     """ """
+    module.log(" ::ptr_records(zone, records, comment, account)")
+
     rrsets = []
 
-    # for z in records:
-    #     status_code, msg, json_response = create_zone(z, nameservers=[], kind="native", masters=None)
-    #
-    #     if status_code in [200, 201]:
-    #         rrsets = [
-    #             build_rrset(z, "SOA", ttl, [soa]),
-    #             # self.build_rrset(z, "NS", ttl, [self.fqdn(zone, for x in nameservers])
-    #         ]
-    #
-    #         status_code, msg, json_response = patch_zone(zone, rrsets)
+    for record in records:
+        module.log(msg=f"  - record: {record})")
+
+        name = fqdn(zone, record.get("name"))
+        ttl = record.get("ttl", 3600)
+        ipv4 = record.get("ip", None)
+        # ipv6 = record.get("ipv6", None)
+        # aliases = record.get("aliases", None)
+
+        rev_name = reverse_zone_names(module, network=ipv4)
+
+        module.log(msg=f"    reverse name: {rev_name}")
+
+        rrsets.append(
+            build_rrset(
+                name=rev_name,
+                rtype="PTR",
+                ttl=ttl,
+                records=[name],
+                comment=comment if comment else "",
+            )
+        )
+
+        # status_code, msg, json_response = create_zone(z, nameservers=[], kind="native", masters=None)
+        #
+        # if status_code in [200, 201]:
+        #     rrsets = [
+        #         build_rrset(z, "SOA", ttl, [soa]),
+        #         # self.build_rrset(z, "NS", ttl, [self.fqdn(zone, for x in nameservers])
+        #     ]
+        #
+        #     status_code, msg, json_response = patch_zone(zone, rrsets)
 
     return rrsets

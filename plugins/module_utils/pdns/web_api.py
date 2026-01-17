@@ -15,6 +15,7 @@ from ansible_collections.bodsch.dns.plugins.module_utils.pdns.records import (
     mx_records,
     srv_records,
     txt_records,
+    ptr_records,
 )
 from ansible_collections.bodsch.dns.plugins.module_utils.pdns.utils import (
     build_rrset,
@@ -29,6 +30,8 @@ class PowerDNSWebApi:
 
     def __init__(self, module, config):
         self.module = module
+
+        self.module.log(f"PowerDNSWebApi::__init__(config={config})")
 
         server_id = config.get("server_id")
         api_key = config.get("api_key", None)
@@ -135,6 +138,9 @@ class PowerDNSWebApi:
         rrsets += srv_records(zone=zone, records=data.get("services", []))
         rrsets += mx_records(zone=zone, records=data.get("mail_servers", []))
         rrsets += txt_records(zone=zone, records=data.get("text", []))
+
+        if bool(data.get("create_forward_zones", False)):
+            rrsets += ptr_records(self.module, zone=zone, records=data.get("hosts", []))
 
         return rrsets
 
