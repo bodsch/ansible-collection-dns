@@ -245,8 +245,8 @@ class PiHole:
             # Header-Zeile?
             hmatch = self._HEADER_RE.match(line)
             if hmatch:
-                # Strip "[✓]" oder "[✗]" vor dem Text
-                text = line[hmatch.end() :].strip()
+                _end = hmatch.end()
+                text = line[_end:].strip()
                 m = self._ACTION_RE.match(text)
                 if not m:
                     continue

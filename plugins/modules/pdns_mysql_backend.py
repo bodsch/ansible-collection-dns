@@ -12,40 +12,165 @@ from ansible_collections.bodsch.dns.plugins.module_utils.database import Databas
 
 # ---------------------------------------------------------------------------------------
 
-DOCUMENTATION = """
-module: pdns_version
-version_added: 0.9.0
-author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+DOCUMENTATION = r"""
+---
+module: pdns_mysql_backend
+short_description: Ensure a PowerDNS MariaDB/MySQL backend schema is present (import schema if missing)
+version_added: "0.9.0"
+author:
+  - Bodo Schulz (@bodsch) <bodo@boone-schulz.de>
 
-short_description: return the version of installed pdns
-description: return the version of installed pdns
+description:
+  - Connects to a MariaDB/MySQL server and verifies the PowerDNS schema by checking for the C(domains) table.
+  - If the schema is missing, imports the given SQL schema file.
+  - Intended to bootstrap the PowerDNS gmysql backend schema.
+  - Note: While C(state=delete) is accepted by the argument spec, this module implementation only performs schema validation/import.
 
 options:
-  validate_version:
-    description: check against the installed version.
+  state:
+    description:
+      - Desired state.
+      - C(create) validates the schema and imports it if missing.
+      - C(delete) is currently not implemented for MariaDB/MySQL by this module code path.
+    type: str
+    default: create
+    choices: [create, delete]
+
+  database:
+    description:
+      - Database connection parameters for MariaDB/MySQL.
+    type: dict
+    required: true
+    suboptions:
+      hostname:
+        description:
+          - Database hostname or IP.
+        type: str
+        required: false
+      port:
+        description:
+          - Database port.
+        type: int
+        required: false
+        default: 3306
+      socket:
+        description:
+          - Path to the UNIX socket (optional, alternative to hostname/port).
+        type: str
+        required: false
+      config_file:
+        description:
+          - Optional client config file used by the underlying database helper.
+        type: str
+        required: false
+      schemaname:
+        description:
+          - Database/schema name to connect to.
+        type: str
+        required: false
+      login:
+        description:
+          - Login credentials.
+        type: dict
+        required: false
+        suboptions:
+          username:
+            description:
+              - Login user.
+            type: str
+            required: false
+          password:
+            description:
+              - Login password.
+            type: str
+            required: false
+            no_log: true
+
+  schema_file:
+    description:
+      - Path to the SQL schema file to import if the PowerDNS schema is missing.
+    type: str
+    required: true
+
+  owner:
+    description:
+      - Optional compatibility parameter (not used directly by this module code path).
     type: str
     required: false
 
+  group:
+    description:
+      - Optional compatibility parameter (not used directly by this module code path).
+    type: str
+    required: false
+
+  mode:
+    description:
+      - Optional compatibility parameter (not used directly by this module code path).
+    type: str
+    default: "0644"
+    required: false
+
+notes:
+  - Check mode is supported.
+
+requirements:
+  - MariaDB/MySQL connectivity as provided by the collection's C(Database) helper utilities.
 """
 
 EXAMPLES = r"""
-- name: detect pdns version
+- name: Ensure PowerDNS schema exists in MariaDB and import if missing
   become: true
-  bodsch.dns.pdns_version:
-  register: pdns_version
-  check_mode: false
-  ignore_errors: true
+  bodsch.dns.pdns_mysql_backend:
+    state: create
+    database:
+      hostname: 127.0.0.1
+      port: 3306
+      schemaname: powerdns
+      login:
+        username: pdns
+        password: secret
+    schema_file: /usr/share/pdns/schema.mysql.sql
 
-- name: detect pdns version
+- name: Use a UNIX socket and a client config file
   become: true
-  bodsch.dns.pdns_version:
-    validate_version: '9.18.0'
-  register: pdns_version
-  check_mode: false
-  ignore_errors: true
+  bodsch.dns.pdns_mysql_backend:
+    state: create
+    database:
+      socket: /run/mysqld/mysqld.sock
+      config_file: /root/.my.cnf
+      schemaname: powerdns
+    schema_file: /usr/share/pdns/schema.mysql.sql
 """
 
-RETURN = """
+RETURN = r"""
+changed:
+  description:
+    - Whether the module imported the schema.
+  returned: always
+  type: bool
+
+failed:
+  description:
+    - Indicates failure.
+  returned: always
+  type: bool
+
+msg:
+  description:
+    - Human readable status or error message.
+  returned: always
+  type: str
+  sample:
+    - "schema already present"
+    - "imported schema successfully"
+    - "connection failed: <details>"
+
+rc:
+  description:
+    - Return code used by the module implementation (may be absent depending on the executed code path).
+  returned: sometimes
+  type: int
 """
 
 # ---------------------------------------------------------------------------------------

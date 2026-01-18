@@ -1,78 +1,121 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# (c) 2020-2023, Bodo Schulz <bodo@boone-schulz.de>
-# Apache-2.0 (see LICENSE or https://opensource.org/license/apache-2-0)
-# SPDX-License-Identifier: Apache-2.0
+"""
+network_type.py
+
+IP address and reverse-DNS helper functions.
+
+This module provides:
+    - `reverse_dns(...)`: Convert an IPv4/IPv6 address (optionally a CIDR network) into its
+      corresponding reverse-DNS domain name.
+    - `is_valid_ipv4(...)`: Validate whether a string is a syntactically valid IPv4 address
+      (supports dotted, decimal, octal, hex notations per the used regex).
+    - `is_valid_ipv6(...)`: Validate whether a string is a syntactically valid IPv6 address.
+
+Implementation notes:
+    - IPv6 reverse computation uses `netaddr.IPNetwork` / `netaddr.IPAddress`.
+    - For IPv6 CIDR inputs, an offset is applied so the returned reverse name corresponds to the
+      reverse-zone boundary implied by the prefix length.
+    - `reverse_dns(...)` logs an error and returns `None` if the input cannot be interpreted
+      as a valid IPv4 or IPv6 address/network.
+
+Source: `network_type.py` :contentReference[oaicite:0]{index=0}
+"""
 
 from __future__ import absolute_import, print_function
 
 import logging
 import re
+from typing import Optional
 
 import netaddr
-
-# from dns.resolver import Resolver
-# import dns.exception
 
 __metaclass__ = type
 
 logging.basicConfig(level=logging.DEBUG)
 
 
-def reverse_dns(data):
-    """ """
-    # logging.info(f"__reverse_dns({data})")
+def reverse_dns(data: str) -> Optional[str]:
+    """
+    Convert an IP address (IPv4/IPv6) or network (CIDR) into its reverse-DNS name.
 
-    reverse_ip = None
-    result = None
+    Behavior:
+        - If `data` is a valid IPv4 address, the function returns:
+              "<reversed octets>.in-addr.arpa"
+          Example:
+              "192.0.2.10" -> "10.2.0.192.in-addr.arpa"
 
-    # display.v(f"__reverse_dns({data})")
+        - Otherwise, the function tries to parse `data` as an IPv6 address or IPv6 network via
+          `netaddr.IPNetwork`. If parsing succeeds, it uses `IPAddress(...).reverse_dns` and, for CIDR
+          inputs, trims the result to match the reverse-zone boundary implied by the prefix length.
+
+        - If parsing fails, the function logs an error and returns `None`.
+
+    Args:
+        data: IPv4/IPv6 address string or CIDR network string (e.g. "2001:db8::/64").
+
+    Returns:
+        Optional[str]:
+            - Reverse-DNS domain name (without a trailing dot) on success.
+            - None if the input is not a valid IPv4/IPv6 address/network.
+    """
+    reverse_ip: Optional[str] = None
+    result: Optional[str] = None
+
     if is_valid_ipv4(data):
-        reverse_ip = ".".join(data.replace(data + ".", "").split(".")[::-1])
+        # Reverse octets for in-addr.arpa.
+        reverse_ip = ".".join(data.split(".")[::-1])
         result = f"{reverse_ip}.in-addr.arpa"
-
     else:
         try:
-            _offset = None
+            offset: Optional[int] = None
             if data.count("/") == 1:
-                _prefix = data.split("/")[1]
-                _offset = int(9 + int(_prefix) // 2)
-                # display.v(f" {_prefix} - {_offset}")
+                prefix_str = data.split("/")[1]
+                # Original logic: compute an offset depending on prefix.
+                offset = int(9 + int(prefix_str) // 2)
 
-            _network = netaddr.IPNetwork(str(data))
-            _prefix = _network.prefixlen
-            _ipaddress = netaddr.IPAddress(_network)
-            reverse_ip = _ipaddress.reverse_dns
+            network = netaddr.IPNetwork(str(data))
+            ipaddress = netaddr.IPAddress(network)
+            reverse_ip = (
+                ipaddress.reverse_dns
+            )  # typically ends with a trailing "ip6.arpa."
 
-            if _offset:
-                result = reverse_ip[-_offset:]
+            if offset:
+                result = reverse_ip[-offset:]
+            else:
+                result = reverse_ip
 
-            if result[-1] == ".":
+            if result and result.endswith("."):
                 result = result[:-1]
 
-            # logging.info(f" - {reverse_ip}")
-            # logging.info(f" - {result}")
-
-            # return result
-
         except Exception:
-            # display.v(f" ERROR: {e}")
+            # Keep original behavior: swallow parsing errors and handle below.
             pass
 
     if not result:
         logging.error(
-            f" PROBLEM: {data} is neither a valid IPv4 nor a valid IPv6 network."
+            f"PROBLEM: {data} is neither a valid IPv4 nor a valid IPv6 network."
         )
+        return None
 
-    logging.info(f" = {result}")
-
+    logging.info(f"= {result}")
     return result
 
 
-def is_valid_ipv4(ip):
+def is_valid_ipv4(ip: str) -> bool:
     """
-    Validates IPv4 addresses.
+    Validate whether a string is a syntactically valid IPv4 address.
+
+    The regex supports multiple IPv4 notations:
+        - dotted decimal/octal/hex variants
+        - pure decimal/octal/hex integer forms
+
+    Args:
+        ip: IPv4 address candidate string.
+
+    Returns:
+        bool: True if `ip` matches the IPv4 pattern, otherwise False.
     """
     pattern = re.compile(
         r"""
@@ -115,15 +158,25 @@ def is_valid_ipv4(ip):
     return pattern.match(ip) is not None
 
 
-def is_valid_ipv6(ip):
+def is_valid_ipv6(ip: str) -> bool:
     """
-    Validates IPv6 addresses.
+    Validate whether a string is a syntactically valid IPv6 address.
+
+    The regex accepts:
+        - full and compressed IPv6 forms (single '::')
+        - IPv4-mapped tail forms (ending in dotted IPv4)
+
+    Args:
+        ip: IPv6 address candidate string.
+
+    Returns:
+        bool: True if `ip` matches the IPv6 pattern, otherwise False.
     """
     pattern = re.compile(
         r"""
         ^
         \s*                         # Leading whitespace
-        (?!.*::.*::)                # Only a single whildcard allowed
+        (?!.*::.*::)                # Only a single wildcard allowed
         (?:(?!:)|:(?=:))            # Colon iff it would be part of a wildcard
         (?:                         # Repeat 6 times:
             [0-9a-f]{0,4}           #   A group of at most four hexadecimal digits
@@ -133,7 +186,7 @@ def is_valid_ipv6(ip):
             [0-9a-f]{0,4}           #   Another group
             (?:(?<=::)|(?<!::):)    #   Colon unless preceeded by wildcard
             [0-9a-f]{0,4}           #   Last group
-            (?: (?<=::)             #   Colon iff preceeded by exacly one colon
+            (?: (?<=::)             #   Colon iff preceeded by exactly one colon
              |  (?<!:)              #
              |  (?<=:) (?<!::) :    #
              )                      # OR

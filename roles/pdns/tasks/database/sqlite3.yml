@@ -9,7 +9,7 @@
   ansible.builtin.find:
     paths:
       - "/usr/share/pdns-backend-sqlite3/schema"
-      - "{{ pdns_config_dir }}/backends"
+      - "{{ pdns_config_dir }}/backends/"
     file_type: file
     patterns:
       - schema.sqlite3.sql

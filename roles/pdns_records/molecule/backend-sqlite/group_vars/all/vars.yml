@@ -57,6 +57,8 @@ pdns_zones:
 
   - name: 'matrix.vpn'
     type: primary
+    create_reverse_zones: true
+
     # create_forward_zones: true
     # create_reverse_zones: true
     #primaries:

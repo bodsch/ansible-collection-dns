@@ -15,40 +15,134 @@ from ansible_collections.bodsch.dns.plugins.module_utils.database import Databas
 
 # ---------------------------------------------------------------------------------------
 
-DOCUMENTATION = """
-module: pdns_version
-version_added: 0.9.0
-author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+DOCUMENTATION = r"""
+---
+module: pdns_sqlite_backend
+short_description: Create, delete or recreate a PowerDNS SQLite backend database and import the schema
+version_added: "0.9.0"
+author:
+  - Bodo Schulz (@bodsch) <bodo@boone-schulz.de>
 
-short_description: return the version of installed pdns
-description: return the version of installed pdns
+description:
+  - Manages a PowerDNS SQLite backend database file.
+  - Ensures the parent directory exists (created with mode C(0750)) before operating on the database.
+  - Imports the given SQL schema file when creating the database (implementation provided by the collection database helper).
+  - Can delete or recreate the database.
 
 options:
-  validate_version:
-    description: check against the installed version.
+  state:
+    description:
+      - Desired state of the SQLite backend.
+      - C(create) ensures the database exists and schema is present.
+      - C(delete) removes the database.
+      - C(recreate) deletes and recreates the database.
+    type: str
+    default: create
+    choices: [create, delete, recreate]
+
+  database:
+    description:
+      - SQLite database definition.
+      - The module expects the database file path in C(database.database).
+    type: dict
+    required: true
+    suboptions:
+      database:
+        description:
+          - Path to the SQLite database file.
+        type: str
+        required: true
+
+  schema_file:
+    description:
+      - Path to the SQL schema file to import when creating the database.
+    type: str
+    required: true
+
+  owner:
+    description:
+      - Owner for the created directory/database (handled by collection helpers).
     type: str
     required: false
 
+  group:
+    description:
+      - Group for the created directory/database (handled by collection helpers).
+    type: str
+    required: false
+
+  mode:
+    description:
+      - File mode for the SQLite database file (octal string, e.g. C(0644)).
+    type: str
+    default: "0644"
+    required: false
+
+notes:
+  - Check mode is supported (C(supports_check_mode=true)).
 """
 
 EXAMPLES = r"""
-- name: detect pdns version
+- name: Create PowerDNS SQLite backend and import schema if needed
   become: true
-  bodsch.dns.pdns_version:
-  register: pdns_version
-  check_mode: false
-  ignore_errors: true
+  bodsch.dns.pdns_sqlite_backend:
+    state: create
+    database:
+      database: /var/lib/powerdns/pdns.sqlite3
+    schema_file: /usr/share/pdns/schema.sqlite3.sql
+    owner: pdns
+    group: pdns
+    mode: "0640"
 
-- name: detect pdns version
+- name: Recreate PowerDNS SQLite backend (drop + create)
   become: true
-  bodsch.dns.pdns_version:
-    validate_version: '9.18.0'
-  register: pdns_version
-  check_mode: false
-  ignore_errors: true
+  bodsch.dns.pdns_sqlite_backend:
+    state: recreate
+    database:
+      database: /var/lib/powerdns/pdns.sqlite3
+    schema_file: /usr/share/pdns/schema.sqlite3.sql
+    owner: pdns
+    group: pdns
+    mode: "0640"
+
+- name: Delete PowerDNS SQLite backend database file
+  become: true
+  bodsch.dns.pdns_sqlite_backend:
+    state: delete
+    database:
+      database: /var/lib/powerdns/pdns.sqlite3
+    schema_file: /usr/share/pdns/schema.sqlite3.sql
 """
 
-RETURN = """
+RETURN = r"""
+rc:
+  description:
+    - Return code used by the module implementation.
+  returned: always
+  type: int
+  sample: 0
+
+changed:
+  description:
+    - Whether the module made changes (e.g. created/imported schema, deleted database, recreated database).
+  returned: always
+  type: bool
+
+failed:
+  description:
+    - Indicates failure.
+  returned: always
+  type: bool
+
+msg:
+  description:
+    - Human readable status or error message.
+  returned: always
+  type: str
+  sample:
+    - "Database successfully created."
+    - "Database successfully recreated."
+    - "The database has been successfully deleted."
 """
 
 # ---------------------------------------------------------------------------------------
@@ -67,6 +161,8 @@ class PdnsBackendSqlite(Database):
         """
         self.module = module
 
+        self.module.log("PdnsBackendSqlite::__init__()")
+
         self.state = module.params.get("state")
         self.database = module.params.get("database")
         self.schema_file = module.params.get("schema_file")
@@ -78,6 +174,8 @@ class PdnsBackendSqlite(Database):
         """
         runner
         """
+        self.module.log("PdnsBackendSqlite::run()")
+
         result = dict(rc=127, failed=True, changed=False, full_version="unknown")
 
         res = []
@@ -118,7 +216,7 @@ class PdnsBackendSqlite(Database):
 
     def _sqlite(self, dbname):
         """ """
-        self.module.log(msg=f"_sqlite({dbname})")
+        self.module.log(msg=f"PdnsBackendSqlite::_sqlite({dbname})")
 
         if self.state == "create":
             """ """

@@ -24,7 +24,7 @@
       - "/usr/share/pdns-backend-sqlite3/schema"
       - "/usr/share/pdns-backend-mysql/schema"
       - "/usr/share/pdns-backend-bind/schema"
-      - "{{ pdns_config_dir }}/backends"
+      - "{{ pdns_config_dir }}/backends/"
     file_type: file
     follow: true
     recurse: true
