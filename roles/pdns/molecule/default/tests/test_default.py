@@ -254,14 +254,24 @@ def test_directories(host, get_vars):
     """
     used config directory
     """
-    print(get_vars)
+    distribution = host.system_info.distribution
+    release = host.system_info.release
+
+    print(f"distribution: {distribution}")
+    print(f"release     : {release}")
+    # print(get_vars)
 
     directories = [
         "/etc/powerdns",
-        "/var/lib/powerdns",
-        "/var/spool/powerdns",
         get_vars.get("pdns_config_include"),
     ]
+
+    if distribution in ['arch', 'artix']:
+        directories.append("/usr/lib/powerdns")
+
+    if distribution in ['debian', 'ubuntu']:
+        directories.append("/var/lib/powerdns",)
+        directories.append("/var/spool/powerdns")
 
     for dirs in directories:
         d = host.file(dirs)
