@@ -65,5 +65,5 @@
   gather_facts: true
 
   roles:
-    - role: bodsch.mariadb
+    - role: bodsch.database.mariadb
 ...

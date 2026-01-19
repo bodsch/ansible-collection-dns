@@ -39,7 +39,7 @@ platforms:
         ipv4_address: "10.11.0.1"
 
   - name: database
-    image: "ghcr.io/bodsch/docker-ansible/ansible-debian:12"
+    image: "ghcr.io/bodsch/docker-ansible/ansible-debian:13"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix:///run/docker.sock}"
     privileged: true
