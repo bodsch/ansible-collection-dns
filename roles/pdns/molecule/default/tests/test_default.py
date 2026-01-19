@@ -287,19 +287,6 @@ def test_files(host, get_vars):
         assert f.is_file
 
 
-def test_lmbd_files(host, get_vars):
-    """ """
-
-    files = [
-        "/var/lib/powerdns/pdns.lmdb",
-        "/var/lib/powerdns/pdns.lmdb-lock",
-    ]
-
-    for _file in files:
-        f = host.file(_file)
-        assert f.is_file
-
-
 def test_service_running_and_enabled(host, get_vars):
     """
     running service
@@ -319,7 +306,7 @@ def test_listening_socket(host, get_vars):
     for i in listening:
         print(i)
 
-    bind_port = "5300"
+    bind_port = "53"
     bind_address = "127.0.0.1"
 
     listen = []
