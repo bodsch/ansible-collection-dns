@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import pytest
 from ansible.parsing.dataloader import DataLoader
-from helpers.dns_utils import dig_python
 from jinja2 import ChainableUndefined
 from jinja2.nativetypes import NativeEnvironment
 
@@ -248,186 +247,85 @@ def get_vars(host) -> Dict[str, Any]:
     return result
 
 
-# --- helper ----------------------------------------------------------------
-
-
 # --- tests -----------------------------------------------------------------
 
 
-def test_records_A(host, get_vars):
-    """ """
-    domains = [
-        {"domain": "ns1.acme-inc.com", "type": "A", "result": "10.11.0.1"},
-        {"domain": "ns2.acme-inc.com", "type": "A", "result": "10.11.0.2"},
-        # {"domain": "srv001.acme-inc.com", "type": "A", "result": "10.11.1.1"},
-        # {"domain": "srv002.acme-inc.com", "type": "A", "result": "10.11.1.2"},
-        # {"domain": "mail001.acme-inc.com", "type": "A", "result": "10.11.2.1"},
-        # {"domain": "mail002.acme-inc.com", "type": "A", "result": "10.11.2.2"},
-        # {"domain": "mail003.acme-inc.com", "type": "A", "result": "10.11.2.3"},
-        # {"domain": "srv010.acme-inc.com", "type": "A", "result": "10.11.0.10"},
-        # {"domain": "srv011.acme-inc.com", "type": "A", "result": "10.11.0.11"},
-        # {"domain": "srv012.acme-inc.com", "type": "A", "result": "10.11.0.12"},
-        # #
-        # {"domain": "cms.cm.local", "type": "A", "result": "192.168.124.21"},
+def test_directories(host, get_vars):
+    """
+    used config directory
+    """
+    print(get_vars)
+
+    directories = [
+        "/etc/powerdns",
+        "/var/lib/powerdns",
+        "/var/spool/powerdns",
+        get_vars.get("pdns_config_include"),
     ]
 
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
+    for dirs in directories:
+        d = host.file(dirs)
+        assert d.is_directory
 
 
-def test_records_PTR(host, get_vars):
-    """ """
-    domains = [
-        # IPv4 Reverse lookups
-        {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.com."},
-        {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.com."},
-        # {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.com."},
-        # {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.com."},
-        # {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.com."},
-        # {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.com."},
-        # {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.com."},
-        # {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.com."},
-        # {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.com."},
-        # {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.com."},
-        # # # IPv6 Reverse lookups
-        # {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.com."},
-        # #
-        # {"domain": "192.168.124.21", "type": "PTR", "result": "cms.cm.local"},
+def test_files(host, get_vars):
+    """
+    created config files
+    """
+    files = [
+        "/etc/powerdns/pdns.conf",
+        "/etc/powerdns/pdns.d/pdns_general.conf",
+        "/etc/powerdns/pdns.d/pdns_backends.conf",
+        "/etc/powerdns/pdns.d/pdns_webserver.conf",
+        "/etc/powerdns/pdns.d/pdns_api.conf",
+        "/etc/ansible/facts.d/pdns.fact",
+        "/usr/bin/pdnsutil",
     ]
 
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
+    for _file in files:
+        f = host.file(_file)
+        assert f.is_file
 
 
-def test_records_CNAME(host, get_vars):
+def test_lmbd_files(host, get_vars):
     """ """
-    domains = [
-        # IPv4 Alias lookups
-        {
-            "domain": "www.acme-inc.com",
-            "type": "CNAME",
-            "result": "srv001.acme-inc.com.",
-        },
-        {
-            "domain": "foo.acme-inc.com",
-            "type": "CNAME",
-            "result": "srv001.acme-inc.com.",
-        },
-        # {
-        #     "domain": "smtp.acme-inc.com",
-        #     "type": "CNAME",
-        #     "result": "mail001.acme-inc.com.",
-        # },
-        # {
-        #     "domain": "mail-in.acme-inc.com",
-        #     "type": "CNAME",
-        #     "result": "mail001.acme-inc.com.",
-        # },
-        # {
-        #     "domain": "imap.acme-inc.com",
-        #     "type": "CNAME",
-        #     "result": "mail003.acme-inc.com.",
-        # },
-        # {
-        #     "domain": "mail-out.acme-inc.com",
-        #     "type": "CNAME",
-        #     "result": "mail003.acme-inc.com.",
-        # },
-        # #
-        # {"domain": "cms.cm.local", "type": "CNAME", "result": "192.168.124.21"},
+
+    files = [
+        "/var/lib/powerdns/pdns.lmdb",
+        "/var/lib/powerdns/pdns.lmdb-lock",
     ]
 
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
+    for _file in files:
+        f = host.file(_file)
+        assert f.is_file
 
 
-def test_records_AAAA(host, get_vars):
+def test_service_running_and_enabled(host, get_vars):
+    """
+    running service
+    """
+    service_name = get_vars.get("pdns_service").get("name", None)
+
+    if service_name:
+        service = host.service(service_name)
+        assert service.is_running
+        assert service.is_enabled
+
+
+def test_listening_socket(host, get_vars):
     """ """
-    domains = [
-        # IPv6 Forward lookups
-        {"domain": "srv001.acme-inc.com", "type": "AAAA", "result": "2001:db8::1"},
-    ]
+    listening = host.socket.get_listening_sockets()
 
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
+    for i in listening:
+        print(i)
 
-    if has_failed:
-        print(failed)
-        assert False
+    bind_port = "5300"
+    bind_address = "127.0.0.1"
 
+    listen = []
+    listen.append(f"tcp://{bind_address}:{bind_port}")
+    listen.append(f"udp://{bind_address}:{bind_port}")
 
-def test_records_NS(host, get_vars):
-    """ """
-    domains = [
-        # NS records lookup
-        {
-            "domain": "acme-inc.com",
-            "type": "NS",
-            "result": "ns1.acme-inc.com.,ns2.acme-inc.com.",
-        },
-        # {"domain": "cm.local", "type": "NS", "result": "dns.cm.local."},
-    ]
-
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
-
-
-def test_records_MX(host, get_vars):
-    """ """
-    domains = [
-        # MX records lookup
-        {
-            "domain": "acme-inc.com",
-            "type": "MX",
-            "result": "10 mail001.acme-inc.com.,20 mail002.acme-inc.com.",
-        },
-    ]
-
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
-
-
-def test_records_SRV(host, get_vars):
-    """ """
-    domains = [
-        # Service records lookup
-        {
-            "domain": "_ldap._tcp.acme-inc.com",
-            "type": "SRV",
-            "result": "0 100 631 srv010.acme-inc.com.,0 50 631 srv010.acme-inc.com.",
-        },
-    ]
-
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
-
-
-def test_records_TXT(host, get_vars):
-    """ """
-    domains = [
-        # TXT records lookup
-        {"domain": "acme-inc.com", "type": "TXT", "result": '"more text","some text"'},
-    ]
-
-    (has_failed, failed) = dig_python(host=host, get_vars=get_vars, domains=domains)
-
-    if has_failed:
-        print(failed)
-        assert False
+    for spec in listen:
+        socket = host.socket(spec)
+        assert socket.is_listening

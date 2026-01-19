@@ -1,7 +1,20 @@
 ---
 
+pdns_config:
+  master: true
+  slave: false
+  also-notify: ""
+  local-address: '127.0.0.1'
+  local-port: '5300'
+  log-dns-details: true
+  loglevel: "5"   # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+
 pdns_zones:
   - name: 'acme-inc.com'
+
+    create_forward_zones: true
+    create_reverse_zones: true
+
     name_servers:
       - ns1
       - ns2
