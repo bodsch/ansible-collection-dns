@@ -1,5 +1,6 @@
 ---
 
+<<<<<<< Updated upstream
 collections:
   - name: community.mysql
   - name: bodsch.database
@@ -8,5 +9,11 @@ collections:
 #  - name: bodsch.mariadb
 #    src: bodsch.mariadb
 #    version: 2.6.0
+=======
+# roles:
+#   - name: bodsch.mariadb
+#     src: bodsch.mariadb
+#     version: 2.6.0
+>>>>>>> Stashed changes
 
 ...
