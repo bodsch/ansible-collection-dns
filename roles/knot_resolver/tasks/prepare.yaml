@@ -20,10 +20,6 @@
         - default.yaml
       skip: true
 
-- name: update package cache
-  ansible.builtin.package:
-    update_cache: true
-
 - name: install dedendency
   ansible.builtin.package:
     name: "{{ knot_resolver_dependencies }}"
@@ -32,34 +28,7 @@
     - knot_resolver_dependencies is defined
     - knot_resolver_dependencies | count > 0
 
-- name: user and group handling
-  when:
-    - knot_resolver_owner != "root"
-  block:
-    - name: create kresd group
-      ansible.builtin.group:
-        name: "{{ knot_resolver_group }}"
-        state: present
-        system: true
-
-    - name: create kresd user
-      ansible.builtin.user:
-        name: "{{ knot_resolver_owner }}"
-        groups: "{{ knot_resolver_group }}"
-        append: true
-        shell: /usr/sbin/nologin
-        system: true
-        createhome: false
-        home: /nonexistent
-
-- name: merge knot_resolver configuration between defaults and custom
-  ansible.builtin.set_fact:
-    knot_resolver_cache: "{{ knot_resolver_defaults_cache | combine(knot_resolver_cache, recursive=True) }}"
-    knot_resolver_log: "{{ knot_resolver_defaults_log | combine(knot_resolver_log, recursive=True) }}"
-    knot_resolver_prometheus: "{{ knot_resolver_defaults_prometheus | combine(knot_resolver_prometheus, recursive=True) }}"
-    knot_resolver_predict: "{{ knot_resolver_defaults_predict | combine(knot_resolver_predict, recursive=True) }}"
-
-- name: get latest system information
-  ansible.builtin.setup:
+# - name: get latest system information
+  # ansible.builtin.setup:
 
 ...

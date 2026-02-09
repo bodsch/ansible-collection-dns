@@ -1,11 +1,11 @@
 ---
 
 - name: restart kresd (systemd)
-  with_sequence: "count={{ knot_resolver_systemd_instances }}"
   listen: "restart kresd"
   ansible.builtin.service:
-    name: "kresd@{{ item }}.service"
+    name: "{{ item }}"
     state: restarted
+  loop: "{{ knot_resolver_service }}"
   when:
     - ansible_facts.service_mgr | lower == 'systemd'
 

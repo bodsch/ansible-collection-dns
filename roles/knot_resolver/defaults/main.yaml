@@ -16,7 +16,9 @@ knot_resolver_prometheus: {}
 
 knot_resolver_predict: {}
 
-knot_resolver_systemd_instances: 2
+knot_resolver_systemd:
+  instances: 2
+  unit: knot-resolver
 
 knot_resolver_internal_domain: []
 
