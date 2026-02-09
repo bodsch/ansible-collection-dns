@@ -47,8 +47,6 @@
         - pdns
         - install
 
-    # BUG
-    #  when resolved_unit_file is 'null' this task fail
     - name: disable systemd-resolved
       ansible.builtin.service:
         name: "{{ resolved_unit_file | default('systemd-resolved') }}"
