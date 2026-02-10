@@ -228,12 +228,12 @@ class PdnsBackendMariadb(Database):
             self.db_login_username, self.db_login_password, self.db_schemaname
         )
 
-        (db_connect_error, db_message) = self.db_connect()
+        db_connect_error, db_message = self.db_connect()
 
         if db_connect_error:
             return dict(failed=True, msg=db_message)
 
-        (state, db_error, db_error_message) = self.check_table_schema("domains")
+        state, db_error, db_error_message = self.check_table_schema("domains")
 
         if state:
             return dict(changed=False, msg=db_error_message)
@@ -244,7 +244,7 @@ class PdnsBackendMariadb(Database):
             # file_name = os.path.basename(self.schema_file)
             # self.module.log(msg=f"import schema from '{file_name}'")
 
-            (state, _msg) = self.import_sqlfile(
+            state, _msg = self.import_sqlfile(
                 sql_file=self.schema_file,
                 commit=True,
                 rollback=True,

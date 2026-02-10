@@ -1,22 +1,16 @@
 # python 3 headers, required if submitting to Ansible
 from __future__ import absolute_import, division, print_function
-from typing import Any, List, Mapping, Sequence
+
+from typing import List, Sequence
 
 __metaclass__ = type
 
 from ansible.utils.display import Display
 
-# from ansible_collections.bodsch.dns.plugins.module_utils.network_type import reverse_dns
-
-# import json
-# import netaddr
-# import hashlib
-# import time
-# import re
-
 display = Display()
 
 # ---------------------------------------------------------------------------------------
+
 
 class FilterModule(object):
     """ """
@@ -26,7 +20,9 @@ class FilterModule(object):
             "knot_resolver_service": self.knot_resolver_service,
         }
 
-    def knot_resolver_service(self, data: Sequence[str], os_family: str, count: int, service: str):
+    def knot_resolver_service(
+        self, data: Sequence[str], os_family: str, count: int, service: str
+    ):
         """ """
         display.v(
             f"knot_resolver_service(data: {data}, os_family: {os_family}, count: {count}, service: {service})"
@@ -39,9 +35,8 @@ class FilterModule(object):
         if family == "archlinux":
             _service.append(data)
         elif family == "debian":
-            for i in range(1, count+1):
-                _service.append(service.replace('@.', f"@{i}."))
+            for i in range(1, count + 1):
+                _service.append(service.replace("@.", f"@{i}."))
 
         display.v(f"  = {_service}")
         return _service
-

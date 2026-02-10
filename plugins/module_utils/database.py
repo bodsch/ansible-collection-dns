@@ -482,7 +482,7 @@ class Database:
                 db_message = None
 
                 if command:
-                    (state, db_error, db_message) = self.db_execute(
+                    state, db_error, db_message = self.db_execute(
                         query=command, commit=commit
                     )
                     if db_error:

@@ -7,7 +7,6 @@
 filter plugin file for knot_resolver filters: resolver_listener
 """
 
-
 # python 3 headers, required if submitting to Ansible
 from __future__ import absolute_import, division, print_function
 
