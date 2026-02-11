@@ -108,6 +108,11 @@ def dns_lookup_on_host(
 
     r = host.run(cmd)
     out = (r.stdout or "").strip()
+    err = (r.stderr or "").strip()
+
+    if err:
+        print(err)
+
     return out or None
 
 

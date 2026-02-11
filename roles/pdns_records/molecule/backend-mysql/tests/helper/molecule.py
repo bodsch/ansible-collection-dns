@@ -7,16 +7,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import pytest
-from ansible.parsing.dataloader import DataLoader
-
 import testinfra.utils.ansible_runner
+from ansible.parsing.dataloader import DataLoader
 from jinja2 import ChainableUndefined
 from jinja2.nativetypes import NativeEnvironment
-
-testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-        os.environ["MOLECULE_INVENTORY_FILE"]
-    ).get_hosts("instance")
-
 
 # --- helper ----------------------------------------------------------------
 
@@ -29,6 +23,35 @@ def pp_json(json_thing, sort=True, indents=2):
         print(json.dumps(json_thing, sort_keys=sort, indent=indents))
 
     return None
+
+
+def local_facts(host, fact: Optional[str] = None) -> Dict:
+    """
+    return local facts
+    """
+    local_fact = host.ansible("setup").get("ansible_facts").get("ansible_local")
+
+    print(f"local_fact     : {local_fact}")
+
+    if local_fact and fact:
+        return local_fact.get(fact, {})
+    else:
+        return dict()
+
+
+def infra_hosts(host_name: Optional[str] = None):
+    """ """
+    if not host_name:
+        host_name = "all"
+
+    result = testinfra.utils.ansible_runner.AnsibleRunner(
+        os.environ["MOLECULE_INVENTORY_FILE"]
+    ).get_hosts(host_name)
+
+    print(f"result: {result}")
+    print(f"        {type(result)}")
+
+    return result
 
 
 # --- paths -----------------------------------------------------------------
@@ -252,84 +275,3 @@ def get_vars(host) -> Dict[str, Any]:
     result = render_all_vars(merged, passes=8)
 
     return result
-
-
-# --- tests -----------------------------------------------------------------
-
-
-def test_directories(host, get_vars):
-    """
-    used config directory
-    """
-    distribution = host.system_info.distribution
-    release = host.system_info.release
-
-    print(f"distribution: {distribution}")
-    print(f"release     : {release}")
-    # print(get_vars)
-
-    directories = [
-        "/etc/powerdns",
-        get_vars.get("pdns_config_include"),
-    ]
-
-    if distribution in ['arch', 'artix']:
-        directories.append("/usr/lib/powerdns")
-
-    if distribution in ['debian', 'ubuntu']:
-        directories.append("/var/lib/powerdns",)
-        directories.append("/var/spool/powerdns")
-
-    for dirs in directories:
-        d = host.file(dirs)
-        assert d.is_directory
-
-
-def test_files(host, get_vars):
-    """
-    created config files
-    """
-    files = [
-        "/etc/powerdns/pdns.conf",
-        "/etc/powerdns/pdns.d/pdns_general.conf",
-        "/etc/powerdns/pdns.d/pdns_backends.conf",
-        "/etc/powerdns/pdns.d/pdns_webserver.conf",
-        "/etc/powerdns/pdns.d/pdns_api.conf",
-        "/etc/ansible/facts.d/pdns.fact",
-        "/usr/bin/pdnsutil",
-    ]
-
-    for _file in files:
-        f = host.file(_file)
-        assert f.is_file
-
-
-def test_service_running_and_enabled(host, get_vars):
-    """
-    running service
-    """
-    service_name = get_vars.get("pdns_service").get("name", None)
-
-    if service_name:
-        service = host.service(service_name)
-        assert service.is_running
-        assert service.is_enabled
-
-
-def test_listening_socket(host, get_vars):
-    """ """
-    listening = host.socket.get_listening_sockets()
-
-    for i in listening:
-        print(i)
-
-    bind_port = "5300"
-    bind_address = "127.0.0.1"
-
-    listen = []
-    listen.append(f"tcp://{bind_address}:{bind_port}")
-    listen.append(f"udp://{bind_address}:{bind_port}")
-
-    for spec in listen:
-        socket = host.socket(spec)
-        assert socket.is_listening

@@ -191,7 +191,7 @@ def test_cache_files(host, get_vars):
     files = [
         f"{bind_dir}/0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
         f"{bind_dir}/0.11.10.in-addr.arpa",
-        f"{bind_dir}/acme-inc.com",
+        f"{bind_dir}/acme-inc.local",
         f"{bind_dir}/124.168.192.in-addr.arpa",
         f"{bind_dir}/cm.local",
     ]
@@ -234,16 +234,16 @@ def test_listening_socket(host, get_vars):
 def test_records_A(host):
     """ """
     domains = [
-        {"domain": "ns1.acme-inc.com", "type": "A", "result": "10.11.0.1"},
-        {"domain": "ns2.acme-inc.com", "type": "A", "result": "10.11.0.2"},
-        {"domain": "srv001.acme-inc.com", "type": "A", "result": "10.11.1.1"},
-        {"domain": "srv002.acme-inc.com", "type": "A", "result": "10.11.1.2"},
-        {"domain": "mail001.acme-inc.com", "type": "A", "result": "10.11.2.1"},
-        {"domain": "mail002.acme-inc.com", "type": "A", "result": "10.11.2.2"},
-        {"domain": "mail003.acme-inc.com", "type": "A", "result": "10.11.2.3"},
-        {"domain": "srv010.acme-inc.com", "type": "A", "result": "10.11.0.10"},
-        {"domain": "srv011.acme-inc.com", "type": "A", "result": "10.11.0.11"},
-        {"domain": "srv012.acme-inc.com", "type": "A", "result": "10.11.0.12"},
+        {"domain": "ns1.acme-inc.local", "type": "A", "result": "10.11.0.1"},
+        {"domain": "ns2.acme-inc.local", "type": "A", "result": "10.11.0.2"},
+        {"domain": "srv001.acme-inc.local", "type": "A", "result": "10.11.1.1"},
+        {"domain": "srv002.acme-inc.local", "type": "A", "result": "10.11.1.2"},
+        {"domain": "mail001.acme-inc.local", "type": "A", "result": "10.11.2.1"},
+        {"domain": "mail002.acme-inc.local", "type": "A", "result": "10.11.2.2"},
+        {"domain": "mail003.acme-inc.local", "type": "A", "result": "10.11.2.3"},
+        {"domain": "srv010.acme-inc.local", "type": "A", "result": "10.11.0.10"},
+        {"domain": "srv011.acme-inc.local", "type": "A", "result": "10.11.0.11"},
+        {"domain": "srv012.acme-inc.local", "type": "A", "result": "10.11.0.12"},
         #
         {"domain": "cms.cm.local", "type": "A", "result": "192.168.124.21"},
     ]
@@ -255,18 +255,18 @@ def test_records_PTR(host):
     """ """
     domains = [
         # IPv4 Reverse lookups
-        {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.com."},
-        {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.com."},
-        {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.com."},
-        {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.com."},
-        {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.com."},
-        {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.com."},
-        {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.com."},
-        {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.com."},
-        {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.com."},
-        {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.com."},
+        {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.local."},
+        {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.local."},
+        {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.local."},
+        {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.local."},
+        {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.local."},
+        {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.local."},
+        {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.local."},
+        {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.local."},
+        {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.local."},
+        {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.local."},
         # # IPv6 Reverse lookups
-        {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.com."},
+        {"domain": "2001:db8::1", "type": "PTR", "result": "srv001.acme-inc.local."},
         #
         {"domain": "192.168.124.21", "type": "PTR", "result": "cms.cm.local"},
     ]
@@ -279,34 +279,34 @@ def test_records_CNAME(host):
     domains = [
         # IPv4 Alias lookups
         {
-            "domain": "www.acme-inc.com",
+            "domain": "www.acme-inc.local",
             "type": "CNAME",
-            "result": "srv001.acme-inc.com.",
+            "result": "srv001.acme-inc.local.",
         },
         {
-            "domain": "mysql.acme-inc.com",
+            "domain": "mysql.acme-inc.local",
             "type": "CNAME",
-            "result": "srv002.acme-inc.com.",
+            "result": "srv002.acme-inc.local.",
         },
         {
-            "domain": "smtp.acme-inc.com",
+            "domain": "smtp.acme-inc.local",
             "type": "CNAME",
-            "result": "mail001.acme-inc.com.",
+            "result": "mail001.acme-inc.local.",
         },
         {
-            "domain": "mail-in.acme-inc.com",
+            "domain": "mail-in.acme-inc.local",
             "type": "CNAME",
-            "result": "mail001.acme-inc.com.",
+            "result": "mail001.acme-inc.local.",
         },
         {
-            "domain": "imap.acme-inc.com",
+            "domain": "imap.acme-inc.local",
             "type": "CNAME",
-            "result": "mail003.acme-inc.com.",
+            "result": "mail003.acme-inc.local.",
         },
         {
-            "domain": "mail-out.acme-inc.com",
+            "domain": "mail-out.acme-inc.local",
             "type": "CNAME",
-            "result": "mail003.acme-inc.com.",
+            "result": "mail003.acme-inc.local.",
         },
         #
         {"domain": "cms.cm.local", "type": "CNAME", "result": "192.168.124.21"},
@@ -319,7 +319,7 @@ def test_records_AAAA(host):
     """ """
     domains = [
         # IPv6 Forward lookups
-        {"domain": "srv001.acme-inc.com", "type": "AAAA", "result": "2001:db8::1"},
+        {"domain": "srv001.acme-inc.local", "type": "AAAA", "result": "2001:db8::1"},
     ]
 
     assert dig(host, domains)
@@ -330,9 +330,9 @@ def test_records_NS(host):
     domains = [
         # NS records lookup
         {
-            "domain": "acme-inc.com",
+            "domain": "acme-inc.local",
             "type": "NS",
-            "result": "ns1.acme-inc.com.,ns2.acme-inc.com.",
+            "result": "ns1.acme-inc.local.,ns2.acme-inc.local.",
         },
         {"domain": "cm.local", "type": "NS", "result": "dns.cm.local."},
     ]
@@ -345,9 +345,9 @@ def test_records_MX(host):
     domains = [
         # MX records lookup
         {
-            "domain": "acme-inc.com",
+            "domain": "acme-inc.local",
             "type": "MX",
-            "result": "10 mail001.acme-inc.com.,20 mail002.acme-inc.com.",
+            "result": "10 mail001.acme-inc.local.,20 mail002.acme-inc.local.",
         },
     ]
 
@@ -359,9 +359,9 @@ def test_records_SRV(host):
     domains = [
         # Service records lookup
         {
-            "domain": "_ldap._tcp.acme-inc.com",
+            "domain": "_ldap._tcp.acme-inc.local",
             "type": "SRV",
-            "result": "0 100 88 srv010.acme-inc.com.",
+            "result": "0 100 88 srv010.acme-inc.local.",
         },
     ]
 
@@ -372,7 +372,7 @@ def test_records_TXT(host):
     """ """
     domains = [
         # TXT records lookup
-        {"domain": "acme-inc.com", "type": "TXT", "result": '"more text","some text"'},
+        {"domain": "acme-inc.local", "type": "TXT", "result": '"more text","some text"'},
     ]
 
     assert dig(host, domains)

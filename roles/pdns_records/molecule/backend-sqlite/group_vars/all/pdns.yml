@@ -14,8 +14,11 @@ pdns_config:
   also-notify: ""
   local-address: '127.0.0.1'
   local-port: '5300'
+  disable-syslog: true
   log-dns-details: true
-  loglevel: 6                 # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+  log-dns-queries: true
+  log-timestamp: true
+  loglevel: 7                 # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
   server-id: localhost
 
 pdns_webserver:

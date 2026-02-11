@@ -10,7 +10,7 @@ pdns_config:
   loglevel: 6
 
 pdns_zones:
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
 
     create_forward_zones: true
     create_reverse_zones: true

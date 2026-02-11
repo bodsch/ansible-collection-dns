@@ -7,7 +7,7 @@ Ansible role to configure dns records for powerdns.
 
 ```yaml
 pdns_zones:
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
     type: primary
     create_forward_zones: true
     create_reverse_zones: true

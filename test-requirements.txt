@@ -9,3 +9,5 @@ pytest-testinfra
 tox
 tox-gh-actions
 yamllint
+# collection specific
+dnspython

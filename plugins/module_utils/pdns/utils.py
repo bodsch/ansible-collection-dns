@@ -76,9 +76,9 @@ def fqdn(zone: str, name: str) -> str:
         - Otherwise, `name` is treated as a label relative to `zone` and `.<zone>.` is appended.
 
     Examples:
-        - fqdn("acme-inc.com", "srv001")              -> "srv001.acme-inc.com."
-        - fqdn("acme-inc.com", "srv001.acme-inc.com.") -> "srv001.acme-inc.com."
-        - fqdn("acme-inc.com", "@")                  -> "acme-inc.com."
+        - fqdn("acme-inc.local", "srv001")              -> "srv001.acme-inc.local."
+        - fqdn("acme-inc.local", "srv001.acme-inc.local.") -> "srv001.acme-inc.local."
+        - fqdn("acme-inc.local", "@")                  -> "acme-inc.local."
 
     Args:
         zone: DNS zone name without trailing dot (recommended).

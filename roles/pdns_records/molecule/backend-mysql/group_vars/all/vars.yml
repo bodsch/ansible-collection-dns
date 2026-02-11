@@ -10,7 +10,7 @@ pdns_config:
   loglevel: "1"   # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
 
 pdns_zones:
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
 
     create_forward_zones: true
     create_reverse_zones: true

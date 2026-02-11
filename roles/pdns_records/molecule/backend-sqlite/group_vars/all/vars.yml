@@ -6,11 +6,15 @@ pdns_config:
   also-notify: ""
   local-address: '127.0.0.1'
   local-port: '5300'
+  disable-syslog: true
   log-dns-details: true
-  loglevel: "1"   # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+  log-dns-queries: true
+  log-timestamp: true
+  loglevel: 7                 # 0 = emergency, 1 = alert, 2 = critical, 3 = error, 4 = warning, 5 = notice, 6 = info, 7 = debug
+  server-id: localhost
 
 pdns_zones:
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
     type: primary
 
     create_forward_zones: true
@@ -37,6 +41,8 @@ pdns_zones:
         aliases:
           - www
           - foo
+      - name: mail001
+        ip: 10.11.2.1
 
     mail_servers:
       - name: mail001

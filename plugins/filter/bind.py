@@ -96,7 +96,7 @@ class FilterModule(object):
 
         input:
             domain:
-                - 'acme-inc.com'
+                - 'acme-inc.local'
             zone_hash:
                 - '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d'
             exists_hashes:
@@ -110,8 +110,8 @@ class FilterModule(object):
                             'serial': '1702835325'
                            }
                         }, {
-                          'acme-inc.com': {
-                            'filename': 'acme-inc.com',
+                          'acme-inc.local': {
+                            'filename': 'acme-inc.local',
                             'hash': '; Hash: 79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d 1702835326',
                             'sha256': '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d',
                             'serial': '1702835326'
@@ -130,7 +130,7 @@ class FilterModule(object):
                    }'
             network:
                 - None or
-                - 'acme-inc.com'
+                - 'acme-inc.local'
         """
         # display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
         result = dict(hash=zone_hash, serial=int(time.time()))
@@ -225,7 +225,7 @@ class FilterModule(object):
         input:
             data: [
             {
-              'name': 'molecule.lan', 'primaries': ['172.17.0.2'], 'name_servers': ['ns1.acme-inc.com.', 'ns2.acme-inc.com.'],
+              'name': 'molecule.lan', 'primaries': ['172.17.0.2'], 'name_servers': ['ns1.acme-inc.local.', 'ns2.acme-inc.local.'],
               'hostmaster_email': 'admin',
               'hosts': [
                 {'name': 'srv001', 'ip': '172.17.2.1', 'aliases': ['www']},
