@@ -424,16 +424,22 @@ class Kdig(object):
           path: Destination file path.
           data: Text content to write.
         """
+        self.module.log(f"Kdig::_atomic_write(path: {path}, data: {data})")
+
         parent = os.path.dirname(path) or "."
         os.makedirs(parent, exist_ok=True)
 
         with tempfile.NamedTemporaryFile(
-            "w", delete=False, dir=parent, encoding="utf-8"
+            "w",
+            delete=False,
+            dir=parent,
+            encoding="utf-8"
         ) as tf:
             tf.write(data)
             tmp_name = tf.name
 
         os.replace(tmp_name, path)
+        os.chmod(path, 0o644)
 
     def _exec(self, commands: List[str], check_rc: bool = True) -> Tuple[int, str, str]:
         """Execute a command via Ansible's `run_command()`.
