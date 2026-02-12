@@ -6,7 +6,23 @@
 {% if hosts_add_default_ipv4 is defined and
       hosts_add_default_ipv4 | string | length > 0 and
       hosts_add_default_ipv4 %}
-{{ ansible_facts.default_ipv4.address.ljust(15) }}  {{ ansible_facts.fqdn.ljust(25) }} {{ ansible_facts.hostname }}
+  {% set _ipv4_address = "" %}
+  {% set _ipv4_fqdn = "" %}
+  {% set _hostname = "" %}
+  {% set _domainname = "" %}
+  {% if ansible_facts['default_ipv4']['address'] is defined %}
+    {% set _ipv4_address = ansible_facts['default_ipv4']['address'] %}
+  {% endif %}
+  {% if ansible_facts['fqdn'] is defined %}
+    {% set _ipv4_fqdn = ansible_facts['fqdn'] %}
+  {% endif %}
+  {% if ansible_facts['hostname'] is defined %}
+    {% set _hostname = ansible_facts['hostname'] %}
+  {% endif %}
+  {% if ansible_facts['domain'] is defined %}
+    {% set _domainname = ansible_facts['domain'] %}
+  {% endif %}
+{{ _ipv4_address.ljust(15) }}  {{ _ipv4_fqdn.ljust(25) }} {{ _hostname if _hostname | string | length > 0 and _hostname != _ipv4_fqdn else '' }}
 {% endif %}
 {% if hosts_add_basic_ipv6 is defined and
       hosts_add_basic_ipv6 | string | length > 0 and
@@ -46,8 +62,8 @@ ff02::2          ip6-allrouters
         {% endif %}
       {% endif %}
       {% if address %}
-        {% set host_fqdn = hostvars.get(host).get('ansible_facts.fqdn') %}
-        {% set host_short = hostvars.get(host).get('ansible_facts.hostname') %}
+        {% set host_fqdn = hostvars.get(host).get('ansible_facts').get('fqdn') %}
+        {% set host_short = hostvars.get(host).get('ansible_facts').get('hostname') %}
 {{ address.ljust(15) }}  {{ host_fqdn.ljust(25) }} {{ host_short if host_fqdn != host_short else '' }}
       {% endif %}
     {% endfor %}

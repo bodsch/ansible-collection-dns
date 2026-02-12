@@ -11,41 +11,118 @@ from ansible.module_utils.basic import AnsibleModule
 
 # ---------------------------------------------------------------------------------------
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
+---
 module: pdns_version
-version_added: 0.9.0
-author: "Bodo Schulz (@bodsch) <bodo@boone-schulz.de>"
+short_description: Return the installed PowerDNS Authoritative Server version
+version_added: "0.9.0"
+author:
+  - Bodo Schulz (@bodsch) <bodo@boone-schulz.de>
 
-short_description: return the version of installed pdns
-description: return the version of installed pdns
+description:
+  - Executes C(pdns_server --version) on the target host and parses the version string.
+  - Optionally validates the installed version against a desired version string.
 
 options:
   validate_version:
-    description: check against the installed version.
+    description:
+      - If set, the module validates the installed PowerDNS version against this value.
+      - The module fails when the installed version does not match.
     type: str
     required: false
 
+notes:
+  - Check mode is supported.
+  - If C(pdns_server) is not installed, the module returns C(failed=false) and C(msg="no pdns installed").
 """
 
 EXAMPLES = r"""
-- name: detect pdns version
+- name: Detect PowerDNS version
   become: true
   bodsch.dns.pdns_version:
   register: pdns_version
   check_mode: false
   ignore_errors: true
 
-- name: detect pdns version
+- name: Validate PowerDNS version
   become: true
   bodsch.dns.pdns_version:
-    validate_version: '9.18.0'
+    validate_version: "4.9.18"
   register: pdns_version
   check_mode: false
   ignore_errors: true
+
+- name: Show parsed version
+  ansible.builtin.debug:
+    msg: "PowerDNS {{ pdns_version.full_version }} ({{ pdns_version.version.major }}.{{ pdns_version.version.minor }}.{{ pdns_version.version.patch }})"
 """
 
-RETURN = """
+RETURN = r"""
+failed:
+  description:
+    - Indicates whether the module considers the result a failure.
+    - With C(validate_version) set, C(true) if the installed version does not match.
+  returned: always
+  type: bool
+
+changed:
+  description:
+    - Always C(false); the module is read-only.
+  returned: always
+  type: bool
+
+rc:
+  description:
+    - Return code used by the module implementation.
+  returned: always
+  type: int
+  sample: 0
+
+msg:
+  description:
+    - Human readable status message.
+  returned: always
+  type: str
+  sample:
+    - "pdns is installed."
+    - "no pdns installed"
+    - "version 4.9.18 successful installed."
+    - "version 4.9.18 not installed."
+
+full_version:
+  description:
+    - Parsed version string as reported by C(pdns_server --version).
+  returned: when pdns_server is installed
+  type: str
+  sample: "4.9.18"
+
+version:
+  description:
+    - Parsed version components.
+  returned: when pdns_server is installed
+  type: dict
+  contains:
+    major:
+      description: Major version.
+      type: int
+      returned: always
+    minor:
+      description: Minor version.
+      type: int
+      returned: always
+    patch:
+      description: Patch version.
+      type: int
+      returned: always
+
+excutable:
+  description:
+    - Absolute path to the C(pdns_server) executable discovered on the target.
+  returned: always
+  type: str
+  sample: "/usr/sbin/pdns_server"
 """
+
 
 # ---------------------------------------------------------------------------------------
 

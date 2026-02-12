@@ -120,7 +120,7 @@ bind_zone_soa:
   time_to_expire: "2D"
 
 bind_zones:
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
     type: primary
     create_forward_zones: true
     create_reverse_zones: true

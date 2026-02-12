@@ -48,9 +48,10 @@
         - install
 
     - name: disable systemd-resolved
-      service:
-        name: "{{ resolved_unit_file }}"
+      ansible.builtin.service:
+        name: "{{ resolved_unit_file | default('systemd-resolved') }}"
         state: stopped
         enabled: false
       when:
-        - resolved_unit_file | default('') | string | length > 0
+        - not resolved_unit_file | default('') == 'null' or
+          resolved_unit_file | default('') | string | length > 0

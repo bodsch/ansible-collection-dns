@@ -23,9 +23,9 @@
 
 - name: update trusted-key
   bodsch.dns.kdig:
-    root_dns: "k.root-servers.net"
-    key_signing_key: "257"
-    trust_keyfile: /etc/trusted-key.key
+    root_dns: "{{ knot_resolver_trusted.dns_server | default('k.root-servers.net') }}"
+    signing_key: "{{ knot_resolver_trusted.signing_key | default('257') | int }}"
+    trust_keyfile: "{{ knot_resolver_trusted.keyfile | default('/etc/trusted-key.key') }}"
   notify:
     - restart kresd
 

@@ -1,5 +1,26 @@
 ---
 
+- name: prepare instance
+  hosts: all
+  gather_facts: true
+  pre_tasks:
+    - name: "archlinux: install dnspython"
+      when:
+        - ansible_facts.distribution | lower == 'archlinux' or
+          ansible_facts.os_family | lower == 'artix linux'
+      ansible.builtin.package:
+        name:
+          - python-dnspython
+        state: present
+
+    - name: "debian: install dnspython"
+      when:
+        - ansible_facts.os_family | lower == 'debian'
+      ansible.builtin.package:
+        name:
+          - python3-dnspython
+        state: present
+
 - name: converge
   hosts: all
   any_errors_fatal: true

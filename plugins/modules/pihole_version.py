@@ -65,8 +65,7 @@ class PiholeVersion(PiHole):
         self.validate_version = module.params.get("validate_version")
 
     def run(self):
-        """
-        """
+        """ """
         version: dict = self.version()
 
         # self.module.log(f"  version: {version}")

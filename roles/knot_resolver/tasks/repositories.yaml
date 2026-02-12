@@ -1,21 +1,24 @@
 ---
 
-- name: debain based
+- name: add CZ.NIC apt sources
   when:
     - ansible_facts.os_family | lower == 'debian'
-  block:
-    - name: download CZ.NIC gpg key and save as keyring
-      ansible.builtin.get_url:
-        url: https://pkg.labs.nic.cz/gpg
-        dest: /usr/share/keyrings/cznic-labs-pkg.gpg
-        mode: '0644'
-
-    - name: add CZ.NIC apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/cznic-labs-pkg.gpg] https://pkg.labs.nic.cz/knot-resolver bookworm main"
-        filename: "cznic-labs-knot-resolver.list"
-        state: present
-        update_cache: true
+  bodsch.core.apt_sources:
+    name: cznic-labs-knot-resolver
+    filename: cznic-labs-knot-resolver.sources
+    uris:
+      - https://pkg.labs.nic.cz/knot-resolver
+    suites: "{{ ansible_facts.distribution_release | lower }}"
+    components:
+      - main
+    signed_by: /usr/share/keyrings/cznic-labs-pkg.gpg
+    key:
+      method: download
+      url: "https://pkg.labs.nic.cz/gpg"
+      dest: "/usr/share/keyrings/cznic-labs-pkg.gpg"
+      dearmor: true
+      validate: true
+    update_cache: true
 
 - name: update package cache
   ansible.builtin.package:

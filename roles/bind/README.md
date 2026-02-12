@@ -212,8 +212,8 @@ bind_zones:
     ipv6_networks:
       - '2001:db9::/48'
     name_servers:
-      - ns1.acme-inc.com.
-      - ns2.acme-inc.com.
+      - ns1.acme-inc.local.
+      - ns2.acme-inc.local.
     hostmaster_email: admin
     #
     allow_updates:
@@ -237,7 +237,7 @@ bind_zones:
       - name: mail001
         preference: 10
 
-  - name: 'acme-inc.com'
+  - name: 'acme-inc.local'
     primaries:
       - 10.11.0.4
     networks:

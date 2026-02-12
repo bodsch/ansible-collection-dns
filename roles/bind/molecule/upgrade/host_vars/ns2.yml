@@ -10,8 +10,8 @@ bind_zones:
       - '192.0.2'
     ipv6_networks:
       - '2001:db9::/48'
-  # Secondary server for domain acme-inc.com (specify zone type explicitly)
-  - name: 'acme-inc.com'
+  # Secondary server for domain acme-inc.local (specify zone type explicitly)
+  - name: 'acme-inc.local'
     type: secondary
     primaries:
       - 10.11.0.1

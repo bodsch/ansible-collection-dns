@@ -24,7 +24,7 @@
       - "/usr/share/pdns-backend-sqlite3/schema"
       - "/usr/share/pdns-backend-mysql/schema"
       - "/usr/share/pdns-backend-bind/schema"
-      - "{{ pdns_config_dir }}/backends"
+      - "{{ pdns_config_dir }}/backends/"
     file_type: file
     follow: true
     recurse: true
@@ -46,8 +46,8 @@
     - pdns_backends is defined
     - "'mysql' in pdns_backend_types"
   tags:
-    - db
-    - mysql
+    - pdns
+    - pdns_backend
 
 - name: sqlite database
   ansible.builtin.include_tasks: database/sqlite3.yml
@@ -55,8 +55,8 @@
     - pdns_backends is defined
     - "'sqlite3' in pdns_backend_types"
   tags:
-    - db
-    - sqlite
+    - pdns
+    - pdns_backend
 
 - name: lmdb database
   ansible.builtin.include_tasks: database/lmdb.yml
@@ -64,5 +64,5 @@
     - pdns_backends is defined
     - "'lmdb' in pdns_backend_types"
   tags:
-    - db
-    - lmdb
+    - pdns
+    - pdns_backend

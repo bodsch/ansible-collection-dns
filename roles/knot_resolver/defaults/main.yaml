@@ -16,7 +16,14 @@ knot_resolver_prometheus: {}
 
 knot_resolver_predict: {}
 
-knot_resolver_systemd_instances: 2
+knot_resolver_systemd:
+  instances: 2
+  unit: knot-resolver
+
+knot_resolver_trusted:
+  dns_server: "k.root-servers.net"
+  signing_key: "257"
+  keyfile: /etc/trusted-key.key
 
 knot_resolver_internal_domain: []
 

@@ -33,7 +33,7 @@
   when:
     - not is_docker_guest
 
-- name: add managed block to {{ hosts_file }}
+- name: add managed block to {{ hosts_file }}.docker
   ansible.builtin.template:
     src: etc/hosts.j2
     dest: "{{ hosts_file }}.docker"

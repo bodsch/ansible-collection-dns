@@ -1,6 +1,0 @@
----
-
-collections:
-  - name: community.general
-  - name: bodsch.core
-    version: ">=2.6.3"

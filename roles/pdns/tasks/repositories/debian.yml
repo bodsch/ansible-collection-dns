@@ -5,29 +5,49 @@
 #     name: gnupg
 #     state: present
 
-- name: add apt signing key
-  ansible.builtin.apt_key:
-    url: https://repo.powerdns.com/CBC8B383-pub.asc
-    # id: "{{ pdns_install_repo['gpg_key_id'] | default('') }}"
-    state: present
-  register: apt_key
-  changed_when: apt_key.changed
-  failed_when: apt_key.failed
-
-- name: Add the PowerDNS APT Repository
-  ansible.builtin.apt_repository:
-    # filename: "{{ pdns_install_repo['name'] }}"
-    repo: deb [signed-by=/etc/apt/keyrings/auth-master-pub.asc] http://repo.powerdns.com/debian bookworm-auth-master main
-    state: present
-  register: apt_repo
-  changed_when: apt_repo.changed
-  failed_when: apt_repo.failed
-
-- name: Update the APT cache
-  ansible.builtin.apt:
-    update_cache: true
+- name: add poerdns apt sources
   when:
-    - apt_key.changed or _pdns_apt_repo.changed
+    - ansible_facts.os_family | lower == 'debian'
+  bodsch.core.apt_sources:
+    name: cznic-labs-knot-dns
+    filename: cznic-labs-knot-dns.sources
+    uris:
+      - http://repo.powerdns.com/debian
+    suites: "{{ ansible_facts.distribution_release | lower }}-auth-master"
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/pdns-auth-master-pub.asc
+    key:
+      method: download
+      url: "https://repo.powerdns.com/CBC8B383-pub.asc"
+      dest: "/etc/apt/keyrings/pdns-auth-master-pub.asc"
+      dearmor: true
+      validate: true
+    update_cache: true
+
+# - name: add apt signing key
+#   ansible.builtin.apt_key:
+#     url: https://repo.powerdns.com/CBC8B383-pub.asc
+#     # id: "{{ pdns_install_repo['gpg_key_id'] | default('') }}"
+#     state: present
+#   register: apt_key
+#   changed_when: apt_key.changed
+#   failed_when: apt_key.failed
+#
+# - name: Add the PowerDNS APT Repository
+#   ansible.builtin.apt_repository:
+#     # filename: "{{ pdns_install_repo['name'] }}"
+#     repo: deb [signed-by=/etc/apt/keyrings/auth-master-pub.asc] http://repo.powerdns.com/debian bookworm-auth-master main
+#     state: present
+#   register: apt_repo
+#   changed_when: apt_repo.changed
+#   failed_when: apt_repo.failed
+#
+# - name: Update the APT cache
+#   ansible.builtin.apt:
+#     update_cache: true
+#   when:
+#     - apt_key.changed or _pdns_apt_repo.changed
 
 # - name: Pin the PowerDNS APT Repository
 #   ansible.builtin.template:

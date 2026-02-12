@@ -1,11 +1,11 @@
 ---
 
 - name: start and enable Knot Resolver service (systemd)
-  with_sequence: "count={{ knot_resolver_systemd_instances }}"
   ansible.builtin.service:
-    name: "kresd@{{ item }}.service"
+    name: "{{ item }}"
     state: started
     enabled: true
+  loop: "{{ knot_resolver_service }}"
   when:
     - ansible_facts.service_mgr | lower == 'systemd'
 

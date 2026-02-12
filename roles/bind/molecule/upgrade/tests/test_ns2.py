@@ -143,7 +143,7 @@ def test_files(host, get_vars):
     files = [
         f"{bind_dir}/0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
         f"{bind_dir}/11.10.in-addr.arpa",
-        f"{bind_dir}/acme-inc.com",
+        f"{bind_dir}/acme-inc.local",
     ]
 
     for _file in files:

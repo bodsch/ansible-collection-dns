@@ -1,34 +1,34 @@
 ---
 
-- name: debain based
+- name: add CZ.NIC apt sources
   when:
-    - ansible_facts.distribution | lower == 'debian'
-  block:
-    - name: add apt signing key (debian)
-      become: true
-      ansible.builtin.apt_key:
-        id: 8C0A90B7DE9CAC3B4A7BD5798A0EFB02C84B1E9B
-        url: https://deb.knot-dns.cz/apt.gpg
+    - ansible_facts.os_family | lower == 'debian'
+  bodsch.core.apt_sources:
+    name: cznic-labs-knot-dns
+    filename: cznic-labs-knot-dns.sources
+    uris:
+      - https://pkg.labs.nic.cz/knot-dns
+    suites: "{{ ansible_facts.distribution_release | lower }}"
+    components:
+      - main
+    signed_by: /usr/share/keyrings/cznic-labs-pkg.gpg
+    key:
+      method: download
+      url: "https://pkg.labs.nic.cz/gpg"
+      dest: "/usr/share/keyrings/cznic-labs-pkg.gpg"
+      dearmor: true
+      validate: true
+    update_cache: true
 
-    - name: install official knot repositories for debian based
-      ansible.builtin.template:
-        src: apt_knot.list.j2
-        dest: /etc/apt/sources.list.d/knot.list
-        mode: "0644"
-        owner: root
-        group: root
-
-- name: ubuntu
+- name: add knot ppa for ubuntu {{ ansible_facts.distribution_release }}
   when:
     - ansible_facts.distribution | lower == 'ubuntu'
-  block:
-    - name: add knot ppa for ubuntu {{ ansible_facts.distribution_release }}
-      ansible.builtin.apt_repository:
-        repo: ppa:cz.nic-labs/knot-dns-latest
-        codename: "{{ ansible_facts.distribution_release }}"
-        state: present
-        update_cache: true
-        validate_certs: false
+  ansible.builtin.apt_repository:
+    repo: ppa:cz.nic-labs/knot-dns-latest
+    codename: "{{ ansible_facts.distribution_release }}"
+    state: present
+    update_cache: true
+    validate_certs: false
 
 - name: update package cache
   ansible.builtin.package:
