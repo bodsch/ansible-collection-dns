@@ -41,45 +41,45 @@ class PiHole:
 
     def version(self):
         """ """
-        args = [self.pihole_ftl_bin]
-        args.append("--version")
 
+        args = [self.pihole_ftl_bin, "--version"]
         rc, out, err = self._exec(args)
 
-        _output = []
-        _output += out.splitlines()
-        _output += err.splitlines()
+        _output = out.splitlines() + err.splitlines()
 
-        msg = "unknown message"
-
-        pattern = re.compile(r".*v(?P<major>\d+).(?P<minor>\d+).(?P<patch>\*|\d+)$")
+        pattern = re.compile(
+            r".*v(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\*|\d+))?$"
+        )
 
         version = next(
             (m.groupdict() for s in _output if (m := pattern.search(s))), None
         )
 
-        if version and isinstance(version, dict):
-            # version_full_string = version.get("version")
-            version_major_string = version.get("major")
-            version_minor_string = version.get("minor")
-            version_patch_string = version.get("patch")
-
-            version_full_string = (
-                f"{version_major_string}.{version_minor_string}.{version_patch_string}"
+        if not version:
+            return dict(
+                msg="unknown message",
+                full_version=None,
+                version=None,
+                executable=self.pihole_ftl_bin,
             )
 
-        result = dict(
-            msg=msg,
-            full_version=version_full_string,
-            version=dict(
-                major=int(version_major_string),
-                minor=int(version_minor_string),
-                patch=int(version_patch_string),
-            ),
-            excutable=self.pihole_ftl_bin,
-        )
+        major = version["major"]
+        minor = version["minor"]
+        patch = version.get("patch")  # None wenn nicht vorhanden
 
-        return result
+        full_version = f"{major}.{minor}.{patch}" if patch else f"{major}.{minor}"
+
+        version = dict(major=int(major), minor=int(minor))
+
+        if patch:
+            version["patch"] = int(patch)
+
+        return dict(
+            # msg="unknown message",
+            full_version=full_version,
+            version=version,
+            executable=self.pihole_ftl_bin,
+        )
 
     def import_list(
         self, domains: List[str], list_type: str, comment: str

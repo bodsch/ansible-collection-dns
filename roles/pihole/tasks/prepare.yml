@@ -27,11 +27,12 @@
     running_in_check_mode: '{{ _check_mode.check_mode }}'
 
 - name: install dependencies
+  when:
+    - not running_in_check_mode
+    - pihole_dependencies | default([]) | count > 0
   ansible.builtin.package:
     name: "{{ pihole_dependencies }}"
     state: present
-  when:
-    - pihole_dependencies | default([]) | count > 0
 
 - name: merge pihole configuration between defaults and custom
   ansible.builtin.set_fact:
