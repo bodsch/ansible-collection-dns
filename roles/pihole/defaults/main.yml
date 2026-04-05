@@ -1,5 +1,7 @@
 ---
 
+pihole_core_version: 6.4
+
 pihole_version: 6.1.2
 
 pihole_direct_download: false
