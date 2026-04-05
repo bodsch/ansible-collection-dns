@@ -9,10 +9,12 @@ import io
 import shutil
 import tarfile
 from pathlib import Path
-# from typing import Optional
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import fetch_url
+
+# from typing import Optional
+
 
 # Scripts aus advanced/Scripts/ → installiert nach /opt/pihole/
 PIHOLE_SCRIPTS = []
@@ -54,6 +56,7 @@ PIHOLE_CLI = "pihole"
 # Tarball-Pfad des database_migration-Verzeichnisses
 DB_MIGRATION_SRC = "advanced/Scripts/database_migration"
 
+
 class PiholeDownloadScripts:
     """
     Lädt das pi-hole Core-Repository als Tarball herunter (kein git/subprocess)
@@ -79,7 +82,9 @@ class PiholeDownloadScripts:
         pihole            → /usr/local/bin/pihole
     """
 
-    TARBALL_URL = "https://github.com/pi-hole/pi-hole/archive/refs/tags/{version}.tar.gz"
+    TARBALL_URL = (
+        "https://github.com/pi-hole/pi-hole/archive/refs/tags/{version}.tar.gz"
+    )
 
     def __init__(self, module: AnsibleModule, cache_dir: str):
         self.module = module
@@ -148,7 +153,7 @@ class PiholeDownloadScripts:
         version_clean = tag.lstrip("v")
         repo_root = f"pi-hole-{version_clean}/"
 
-        scripts_dir   = target_dir / "scripts"
+        scripts_dir = target_dir / "scripts"
         templates_dir = target_dir / "templates"
         scripts_dir.mkdir()
         templates_dir.mkdir()
@@ -163,7 +168,9 @@ class PiholeDownloadScripts:
             for script in PIHOLE_SCRIPTS:
                 src_path = f"{repo_root}advanced/Scripts/{script}.sh"
                 if src_path in members:
-                    self._extract_member(tf, members[src_path], scripts_dir / script, mode=0o755)
+                    self._extract_member(
+                        tf, members[src_path], scripts_dir / script, mode=0o755
+                    )
                 else:
                     self.module.warn(f"Script not found in tarball: {src_path}")
 
@@ -174,7 +181,9 @@ class PiholeDownloadScripts:
                     f"{repo_root}advanced/{fname}",
                 ]:
                     if candidate in members:
-                        self._extract_member(tf, members[candidate], scripts_dir / fname, mode=0o644)
+                        self._extract_member(
+                            tf, members[candidate], scripts_dir / fname, mode=0o644
+                        )
                         break
                 else:
                     self.module.warn(f"Extra file not found in tarball: {fname}")
@@ -184,7 +193,9 @@ class PiholeDownloadScripts:
                 src_path = f"{repo_root}advanced/Templates/{tpl}"
                 if src_path in members:
                     mode = 0o755 if tpl.endswith(".sh") else 0o644
-                    self._extract_member(tf, members[src_path], templates_dir / tpl, mode=mode)
+                    self._extract_member(
+                        tf, members[src_path], templates_dir / tpl, mode=mode
+                    )
                 else:
                     self.module.warn(f"Template not found in tarball: {src_path}")
 
@@ -193,15 +204,17 @@ class PiholeDownloadScripts:
             # Ziel:   database_migration/ (→ /etc/.pihole/advanced/Scripts/database_migration/)
             db_src_prefix = f"{repo_root}{DB_MIGRATION_SRC}/"
             db_members = {
-                name: m for name, m in members.items()
-                if name.startswith(db_src_prefix)
+                name: m for name, m in members.items() if name.startswith(db_src_prefix)
             }
             if not db_members:
-                self.module.warn(f"database_migration directory not found in tarball: {db_src_prefix}")
+                self.module.warn(
+                    f"database_migration directory not found in tarball: {db_src_prefix}"
+                )
             else:
                 for src_name, member in db_members.items():
+                    _len_src_prefix = len(db_src_prefix)
                     # Relativen Pfad innerhalb von database_migration/ bestimmen
-                    rel_path = src_name[len(db_src_prefix):]
+                    rel_path = src_name[_len_src_prefix:]
                     if not rel_path:
                         continue
                     dest = db_migration_dir / rel_path
@@ -212,12 +225,16 @@ class PiholeDownloadScripts:
             # pihole CLI-Wrapper: pihole → pihole
             cli_path = f"{repo_root}pihole"
             if cli_path in members:
-                self._extract_member(tf, members[cli_path], target_dir / PIHOLE_CLI, mode=0o755)
+                self._extract_member(
+                    tf, members[cli_path], target_dir / PIHOLE_CLI, mode=0o755
+                )
             else:
                 self.module.warn(f"CLI wrapper not found in tarball: {cli_path}")
 
     @staticmethod
-    def _extract_member(tf: tarfile.TarFile, member: tarfile.TarInfo, dest: Path, mode: int) -> None:
+    def _extract_member(
+        tf: tarfile.TarFile, member: tarfile.TarInfo, dest: Path, mode: int
+    ) -> None:
         """Extrahiert ein einzelnes Tarball-Member nach dest."""
         fobj = tf.extractfile(member)
         if fobj is None:

@@ -50,12 +50,12 @@ GITHUB_API = "https://api.github.com"
 FTL_DOWNLOAD_BASE = "https://github.com/pi-hole/FTL/releases/download"
 
 ARCH_MAP = {
-    "x86_64":  "amd64",
-    "i386":    "386",
-    "i686":    "386",
+    "x86_64": "amd64",
+    "i386": "386",
+    "i686": "386",
     "aarch64": "arm64",
-    "armv7l":  "armhf",
-    "armv6l":  "armhf",
+    "armv7l": "armhf",
+    "armv6l": "armhf",
     "riscv64": "riscv64",
 }
 
@@ -71,7 +71,9 @@ class PiholeResolveVersions:
         cache_minutes: int = 60,
     ):
         self.module = module
-        self.core_version = core_version if core_version.startswith("v") else f"v{core_version}"
+        self.core_version = (
+            core_version if core_version.startswith("v") else f"v{core_version}"
+        )
         self.arch_override = arch
 
         _cache_dir = cache_dir or os.path.expanduser("~/.cache/ansible/pihole/github")
@@ -93,7 +95,7 @@ class PiholeResolveVersions:
     def run(self) -> dict:
         self.module.log(f"PiholeResolveVersions::run(core_version={self.core_version})")
 
-        ftl_arch    = self._resolve_arch()
+        ftl_arch = self._resolve_arch()
         binary_name = f"pihole-FTL-{ftl_arch}"
 
         # 1. Release-Datum des Core-Tags
@@ -154,7 +156,9 @@ class PiholeResolveVersions:
     # Private: GitHub API (with cache)
     # ------------------------------------------------------------------
 
-    def _gh_get(self, path: str, cache_filename: str, cache_minutes: int) -> dict | list:
+    def _gh_get(
+        self, path: str, cache_filename: str, cache_minutes: int
+    ) -> dict | list:
         """GitHub API GET mit transparentem Datei-Cache."""
         cache_path = self._cache.cache_path(cache_filename)
 
@@ -167,7 +171,9 @@ class PiholeResolveVersions:
             self.module.log(f"  [cache HIT] {cache_filename}")
             return cached
 
-        self.module.log(f"  [cache MISS] {cache_filename} → fetching {GITHUB_API}{path}")
+        self.module.log(
+            f"  [cache MISS] {cache_filename} → fetching {GITHUB_API}{path}"
+        )
 
         url = f"{GITHUB_API}{path}"
         headers = {
@@ -260,5 +266,5 @@ class PiholeResolveVersions:
         base = f"{FTL_DOWNLOAD_BASE}/{ftl_tag}"
         return {
             "ftl_binary_url": f"{base}/{binary_name}",
-            "ftl_sha1_url":   f"{base}/{binary_name}.sha1",
+            "ftl_sha1_url": f"{base}/{binary_name}.sha1",
         }

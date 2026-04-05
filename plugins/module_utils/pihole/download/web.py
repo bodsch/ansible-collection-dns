@@ -70,7 +70,9 @@ class PiholeDownloadWeb:
 
         # Marker setzen
         complete_marker.write_text(tag, encoding="utf-8")
-        self.module.log(f"  [extracted] {target_dir} ({self._count_files(admin_dir)} files)")
+        self.module.log(
+            f"  [extracted] {target_dir} ({self._count_files(admin_dir)} files)"
+        )
 
         return self._result(target_dir, changed=True)
 
@@ -110,7 +112,8 @@ class PiholeDownloadWeb:
                 if not member.name.startswith(tarball_root):
                     continue
 
-                rel_path = member.name[len(tarball_root):]
+                _len_tarball_root = len(tarball_root)
+                rel_path = member.name[_len_tarball_root:]
                 if not rel_path:
                     continue
 
