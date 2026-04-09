@@ -7,11 +7,12 @@ __metaclass__ = type
 import hashlib
 import json
 import time
+from typing import Hashable, TypeVar
 
 from ansible.utils.display import Display
 from ansible_collections.bodsch.dns.plugins.module_utils.network_type import reverse_dns
 
-# import re
+T = TypeVar("T", bound=Hashable)
 
 display = Display()
 
@@ -45,6 +46,8 @@ class FilterModule(object):
             "forward_zone_data": self.forward_zone_data,
             "reverse_zone_data": self.reverse_zone_data,
             "zone_filename": self.zone_filename,
+            # "combine_zone_data": self.combine_zone_data,
+            # "when_reverse_zone": self.when_reverse_zone,
         }
 
     def zone_type(self, data, all_addresses):
@@ -90,12 +93,12 @@ class FilterModule(object):
 
         return result
 
-    def zone_serial(self, domain, zone_hash, exists_hashes, network=None):
+    def zone_serial(self, data, zone_hash, exists_hashes, network=None):
         """
         define serial for zone data or take existing serial when hash are equal
 
         input:
-            domain:
+            data:
                 - 'acme-inc.local'
             zone_hash:
                 - '79803e1202406f3051d3b151ed953db2a98c86f61d5c9eead61671377d10320d'
@@ -132,7 +135,10 @@ class FilterModule(object):
                 - None or
                 - 'acme-inc.local'
         """
-        # display.v(f"zone_serial({domain}, {zone_hash}, {exists_hashes}, {network})")
+        display.v(
+            f"bodsch.dns.zone_serial(data: {data}, zone_hash: {zone_hash}, exists_hashes: {exists_hashes}, network: {network})"
+        )
+
         result = dict(hash=zone_hash, serial=int(time.time()))
         domain_data = None
 
@@ -146,7 +152,7 @@ class FilterModule(object):
             domain_data = [x for x in hashes for k, v in x.items() if k == network]
         else:
             hashes = zone_data.get("forward", {})
-            domain_data = [x for x in hashes for k, v in x.items() if k == domain]
+            domain_data = [x for x in hashes for k, v in x.items() if k == data]
 
         if isinstance(domain_data, list) and len(domain_data) > 0:
             domain_data = domain_data[0]
@@ -154,7 +160,7 @@ class FilterModule(object):
             if network:
                 domain_data = domain_data.get(network)
             else:
-                domain_data = domain_data.get(domain)
+                domain_data = domain_data.get(data)
 
         if domain_data and len(domain_data) > 0:
             _serial = domain_data.get("serial", "")
@@ -162,7 +168,7 @@ class FilterModule(object):
             if _serial and _serial != "None":
                 result.update({"serial": _serial})
 
-        # display.v(f"  = {result}")
+        display.v(f"  = {result}")
         return result
 
     def forward_zone_data(self, data, soa, ansible_hostname):
@@ -238,7 +244,9 @@ class FilterModule(object):
             ansible_hostname: instance
 
         """
-        # display.v(f"reverse_zone_data({data}, {soa}, {ansible_hostname})")
+        display.v(
+            f"bodsch.dns.reverse_zone_data(data: {data}, soa: {soa}, ansible_hostname: {ansible_hostname})"
+        )
 
         revip = None
 
@@ -252,6 +260,13 @@ class FilterModule(object):
         hostmaster_email = data.get("hostmaster_email", None)
         soa_ns_server = data.get("name_servers", [])
         other_name_servers = data.get("other_name_servers", None)
+
+        display.v(f"  - domain            : {domain}")
+        display.v(f"  - hostmaster_email  : {hostmaster_email}")
+        display.v(f"  - soa_ns_server     : {soa_ns_server}")
+        display.v(f"  - other_name_servers: {other_name_servers}")
+
+        display.v("------------------------------")
 
         if not hostmaster_email:
             hostmaster_email = f"hostmaster.{domain}."
@@ -272,7 +287,11 @@ class FilterModule(object):
             # display.v(f" - {other_name_servers}")
             other_name_servers = self.__append(other_name_servers)
 
+        display.v("------------------------------")
+        display.v(f"  - revip             : {revip}")
         reverse_ip = reverse_dns(revip)
+        display.v(f"  - reverse_ip        : {reverse_ip}")
+        display.v("------------------------------")
 
         result = dict(
             ttl=soa.get("ttl"),
@@ -290,20 +309,71 @@ class FilterModule(object):
 
         result_hash = self.__hash(result)
 
-        # display.v(f"  = {result} - {result_hash}")
+        display.v(f"  = {result} - {result_hash}")
 
         return dict(reverse_zone_data=result, zone_hash=result_hash)
 
     def zone_filename(self, data, zone_data):
         """
-        append to every list element
+        data: 10.11.0,
+        zone_data: {
+            'zone_data': {
+                'forward': [
+                    {'acme-inc.local': {
+                        'filename': 'acme-inc.local',
+                        'sha256': 'df1710b930ae6d3afc4fb530acf583d0aaad09e57b5e8442fca9a7265f2ffdef',
+                        'serial': '1775380015'}
+                    }
+                ],
+                'reverse': [
+                    {'10.11.0': {'filename': '0.11.10.in-addr.arpa', 'sha256': 'None', 'serial': 'None', 'network': '10.11.0'}}
+                ]
+            },
+            'failed': False,
+            'changed': False
+        }
+
+        # ------
+        data: {
+            'name': 'acme-inc.local', 'type': 'primary', 'state': 'present', 'create_forward_zones': True, 'create_reverse_zones': True,
+            'update_policy': {'mode': 'rules',
+                'rules': [
+                    {'action': 'grant', 'identity': 'ddns-host1',
+                        'ruletype': 'name', 'name': 'host1.example.org.',
+                        'types': ['A', 'TXT']
+                    }, {
+                        'action': 'grant', 'identity': 'ddns-host1',
+                        'ruletype': 'name', 'name': '_acme-challenge.host1.example.org.',
+                        'types': ['TXT']
+                    }]},
+            'networks': ['10.11.0'],
+            'name_servers': ['ns1'],
+            'hosts': [{'name': 'ns1', 'ip': '10.11.0.1'}, {'name': 'srv001', 'ip': '10.11.1.1', 'aliases': ['www']}]
+        },
+        zone_data: {
+            'zone_data': {
+                'forward': [
+                    {'acme-inc.local': {'filename': 'acme-inc.local',
+                        'sha256': 'df1710b930ae6d3afc4fb530acf583d0aaad09e57b5e8442fca9a7265f2ffdef',
+                        'serial': '1775380015'}}
+                ],
+                'reverse': [
+                    {'10.11.0': {'filename': '0.11.10.in-addr.arpa',
+                        'sha256': '24cfbc3e3889ac955c8d0e0cc5ab0cdc06a341eab04253e4012ad38d02bca84d',
+                        'serial': '1775464534', 'network': '10.11.0'}}
+                ]
+            },
+            'failed': False,
+            'changed': False
+        }
         """
-        # display.v(f"zone_filename({data}, {zone_data})")
+        display.v(f"bodsch.dns.zone_filename(data: {data}, zone_data: {zone_data})")
+
         result = None
 
         zone_data = zone_data.get("zone_data", {})
 
-        # display.v(f"  - zone_data: {zone_data}")
+        display.v(f"  - zone_data: {zone_data}")
 
         item = {
             k: v
@@ -313,14 +383,48 @@ class FilterModule(object):
             if k == data
         }
 
-        # display.v(f"  - item     : {item}")
+        display.v(f"  - item     : {item}")
 
         if item:
             result = list(item.values())[0].get("filename")
 
-        # display.v(f"= {result}")
+        display.v(f"= {result}")
 
         return result
+
+    # def combine_zone_data(self, data, zone_data):
+    #     """ """
+    #     display.v(f"bodsch.dns.combine_zone_data(data: {data}, zone_data: {zone_data})")
+    #
+    #     result = dict()
+    #
+    #     _zone_data = zone_data.get("zone_data", {})
+    #
+    #     _forward_data = _zone_data.get("forward", None)
+    #     _reverse_data = _zone_data.get("reverse", None)
+    #
+    #     display.v(f"  - forward: {_forward_data}")
+    #     display.v(f"  - reverse: {_reverse_data}")
+    #
+    #     display.v(f"  - forward: {type(_forward_data)}")
+    #
+    #     forward_filenames = {
+    #         k: v.get("filename") for x in _forward_data for k, v in x.items()
+    #     }
+    #     reverse_filenames = {
+    #         k: v.get("filename") for x in _reverse_data for k, v in x.items()
+    #     }
+    #
+    #     display.v(f"  - forward_filenames: {forward_filenames}")
+    #
+    #     for d in data:
+    #         _name = d.get("name")
+    #         display.v(f"  - name: {_name}")
+    #
+    #         if _name in forward_filenames.keys():
+    #             display.v(f"    filename: {forward_filenames.get(_name).values()}")
+    #
+    #     return result
 
     def __append(self, data, domain=None):
         """
@@ -467,4 +571,86 @@ class FilterModule(object):
     #     """, re.VERBOSE | re.IGNORECASE | re.DOTALL)
     #
     #     return pattern.match(ip) is not None
+
+    # def when_reverse_zone(self, data, host_all_addresses: list = []):
+    #     """
+    #     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
+    #     (item.state | default('present') == 'present') and
+    #     (item.create_reverse_zones | default('true') | bool) and
+    #     (
+    #         (item[0].type is defined and item[0].type == 'primary') or
+    #         (item[0].type is not defined and item[0].primaries is defined and
+    #         (host_all_addresses | intersect(item[0].primaries) | length > 0))
+    #     )
     #
+    #     data:
+    #         [
+    #             {   'name': 'acme-inc.local', 'type': 'primary', 'create_forward_zones': True,
+    #                 'create_reverse_zones': True,
+    #                 'update_policy': {'mode': 'rules', 'rules': [
+    #                     {'action': 'grant', 'identity': 'ddns-host1', 'ruletype': 'name', 'name': 'host1.example.org.', 'types': ['A', 'TXT']},
+    #                     {'action': 'grant', 'identity': 'ddns-host1', 'ruletype': 'name', 'name': '_acme-challenge.host1.example.org.', 'types': ['TXT']}
+    #                 ]},
+    #                 'name_servers': ['ns1'],
+    #                 'hosts': [
+    #                     {'name': 'ns1', 'ip': '10.11.0.1'}, {'name': 'srv001', 'ip': '10.11.1.1', 'aliases': ['www']}
+    #                 ]
+    #             },
+    #             '10.11.0'
+    #         ]
+    #     """
+    #     display.v(
+    #         f"bodsch.dns.when_reverse_zone(data: {data}, host_all_addresses: {host_all_addresses})"
+    #     )
+    #     # display.v("-----")
+    #
+    #     item_0 = data[0]
+    #     # item_1 = data[1]
+    #
+    #     # display.v(f" - 0: {item_0}")
+    #     # display.v(f" - 1: {item_1}")
+    #
+    #     zone_type = item_0.get("type", None)
+    #     zone_primaries = item_0.get("primaries", [])
+    #     zone_state = item_0.get("state", "present")
+    #     create_reverse_zones = item_0.get("create_reverse_zones", None)
+    #
+    #     # display.v(f" - type     : {zone_type}")
+    #     # display.v(f" - primaries: {zone_primaries}")
+    #     # display.v(f" - state    : {zone_state}")
+    #     # display.v(f" - create_reverse_zones: {create_reverse_zones}")
+    #
+    #     # display.v("-----")
+    #     # display.v(f" - zone_primaries    : {zone_primaries}")
+    #     # display.v(f" - host_all_addresses: {host_all_addresses}")
+    #
+    #     _intersect = intersect(left=zone_primaries, right=host_all_addresses)
+    #
+    #     # display.v(f" - intersect: {_intersect}")
+    #
+    #     if zone_state == "present" or len(_intersect) > 0:
+    #         result = True
+    #     else:
+    #         result = False
+    #
+    #     display.v(f"= {result}")
+    #
+    #     return result
+
+
+def intersect(left: list[T], right: list[T]) -> list[T]:
+    """Return the unique elements that exist in both input lists.
+
+    Args:
+        left: First list of values.
+        right: Second list of values.
+
+    Returns:
+        A list with the unique common elements of both inputs.
+
+    Notes:
+        The elements must be hashable at runtime because a set-based
+        implementation is used.
+        The result order is not guaranteed.
+    """
+    return list(set(left).intersection(right))
