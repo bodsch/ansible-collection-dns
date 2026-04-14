@@ -61,7 +61,7 @@ bind_listen:
   ipv6:
     - port: 53
       addresses:
-        - "{{ ansible_facts.default_ipv4.address }}"
+        - "{{ ansible_facts.default_ipv6.address | default('::1') }}"
 
 bind_acls:
   - name: acl1
@@ -72,8 +72,8 @@ bind_forwarders:
   - '9.9.9.9'
   - '141.1.1.1'
 
-bind_recursion: true
-bind_dns64: true
+# bind_recursion: true
+# bind_dns64: true
 
 bind_check_names:
   - master

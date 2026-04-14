@@ -1,0 +1,88 @@
+---
+
+- name: "d: {{ zone_item.name }}"
+  debug:
+    msg: "{{ zone_item }}"
+
+- name: Assemble zone vars
+  ansible.builtin.set_fact:
+    zone_forward_filename: "{{ zone_item.files.forward }}"
+    zone_reverse_filename: "{{ zone_item.files.reverse }}"
+
+- name: "create forward lookup zone file: {{ bind_zone_dir }}/{{ zone_forward_filename }}"
+  become: true
+  ansible.builtin.template:
+    src: etc/bind_zone.j2
+    dest: "{{ bind_zone_dir }}/{{ zone_forward_filename }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "{{ bind_zone_file_mode }}"
+    backup: true
+    validate: 'named-checkzone -d {{ zone_item.name }} %s'
+  when: >
+    (zone_item.state | default('present') == 'present') and
+    (zone_item.create_forward_zones | default('true') | bool) and
+    (
+      (zone_item.type | default('primary') == 'primary') or
+      (zone_item.type is not defined and zone_item.primaries is defined and
+      (host_all_addresses | intersect(zone_item.primaries) | length > 0))
+    )
+  # notify: reload bind
+  tags: bind
+
+- name: "create reverse lookup zone file: {{ bind_zone_dir }}/{{ zone_reverse_filename.0 }}"
+  become: true
+  ansible.builtin.template:
+    src: etc/reverse_zone.j2
+    dest: "{{ bind_zone_dir }}/{{ zone_reverse_filename.0 }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "{{ bind_zone_file_mode }}"
+    backup: true
+    # validate: "named-checkzone {{ ('.'.join(item.1.replace(item.1 + '.','').split('.')[::-1])) }}.in-addr.arpa %s"
+  # with_subelements:
+  #   - "{{ zone_item.files.reverse }}"
+  #   - "{{ zone_item }}"
+  #   - flags:
+  #     skip_missing: true
+  # # loop_control:
+  # #   label: "{{ item.1 }}"
+  when: >
+    (zone_item.state | default('present') == 'present') and
+    (zone_item.create_reverse_zones | default('true') | bool) and
+    (
+      (zone_item.type | default('primary') == 'primary') or
+      (zone_item.type is not defined and zone_item.primaries is defined and
+      (host_all_addresses | intersect(zone_item[0].primaries) | length > 0))
+    )
+
+# # temporary disabled -
+# #
+# # - name: Create reverse IPv6 lookup zone file
+# #   ansible.builtin.template:
+# #     src: etc/reverse_zone_ipv6.j2
+# #     dest: "{{ bind_zone_dir }}/{{ item.1 | bodsch.dns.zone_filename(bind_zone_data) }}"
+# #     owner: "{{ bind_owner }}"
+# #     group: "{{ bind_group }}"
+# #     mode: "{{ bind_zone_file_mode }}"
+# #     backup: true
+# #     # validate: "named-checkzone {{ (item.1 | ansible.utils.ipaddr('revdns'))[-(9+(item.1 | regex_replace('^.*/','')|int)//2):] }} %s"
+# #   become: true
+# #   with_subelements:
+# #     - "{{ bind_zones }}"
+# #     - ipv6_networks
+# #     - flags:
+# #       skip_missing: true
+# #   loop_control:
+# #     label: "{{ item.1 }}"
+# #   when: >
+# #     (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) and
+# #     (item.state | default('present') == 'present') and
+# #     (item.create_reverse_zones | default('true') | bool) and
+# #     ((item[0].type is defined and item[0].type == 'primary') or
+# #     (item[0].type is not defined and item[0].primaries is defined and
+# #     (host_all_addresses | intersect(item[0].primaries) | length > 0)))
+# #   # notify: reload bind
+# #   tags: bind
+
+...

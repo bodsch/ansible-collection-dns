@@ -75,6 +75,17 @@
 - name: configure
   ansible.builtin.include_tasks: configure/zones.yml
 
+- name: detect default zone files
+  bodsch.core.find_files:
+    file_list: "{{ bind_default_zone_files }}"
+  register: file_check
+
+- name: update bind_default_zone_files
+  delegate_to: localhost
+  become: false
+  ansible.builtin.set_fact:
+    bind_default_zone_files: "{{ file_check.stat | selectattr('exists') | map(attribute='path') | list }}"
+
 - name: create main bind config file {{ bind_config }}
   become: true
   ansible.builtin.template:

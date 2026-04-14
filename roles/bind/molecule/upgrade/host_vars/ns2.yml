@@ -4,6 +4,7 @@
 bind_zones:
   # Secondary server for domain example.com (use zone type autodetection)
   - name: 'example.com'
+    type: secondary
     primaries:
       - 10.11.0.1
     networks:
