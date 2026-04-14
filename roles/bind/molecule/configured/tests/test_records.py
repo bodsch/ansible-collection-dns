@@ -21,7 +21,7 @@ def _exec_dns_test(host, get_vars, domains):
         assert False
 
 
-def test_records_A(host):
+def test_records_A(host, get_vars):
     """ """
     domains = [
         {"domain": "ns1.acme-inc.local", "type": "A", "result": "10.11.0.1"},
@@ -41,7 +41,7 @@ def test_records_A(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_PTR(host):
+def test_records_PTR(host, get_vars):
     """ """
     domains = [
         # IPv4 Reverse lookups
@@ -64,7 +64,7 @@ def test_records_PTR(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_CNAME(host):
+def test_records_CNAME(host, get_vars):
     """ """
     domains = [
         # IPv4 Alias lookups
@@ -105,7 +105,7 @@ def test_records_CNAME(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_AAAA(host):
+def test_records_AAAA(host, get_vars):
     """ """
     domains = [
         # IPv6 Forward lookups
@@ -115,7 +115,7 @@ def test_records_AAAA(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_NS(host):
+def test_records_NS(host, get_vars):
     """ """
     domains = [
         # NS records lookup
@@ -130,7 +130,7 @@ def test_records_NS(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_MX(host):
+def test_records_MX(host, get_vars):
     """ """
     domains = [
         # MX records lookup
@@ -144,7 +144,7 @@ def test_records_MX(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_SRV(host):
+def test_records_SRV(host, get_vars):
     """ """
     domains = [
         # Service records lookup
@@ -158,7 +158,7 @@ def test_records_SRV(host):
     _exec_dns_test(host, get_vars, domains)
 
 
-def test_records_TXT(host):
+def test_records_TXT(host, get_vars):
     """ """
     domains = [
         # TXT records lookup
