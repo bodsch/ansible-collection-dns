@@ -7,15 +7,14 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import pytest
-from ansible.parsing.dataloader import DataLoader
-
 import testinfra.utils.ansible_runner
+from ansible.parsing.dataloader import DataLoader
 from jinja2 import ChainableUndefined
 from jinja2.nativetypes import NativeEnvironment
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-        os.environ["MOLECULE_INVENTORY_FILE"]
-    ).get_hosts("instance")
+    os.environ["MOLECULE_INVENTORY_FILE"]
+).get_hosts("instance")
 
 
 # --- helper ----------------------------------------------------------------
@@ -273,11 +272,13 @@ def test_directories(host, get_vars):
         get_vars.get("pdns_config_include"),
     ]
 
-    if distribution in ['arch', 'artix']:
+    if distribution in ["arch", "artix"]:
         directories.append("/usr/lib/powerdns")
 
-    if distribution in ['debian', 'ubuntu']:
-        directories.append("/var/lib/powerdns",)
+    if distribution in ["debian", "ubuntu"]:
+        directories.append(
+            "/var/lib/powerdns",
+        )
         directories.append("/var/spool/powerdns")
 
     for dirs in directories:

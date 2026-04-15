@@ -17,5 +17,6 @@
     zones: "{{ bind_zones }}"
     zone_directory: "{{ bind_zone_dir }}"
     serial_strategy: "increment"
+  notify: reload bind
 
 ...

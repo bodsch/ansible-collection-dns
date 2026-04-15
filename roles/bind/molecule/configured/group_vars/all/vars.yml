@@ -131,26 +131,26 @@ bind_zones:
       - name: ns2
         ip: 10.11.0.2
       - name: srv001
-        ip: 10.11.1.1
+        ip: 10.11.0.3
         ipv6: 2001:db8::1
         aliases:
           - www
       - name: srv002
-        ip: 10.11.1.2
+        ip: 10.11.0.4
         ipv6: 2001:db8::2
         aliases:
           - mysql
       - name: mail001
-        ip: 10.11.2.1
+        ip: 10.11.0.21
         ipv6: 2001:db8::d:1
         aliases:
           - smtp
           - mail-in
       - name: mail002
-        ip: 10.11.2.2
+        ip: 10.11.0.22
         ipv6: 2001:db8::d:2
       - name: mail003
-        ip: 10.11.2.3
+        ip: 10.11.0.23
         ipv6: 2001:db8::d:3
         aliases:
           - imap
@@ -180,9 +180,9 @@ bind_zones:
           - 'more text'
 
   - name: cm.local
-    # type: primary               # default: primary [primary, secondary, forward]
-    # create_forward_zones: true
-    # create_reverse_zones: true  # Skip creation of reverse zones
+    type: primary               # default: primary [primary, secondary, forward]
+    create_forward_zones: true
+    create_reverse_zones: true  # Skip creation of reverse zones
     primaries:
       - "{{ ansible_facts.default_ipv4.address }}" # Primary server(s) for this zone
     name_servers:

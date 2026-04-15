@@ -13,11 +13,19 @@ def _exec_dns_test(host, get_vars, domains):
     has_failed, failed = dig_python(host=host, get_vars=get_vars, domains=domains)
 
     if has_failed:
-        print(failed)
         unique_errors = extract_unique_errors(failed)
         error = extract_error(failed)
-        print("\n".join(error))
-        print("\n".join(unique_errors))
+        # print("------------------------------------------------")
+        # print("failed")
+        # print(failed)
+        # print("------------------------------------------------")
+        # print("error")
+        # print("\n".join(error))
+        # print("------------------------------------------------")
+        # print("unique_errors")
+        # print("\n".join(unique_errors))
+        # print("------------------------------------------------")
+        # {k: v for k, v in data.items() if v.get('failed')}
         assert False
 
 
@@ -26,11 +34,11 @@ def test_records_A(host, get_vars):
     domains = [
         {"domain": "ns1.acme-inc.local", "type": "A", "result": "10.11.0.1"},
         {"domain": "ns2.acme-inc.local", "type": "A", "result": "10.11.0.2"},
-        {"domain": "srv001.acme-inc.local", "type": "A", "result": "10.11.1.1"},
-        {"domain": "srv002.acme-inc.local", "type": "A", "result": "10.11.1.2"},
-        {"domain": "mail001.acme-inc.local", "type": "A", "result": "10.11.2.1"},
-        {"domain": "mail002.acme-inc.local", "type": "A", "result": "10.11.2.2"},
-        {"domain": "mail003.acme-inc.local", "type": "A", "result": "10.11.2.3"},
+        {"domain": "srv001.acme-inc.local", "type": "A", "result": "10.11.0.3"},
+        {"domain": "srv002.acme-inc.local", "type": "A", "result": "10.11.0.4"},
+        {"domain": "mail001.acme-inc.local", "type": "A", "result": "10.11.0.21"},
+        {"domain": "mail002.acme-inc.local", "type": "A", "result": "10.11.0.22"},
+        {"domain": "mail003.acme-inc.local", "type": "A", "result": "10.11.0.23"},
         {"domain": "srv010.acme-inc.local", "type": "A", "result": "10.11.0.10"},
         {"domain": "srv011.acme-inc.local", "type": "A", "result": "10.11.0.11"},
         {"domain": "srv012.acme-inc.local", "type": "A", "result": "10.11.0.12"},
@@ -47,11 +55,11 @@ def test_records_PTR(host, get_vars):
         # IPv4 Reverse lookups
         {"domain": "10.11.0.1", "type": "PTR", "result": "ns1.acme-inc.local."},
         {"domain": "10.11.0.2", "type": "PTR", "result": "ns2.acme-inc.local."},
-        {"domain": "10.11.1.1", "type": "PTR", "result": "srv001.acme-inc.local."},
-        {"domain": "10.11.1.2", "type": "PTR", "result": "srv002.acme-inc.local."},
-        {"domain": "10.11.2.1", "type": "PTR", "result": "mail001.acme-inc.local."},
-        {"domain": "10.11.2.2", "type": "PTR", "result": "mail002.acme-inc.local."},
-        {"domain": "10.11.2.3", "type": "PTR", "result": "mail003.acme-inc.local."},
+        {"domain": "10.11.0.3", "type": "PTR", "result": "srv001.acme-inc.local."},
+        {"domain": "10.11.0.4", "type": "PTR", "result": "srv002.acme-inc.local."},
+        {"domain": "10.11.0.21", "type": "PTR", "result": "mail001.acme-inc.local."},
+        {"domain": "10.11.0.22", "type": "PTR", "result": "mail002.acme-inc.local."},
+        {"domain": "10.11.0.23", "type": "PTR", "result": "mail003.acme-inc.local."},
         {"domain": "10.11.0.10", "type": "PTR", "result": "srv010.acme-inc.local."},
         {"domain": "10.11.0.11", "type": "PTR", "result": "srv011.acme-inc.local."},
         {"domain": "10.11.0.12", "type": "PTR", "result": "srv012.acme-inc.local."},
@@ -99,7 +107,11 @@ def test_records_CNAME(host, get_vars):
             "result": "mail003.acme-inc.local.",
         },
         #
-        {"domain": "cms.cm.local", "type": "CNAME", "result": "192.168.124.21"},
+        {
+            "domain": "content-management-server.cm.local",
+            "type": "CNAME",
+            "result": "cms.cm.local"
+        },
     ]
 
     _exec_dns_test(host, get_vars, domains)
