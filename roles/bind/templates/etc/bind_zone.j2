@@ -4,6 +4,12 @@
  #  from it, that it can be compared with subsequent task executions. In this
  #  way the serial will only be updated if there are some content changes.
  #}
+{#
+; ------------------------------------------------
+; {{ zone_item }}
+; ------------------------------------------------
+#}
+{% set item = zone_item %}
 {% set _data = item | bodsch.dns.forward_zone_data(bind_zone_soa, ansible_facts.hostname) %}
 {% set _zone_data = _data.get("forward_zone_data", None) %}
 {% set _zone_hash = _data.get("zone_hash", None) %}
@@ -24,6 +30,20 @@ $ORIGIN {{ _zone_data['domain'] }}.
                                {{ (_zone_data['expire'] | string).ljust(20) }} ; expire (4 weeks)
                                {{ (_zone_data['minimum'] | string).ljust(20) }} ; minimum (1 day)
                                )
+; --------------------------------------------------------------------------------------
+{#
+{% if _zone_data['update_policy'] is defined %}
+  {% if _zone_data['update_policy']['mode'] == 'local' %}
+    update-policy local;
+  {% elif _zone_data['update_policy']['mode'] == 'rules' %}
+    update-policy {
+    {% for rule in _zone_data['update_policy']['rules'] %}
+        {{ rule.action }} {{ rule.identity }} {{ rule.ruletype }}{% if rule.name is defined %} {{ rule.name }}{% endif %} {{ (rule.types | default(['any'])) | join(' ') }};
+    {% endfor %}
+    };
+  {% endif %}
+{% endif %}
+#}
 ; --------------------------------------------------------------------------------------
 ; dns
 {% if _zone_data['soa_name_server'] | length > 0 %}

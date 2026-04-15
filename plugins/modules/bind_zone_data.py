@@ -3,10 +3,12 @@
 
 # (c) 2023, Bodo Schulz <bodo@boone-schulz.de>
 
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, annotations, division, print_function
 
 import os
 import re
+from itertools import islice
+from typing import Optional, Tuple
 
 import netaddr
 from ansible.module_utils.basic import AnsibleModule
@@ -51,6 +53,7 @@ class BindZoneData(object):
     def __init__(self, module):
         """ """
         self.module = module
+        # self.module.log(f"BindZoneData::__init__()")
 
         self.zone_directory = module.params.get("zone_directory")
         self.zone_data = module.params.get("zone_data")
@@ -61,12 +64,14 @@ class BindZoneData(object):
         """
         runner
         """
+        # self.module.log(f"BindZoneData::run()")
+
         forward_zones = self.define_zone_forward_names()
         reverse_zones = self.define_zone_reverse_names()
         reverse_zones += self.define_zone_reverse_names(ipv6=True)
 
-        # self.module.log(msg=f" forward_zones: '{forward_zones}'")
-        # self.module.log(msg=f" reverse_zones: '{reverse_zones}'")
+        # self.module.log(f" forward_zones: '{forward_zones}'")
+        # self.module.log(f" reverse_zones: '{reverse_zones}'")
 
         forward_data = self.forward_zone_data(forward_zones)
         reverse_data = self.reverse_zone_data(reverse_zones)
@@ -78,10 +83,11 @@ class BindZoneData(object):
 
     def forward_zone_data(self, forward_zones):
         """ """
-        self.module.log(msg=f"forward_zone_data({forward_zones})")
+        # self.module.log(f"BindZoneData::forward_zone_data(forward_zones: {forward_zones})")
+
         result = []
         for name in forward_zones:
-            self.module.log(msg=f" - '{name}'")
+            # self.module.log(f" - '{name}'")
 
             res = {}
             res[name] = {}
@@ -92,17 +98,15 @@ class BindZoneData(object):
 
             result.append(res)
 
-        self.module.log(msg=f" = '{result}'")
-
         return result
 
     def reverse_zone_data(self, reverse_zones):
         """ """
-        self.module.log(msg=f"reverse_zone_data({reverse_zones})")
+        # self.module.log(f"BindZoneData::reverse_zone_data(reverse_zones: {reverse_zones})")
 
         result = []
         for name in reverse_zones:
-            self.module.log(msg=f" - '{name}'")
+            self.module.log(f" - '{name}'")
 
             filename = self.reverse_zone_names(name)
 
@@ -120,29 +124,75 @@ class BindZoneData(object):
 
             result.append(res)
 
-        self.module.log(msg=f" = '{result}'")
-
         return result
 
-    def read_zone_file(self, zone_file):
+    def read_zone_file(self, zone_file: str) -> Tuple[Optional[str], Optional[str]]:
+        """Read the zone file header and extract stored hash and serial.
+
+        The function reads up to the first five lines of the zone file and looks
+        for a comment line containing the persisted hash and serial value.
+
+        Args:
+            zone_file: Relative zone file name inside the configured zone directory.
+
+        Returns:
+            A tuple containing:
+                - The extracted SHA-256 hash as a string, or None
+                - The extracted serial as a string, or None
+        """
+        # self.module.log(f"BindZoneData::read_zone_file(zone_file: {zone_file})")
+
+        zone_hash: Optional[str] = None
+        serial: Optional[str] = None
+        file_name = os.path.join(self.zone_directory, zone_file)
+
+        pattern = re.compile(
+            r"^;\s*Hash:.*?(?P<hash>[0-9A-Fa-f]{64})\s+(?P<serial>[0-9]+)\s*$"
+        )
+
+        if not os.path.exists(file_name):
+            # self.module.log(f"file {file_name} not exists.")
+            # self.module.log(f"= hash: {zone_hash}, serial: {serial}")
+            return zone_hash, serial
+
+        try:
+            with open(file_name, "r", encoding="utf-8") as file_handle:
+                zone_data = [line.rstrip("\n") for line in islice(file_handle, 5)]
+                # self.module.log(f"  - header lines: {zone_data}")
+
+            for line in zone_data:
+                match = pattern.match(line.strip())
+                if match:
+                    zone_hash = match.group("hash")
+                    serial = match.group("serial")
+                    break
+
+        except OSError as exc:
+            self.module.log(f"failed to read zone file {file_name}: {exc}")
+
+        return zone_hash, serial
+
+    def read_zone_file_OLD(self, zone_file):
         """ """
-        # self.module.log(msg=f"read_zone_file({zone_file})")
+        self.module.log(f"BindZoneData::read_zone_file(zone_file: {zone_file})")
+
         # line = None
         hash = None
         serial = None
         _file_name = os.path.join(self.zone_directory, zone_file)
 
-        # self.module.log(msg=f"   zone_directory: '{self.zone_directory}'")
-        # self.module.log(msg=f"   zone_file     : '{zone_file}'")
-        # self.module.log(msg=f"   file_name     : '{_file_name}'")
-        # self.module.log(msg=f"                 : '{os.path.join(self.zone_directory, _file_name)}'")
+        # self.module.log(f"   zone_directory: '{self.zone_directory}'")
+        # self.module.log(f"   zone_file     : '{zone_file}'")
+        # self.module.log(f"   file_name     : '{_file_name}'")
+        # self.module.log(f"                 : '{os.path.join(self.zone_directory, _file_name)}'")
 
         if os.path.exists(_file_name):
             with open(_file_name, "r") as f:
                 # zone_data = f.readlines()
                 # read first 4 lines from file
                 zone_data = [next(f) for _ in range(5)]
-                # self.module.log(msg=f"                 : {zone_data}")
+                self.module.log(f"                 : {zone_data}")
+
                 pattern = re.compile(
                     r"; Hash:.*(?P<hash>[0-9A-Za-z]{64}) (?P<timestamp>[0-9]+)",
                     re.MULTILINE,
@@ -152,19 +202,25 @@ class BindZoneData(object):
                 # [0]  # Read Note
                 _list = list(filter(pattern.match, zone_data))
 
+                self.module.log(f"  - list: {_list}")
+
                 if isinstance(_list, list) and len(_list) > 0:
                     line = _list[0].strip()
                     if len(line) > 0:
                         arr = line.split(" ")
                         hash = arr[2]
                         serial = arr[3]
+        else:
+            self.module.log(f"file {_file_name} not exists.")
 
-        self.module.log(msg=f"= hash: {hash}, serial: {serial}")
+        self.module.log(f"= hash: {hash}, serial: {serial}")
 
         return (hash, serial)
 
     def define_zone_forward_names(self):
         """ """
+        # self.module.log("BindZoneData::define_zone_forward_names()")
+
         return [
             x.get("name")
             for x in self.zone_data
@@ -173,7 +229,7 @@ class BindZoneData(object):
 
     def define_zone_reverse_names(self, ipv6=False):
         """ """
-        # self.module.log(msg=f"define_zone_reverse_names({ipv6})")
+        # self.module.log("BindZoneData::define_zone_reverse_names({ipv6})")
 
         networks = []
 
@@ -190,25 +246,27 @@ class BindZoneData(object):
                 if x.get("state", "present") and x.get("create_reverse_zones", True)
             ]
 
-        # self.module.log(msg=f" - {networks} (type(networks))")
+        # self.module.log(f" - {networks} (type(networks))")
         if networks:
             # flatten list of lists
             networks = [x for row in networks for x in row]
         else:
             networks = []
 
-        # self.module.log(msg=f" = {networks}")
+        # self.module.log(f" = {networks}")
         return networks
 
     def define_zone_networks(self):
         """ """
+        # self.module.log("BindZoneData::define_zone_networks()")
+
         networks = [x.get("networks") for x in self.zone_data]
         # flatten list of lists
         return [x for row in networks for x in row]
 
     def reverse_zone_names(self, network):
         """ """
-        # self.module.log(msg=f"reverse_zone_names({network})")
+        # self.module.log(f"BindZoneData::reverse_zone_names(network: {network})")
 
         # ----------------------------------------------------
         from ansible_collections.bodsch.dns.plugins.module_utils.network_type import (
@@ -229,7 +287,7 @@ class BindZoneData(object):
                 if network.count("/") == 1:
                     _prefix = network.split("/")[1]
                     _offset = int(9 + int(_prefix) // 2)
-                    # self.module.log(msg=f" - {_prefix} - {_offset}")
+                    # self.module.log(f" - {_prefix} - {_offset}")
 
                 _network = netaddr.IPNetwork(str(network))
                 _prefix = _network.prefixlen
@@ -243,7 +301,7 @@ class BindZoneData(object):
                     result = result[:-1]
 
             except Exception as e:
-                self.module.log(msg=f" =>  ERROR: {e}")
+                self.module.log(f" =>  ERROR: {e}")
                 pass
 
         if not result:
@@ -251,7 +309,7 @@ class BindZoneData(object):
                 msg=f" PROBLEM: {network} is neither a valid IPv4 nor a valid IPv6 network."
             )
 
-        # self.module.log(msg=f" = '{result}'")
+        # self.module.log(f" = '{result}'")
 
         return result
 
@@ -268,10 +326,10 @@ def main():
         supports_check_mode=True,
     )
 
-    icinga = BindZoneData(module)
-    result = icinga.run()
+    zone_data = BindZoneData(module)
+    result = zone_data.run()
 
-    module.log(msg=f"= result: {result}")
+    # module.log(msg=f"= result: {result}")
 
     module.exit_json(**result)
 

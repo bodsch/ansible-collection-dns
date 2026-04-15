@@ -372,7 +372,11 @@ def test_records_TXT(host):
     """ """
     domains = [
         # TXT records lookup
-        {"domain": "acme-inc.local", "type": "TXT", "result": '"more text","some text"'},
+        {
+            "domain": "acme-inc.local",
+            "type": "TXT",
+            "result": '"more text","some text"',
+        },
     ]
 
     assert dig(host, domains)

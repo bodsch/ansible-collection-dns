@@ -146,15 +146,15 @@ class AnsibleModuleLike(Protocol):
     check_mode: bool
 
     def get_bin_path(self, arg: str, required: bool = False) -> Optional[str]:
-        ...
+        pass
 
     def run_command(
         self, args: Sequence[str], check_rc: bool = True
     ) -> Tuple[int, str, str]:
-        ...
+        pass
 
     def log(self, msg: str = "", **kwargs: Any) -> None:
-        ...
+        pass
 
 
 class Kdig(object):
@@ -347,7 +347,7 @@ class Kdig(object):
         if start == -1 or end == -1 or end <= start:
             return None
 
-        payload = out[start: end + 1]
+        payload = out[start : end + 1]
         try:
             parsed = json.loads(payload)
         except Exception:
@@ -430,10 +430,7 @@ class Kdig(object):
         os.makedirs(parent, exist_ok=True)
 
         with tempfile.NamedTemporaryFile(
-            "w",
-            delete=False,
-            dir=parent,
-            encoding="utf-8"
+            "w", delete=False, dir=parent, encoding="utf-8"
         ) as tf:
             tf.write(data)
             tmp_name = tf.name

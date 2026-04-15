@@ -220,7 +220,23 @@ bind_zones:
       - "10.0.1.2"
       - 'key "external-dns"'
     allow_transfers:
-      - 'key "external-dns"'    
+      - 'key "external-dns"'
+    update_policy:
+      mode: rules
+      rules:
+        - action: grant
+          identity: ddns-host1
+          ruletype: name
+          name: host1.example.org.
+          types:
+            - A
+            - TXT
+        - action: grant
+          identity: ddns-host1
+          ruletype: name
+          name: _acme-challenge.host1.example.org.
+          types:
+            - TXT
     hosts:
       - name: srv001
         ip: 192.0.2.1
@@ -300,6 +316,70 @@ bind_zones:
         text:
           - 'some text'
           - 'more text'
+```
+
+#### `bind_zones.update_policy`
+
+Possible values for `mode`:
+
+- `name`
+- `subdomain`
+- `zonesub`
+- `wildcard`
+- `self`
+- `selfsub`
+- `selfwild`
+- `ms-self`
+- `ms-selfsub`
+- `ms-subdomain`
+- `ms-subdomain-self-rhs`
+- `krb5-self`
+- `krb5-selfsub`
+- `krb5-subdomain`
+- `krb5-subdomain-self-rhs`
+- `tcp-self`
+- `6to4-self`
+- `external`
+
+#### mode: rules
+
+`rules` ist Pflicht.
+
+jede Regel hat mindestens:
+
+- `action`
+- `identity`
+- `ruletype`
+- `types`
+
+`name` ist:
+
+- **verboten/unnötig** bei `zonesub`
+- **empfohlen als** "." bei `ms-self`, `krb5-self`, `tcp-self`, `6to4-self`
+- **fachlich relevant** bei `name`, `subdomain`, `wildcard`, `ms-subdomain`, `krb5-subdomain` usw.
+
+```yaml
+    update_policy:
+      mode: rules
+      rules:
+        - action: grant
+          identity: ddns-host1
+          ruletype: name
+          name: host1.example.org.
+          types:
+            - A
+            - TXT
+
+        - action: grant
+          identity: ddns-host1
+```
+
+#### mode: local
+
+
+```yaml
+    update_policy:
+      mode: local
 ```
 
 

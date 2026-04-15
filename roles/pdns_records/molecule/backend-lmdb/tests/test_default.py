@@ -1,11 +1,12 @@
 from __future__ import annotations, unicode_literals
 
 from helper.dns_utils import dig_python, extract_error, extract_unique_errors
-from helper.molecule import infra_hosts, get_vars
+from helper.molecule import get_vars, infra_hosts
 
 testinfra_hosts = infra_hosts(host_name="instance")
 
 # --- tests -----------------------------------------------------------------
+
 
 def _exec_dns_test(host, get_vars, domains):
 
@@ -18,6 +19,7 @@ def _exec_dns_test(host, get_vars, domains):
         print("\n".join(error))
         print("\n".join(unique_errors))
         assert False
+
 
 def test_records_A(host, get_vars):
     """ """

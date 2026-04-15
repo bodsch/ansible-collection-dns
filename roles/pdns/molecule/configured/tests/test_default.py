@@ -266,11 +266,13 @@ def test_directories(host, get_vars):
         get_vars.get("pdns_config_include"),
     ]
 
-    if distribution in ['arch', 'artix']:
+    if distribution in ["arch", "artix"]:
         directories.append("/usr/lib/powerdns")
 
-    if distribution in ['debian', 'ubuntu']:
-        directories.append("/var/lib/powerdns",)
+    if distribution in ["debian", "ubuntu"]:
+        directories.append(
+            "/var/lib/powerdns",
+        )
         directories.append("/var/spool/powerdns")
 
     for dirs in directories:

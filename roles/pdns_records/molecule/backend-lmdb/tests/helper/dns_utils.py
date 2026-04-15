@@ -336,6 +336,7 @@ def extract_error(failed: dict[str, dict[str, Any]]) -> list[str]:
 
     return seen
 
+
 def extract_unique_errors(failed: dict[str, dict[str, Any]]) -> list[str]:
     """
     Extracts `error` strings from a molecule-style `failed` dict and removes duplicates

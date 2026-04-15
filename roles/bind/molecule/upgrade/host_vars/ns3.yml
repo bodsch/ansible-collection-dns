@@ -8,6 +8,7 @@ bind_dnssec:
 bind_zones:
   # Forwarder for domain example.com (use zone type autodetection)
   - name: 'example.com'
+    type: forward
     forwarders:
       - 10.11.0.1
       - 10.11.0.2

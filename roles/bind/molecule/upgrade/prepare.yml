@@ -54,7 +54,7 @@
           - "ansible version      : {{ ansible_version.full }}"
           - "python version       : {{ ansible_facts.python.version.major }}.{{ ansible_facts.python.version.minor }}"
 
-- name: install bertvv.bind
+- name: install salvoxia.bind
   hosts: all
   gather_facts: true
 
@@ -70,6 +70,6 @@
           - 'all'
 
   roles:
-    - role: bertvv.bind
+    - role: salvoxia.bind
 
 ...

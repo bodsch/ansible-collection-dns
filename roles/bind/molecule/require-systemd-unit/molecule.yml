@@ -35,10 +35,8 @@ provisioner:
       deprecation_warnings: true
       callback_result_format: yaml
       callbacks_enabled: profile_tasks
-      # remote_tmp: /tmp/ansible-${USER}
-      fact_caching: "jsonfile"
-      fact_caching_timeout: 8640
-      fact_caching_connection: ".facts"
+      gathering: smart
+      fact_caching_timeout: 320
 
 scenario:
   test_sequence:
@@ -48,6 +46,7 @@ scenario:
     - create
     - prepare
     - converge
+    - idempotence
     - verify
     - destroy
 

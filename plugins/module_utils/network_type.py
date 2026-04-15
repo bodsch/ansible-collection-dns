@@ -99,7 +99,7 @@ def reverse_dns(data: str) -> Optional[str]:
         )
         return None
 
-    logging.info(f"= {result}")
+    # logging.info(f"= {result}")
     return result
 
 

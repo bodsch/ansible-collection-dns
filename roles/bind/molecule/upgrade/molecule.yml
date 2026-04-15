@@ -97,9 +97,7 @@ provisioner:
       callback_result_format: yaml
       callbacks_enabled: profile_tasks
       gathering: smart
-      fact_caching: jsonfile
-      fact_caching_timeout: 8640
-      fact_caching_connection: ansible_facts
+      fact_caching_timeout: 320
 
 scenario:
   test_sequence:
@@ -109,6 +107,7 @@ scenario:
     - create
     - prepare
     - converge
+    - idempotence
     - verify
     - destroy
 

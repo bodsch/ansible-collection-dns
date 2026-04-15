@@ -67,7 +67,19 @@ zone "{{ bind_zone.name }}" IN {
           {% endif %}
         {% endif %}
   {# -------------------------------------------- #}
-
+  {# -------------------------------------------- #}
+        {% if bind_zone['update_policy'] is defined %}
+          {% if bind_zone['update_policy']['mode'] == 'local' %}
+  update-policy local;
+          {% elif bind_zone['update_policy']['mode'] == 'rules' %}
+  update-policy {
+            {% for rule in bind_zone['update_policy']['rules'] %}
+    {{ rule.action }} {{ rule.identity }} {{ rule.ruletype }}{% if rule.name is defined %} {{ rule.name }}{% endif %} {{ (rule.types | default(['any'])) | join(' ') }};
+            {% endfor %}
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
         {% if bind_zone.also_notify is defined %}
   also-notify  {
     {{ bind_zone.also_notify| join(';\n') | indent(4) }};

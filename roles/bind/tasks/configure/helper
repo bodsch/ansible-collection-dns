@@ -1,0 +1,176 @@
+
+# - name: bind_zone_data
+#   debug:
+#     msg: "{{ bind_zone_data | default([]) }}"
+#
+# - name: bind_zones
+#   debug:
+#     msg: "{{ bind_zones | default([]) }}"
+#
+# - name: append zone filename to zone data
+#   ansible.builtin.set_fact:
+#     bind_zones: "{{ bind_zones | bodsch.dns.append_zone_filename(bind_zone_data) }}"
+#
+# - name: bind_zones
+#   debug:
+#     msg: "{{ bind_zones | default([]) }}"
+
+# - name: Read forward zone hashes
+#   bodsch.dns.bind_zone_hash:
+#     zone_directory: "{{ bind_zone_dir }}"
+#     zone_data: "{{ bind_zones }}"
+#   changed_when: false
+#   check_mode: false
+#   register: forward_hashes
+#   tags: bind
+
+# - name: Read reverse ipv4 zone hashes
+#   bodsch.dns.bind_zone_hash:
+#     zone_directory: "{{ bind_zone_dir }}"
+#     zone_data: "{{ bind_zones }}"
+#     reverse_zone: true
+#   changed_when: false
+#   check_mode: false
+#   register: reverse_hashes
+#   tags: bind
+#
+# - name: bind_zone_data
+#   debug:
+#     msg: "{{ reverse_hashes | default([]) }}"
+
+
+# - name: Read reverse ipv6 zone hashes
+#   bodsch.dns.bind_zone_hash:
+#     zone_directory: "{{ bind_zone_dir }}"
+#     zone_data: "{{ bind_zones }}"
+#     reverse_zone: true
+#     ipv6: true
+#   changed_when: false
+#   check_mode: false
+#   register: reverse_hashes_ipv6
+#   tags: bind
+#
+# - name: forward_hashes
+#   debug:
+#     msg: "{{ forward_hashes | default([]) }}"
+#
+# - name: reverse_hashes
+#   debug:
+#     msg: "{{ reverse_hashes | default([]) }}"
+#
+# - name: reverse_hashes_ipv6
+#   debug:
+#     msg: "{{ reverse_hashes_ipv6 | default([]) }}"
+
+# ---------------------------------------------------------------------------------------------------
+
+# - name: define zone information
+#   run_once: true
+#   ansible.builtin.set_fact:
+#     bind_zone_data: "{{ item | bodsch.dns.zone_data(bind_zone_soa, ansible_hostname) }}"
+#   tags: bind
+#   loop: "{{ bind_zones }}"
+#   loop_control:
+#     label: "{{ item.name }}"
+#   when:
+#     - bind_zones is defined
+#     - bind_zones | count > 0
+#
+# - name: d
+#   debug:
+#     msg: "{{ bind_zone_data | default({}) }}"
+
+# ---------------------------------------------------------------------------------------------------
+
+- name: create temporary reverse lookup zone file
+  become: false
+  local_action:
+    module: template
+    src: etc/reverse_zone.j2
+    dest: "/tmp/{{ item.1 | bodsch.dns.reverse_lookup_zone_file(bind_zone_data, item.0, host_all_addresses) }}"
+  with_subelements:
+    - "{{ bind_zones }}"
+    - networks
+    - flags:
+      skip_missing: true
+  loop_control:
+    label: "named-checkzone -D -d {{ item.1 }}.in-addr.arpa {{ bind_zone_dir }}/{{ item.1 | bodsch.dns.reverse_lookup_zone_file(bind_zone_data, item.0, host_all_addresses) }}"
+  when:
+    - item.1 | bodsch.dns.reverse_lookup_zone_file(bind_zone_data, item.0, host_all_addresses) | default('') | string | length > 0
+  tags: bind
+
+
+# - name: forward lookup zone file
+#   run_once: true
+#   debug:
+#     msg:
+#       - "{{ item }}"
+#       - "{{ (host_all_addresses | intersect(item.primaries)) }}"
+#       - "{{ item | bodsch.dns.forward_lookup_zone_file(bind_zone_data, host_all_addresses) | default('') }}"
+#       # - "{{ (item.name | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) }}"
+#       # - "{{ (item.state | default('present') == 'present') }}"
+#       # - "{{ (item.create_forward_zones | default('true') | bool) }}"
+#       # - "{{ (
+#       #           (item.type | default('primary') == 'primary') or
+#       #           (item.type is not defined and item.primaries is defined and
+#       #           (host_all_addresses | intersect(item.primaries) | length > 0))
+#       #       )
+#       #   }}"
+#       # - "{{ (host_all_addresses | intersect(item.primaries)) }}"
+#   loop: "{{ bind_zones }}"
+#   loop_control:
+#     label: "{{ item.name }}"
+
+# - name: reverse lookup zone file
+#   run_once: true
+#   debug:
+#     msg:
+#       #- "item  : {{ item }}"
+#       #- "item.0: {{ item.0 }}"
+#       #- "item.1: {{ item.1 }}"
+#       - "file name: {{ item.1 | bodsch.dns.reverse_lookup_zone_file(bind_zone_data, item.0, host_all_addresses) | default('') }}"
+#       # - "{{ (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) }}"
+#       # - "{{ (item.1.state | default('present') == 'present') }}"
+#       # - "{{ (item.1.create_reverse_zones | default('false') | bool) }}"
+#       # - "{{ (
+#       #           (item[0].type  | default('primary') == 'primary') or
+#       #           (item[0].type is not defined and item[0].primaries is defined and
+#       #           (host_all_addresses | intersect(item[0].primaries) | length > 0))
+#       #       )
+#       #   }}"
+#       # - "{{ (host_all_addresses | intersect(item[0].primaries)) }}"
+#       # - "{{ item.2 }}"
+#   with_subelements:
+#     - "{{ bind_zones }}"
+#     - networks
+#     - flags:
+#       skip_missing: true
+#   loop_control:
+#     label: "{{ item.1 }}"
+
+# - name: reverse IPv6 lookup zone file
+#   run_once: true
+#   debug:
+#     msg:
+#       - "item  : {{ item }}"
+#       - "item.0: {{ item.0 }}"
+#       - "item.1: {{ item.1 }}"
+#       - "file name: {{ item.1 | bodsch.dns.reverse_lookup_zone_file(bind_zone_data, item.0, host_all_addresses) | default('') }}"
+#
+#       # - "{{ (item.1 | bodsch.dns.zone_filename(bind_zone_data) | string | length > 0) }}"
+#       # - "{{ (item.state | default('present') == 'present') }}"
+#       # - "{{ (item.create_reverse_zones is not defined or item.create_reverse_zones) }}"
+#       # - "{{ (
+#       #           (item[0].type is defined and item[0].type == 'primary') or
+#       #           (item[0].type is not defined and item[0].primaries is defined and
+#       #           (host_all_addresses | intersect(item[0].primaries) | length > 0))
+#       #       )
+#       #   }}"
+#       # - "{{ (host_all_addresses | intersect(item[0].primaries)) }}"
+#   with_subelements:
+#     - "{{ bind_zones }}"
+#     - ipv6_networks
+#     - flags:
+#       skip_missing: true
+#   loop_control:
+#     label: "{{ item.1 }}"
