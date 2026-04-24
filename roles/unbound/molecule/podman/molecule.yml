@@ -26,7 +26,7 @@ platforms:
 
 provisioner:
   name: ansible
-  ansible_facts.args:
+  ansible_args:
     - --diff
     # - -vvv
   config_options:

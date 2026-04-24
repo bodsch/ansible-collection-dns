@@ -11,7 +11,7 @@ testinfra_hosts = infra_hosts(host_name="all")
 
 # --- tests -----------------------------------------------------------------
 
-# _facts = local_facts(host=host, fact="nextcloud")
+# _facts = local_facts(host=host, fact="bind")
 
 
 def test_directories(host, get_vars):
