@@ -1,5 +1,0 @@
----
-
-- name: redis
-  src: https://github.com/geerlingguy/ansible-role-redis.git
-  version: 1.7.0
