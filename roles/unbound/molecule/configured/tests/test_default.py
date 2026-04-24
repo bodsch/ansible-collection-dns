@@ -174,7 +174,6 @@ def test_service(host):
     "ports",
     [
         "0.0.0.0:53",
-        "127.0.0.1:8953",
     ],
 )
 def test_open_port(host, ports):

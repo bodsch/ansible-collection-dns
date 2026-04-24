@@ -4,29 +4,39 @@
   when:
     - ansible_facts.service_mgr == "systemd"
   block:
+
     - name: populate service facts
       ansible.builtin.service_facts:
       register: systemd_facts
       no_log: true
+      tags:
+        - unbound
+        - install
+        - unbound-stop-disable-service
 
     - name: set systemd unit name
       ansible.builtin.set_fact:
-        systemd_resolved_unit_file: "{{ ansible_facts.services | bodsch.core.get_service('systemd-resolved') }}"
-      notify:
-        - disable systemd-resolved
+        resolved_unit_file: "{{ ansible_facts.services | bodsch.systemd.service('systemd-resolved', state='running') }}"
+      tags:
+        - unbound
+        - install
+        - unbound-stop-disable-service
 
-    # - name: disable systemd-resolved
-    #   ansible.builtin.service:
-    #     name: systemd-resolved
-    #     state: stopped
-    #     enabled: false
-    #   ignore_errors: true
-    #   when:
-    #     - systemd_resolved_unit_file is defined
-    #     - systemd_resolved_unit_file | string | length > 0
+    - name: disable systemd-resolved
+      ansible.builtin.service:
+        name: "{{ resolved_unit_file | default('systemd-resolved') }}"
+        state: stopped
+        enabled: false
+      when:
+        - resolved_unit_file | default('') | string | length > 0
+      tags:
+        - unbound
+        - install
+        - unbound-stop-disable-service
 
 - name: enable unbound service
   ansible.builtin.service:
     name: unbound
     enabled: true
     state: started
+

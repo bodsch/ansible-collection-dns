@@ -100,6 +100,7 @@
       tags:
         - unbound
         - install
+        - unbound-stop-disable-service
 
     - name: set systemd unit name
       ansible.builtin.set_fact:
@@ -107,11 +108,16 @@
       tags:
         - unbound
         - install
+        - unbound-stop-disable-service
 
     - name: disable systemd-resolved
-      service:
-        name: "{{ resolved_unit_file }}"
+      ansible.builtin.service:
+        name: "{{ resolved_unit_file | default('systemd-resolved') }}"
         state: stopped
         enabled: false
       when:
         - resolved_unit_file | default('') | string | length > 0
+      tags:
+        - unbound
+        - install
+        - unbound-stop-disable-service
