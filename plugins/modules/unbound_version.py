@@ -54,7 +54,8 @@ EXAMPLES = r"""
 
 - name: Show parsed version
   ansible.builtin.debug:
-    msg: "unbound {{ unbound_version.full_version }} ({{ unbound_version.version.major }}.{{ unbound_version.version.minor }}.{{ unbound_version.version.patch }})"
+    msg: "unbound {{ unbound_version.full_version }}
+        ({{ unbound_version.version.major }}.{{ unbound_version.version.minor }}.{{ unbound_version.version.patch }})"
 """
 
 RETURN = r"""

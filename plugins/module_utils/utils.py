@@ -20,6 +20,8 @@ Source: utils.py :contentReference[oaicite:0]{index=0}
 
 from __future__ import absolute_import, print_function
 
+import hashlib
+from pathlib import Path
 from typing import Any, Optional
 
 import netaddr
@@ -132,3 +134,43 @@ def reverse_zone_names_OLD(module, network):
     # module.log(msg=f" = '{result}'")
 
     return result
+
+
+def file_sha256(path: Path) -> Optional[str]:
+    """Compute the SHA-256 hex digest of a file's meaningful content.
+
+    Reads the file line by line and skips any line whose first
+    non-whitespace character is ``';'``.  In the unbound anchor file
+    format (both the autotrust ``root.key`` and the static
+    ``/usr/share/dns/root.key``), lines starting with ``';'`` are
+    comments that carry volatile metadata such as timestamps and probe
+    counters::
+
+        ; created by unbound-anchor on Sun Apr 26 12:39:35 2026
+        ;;last_queried: 1777203753 ;;Sun Apr 26 11:42:33 2026
+
+    Including these in the digest would cause spurious ``changed=True``
+    results on every run even when no DNSKEY or DS record has changed.
+    Only non-comment lines (the actual resource records) are fed into
+    the hash.
+
+    Args:
+        path: Path to the file to hash.  The file must be readable by
+              the current process.
+
+    Returns:
+        Lowercase hex digest string on success, or ``None`` when the
+        file does not exist or cannot be read (e.g. permission denied).
+        ``None`` is treated by :meth:`run` as "no prior state", which
+        causes the module to report ``changed=True`` after a successful
+        run — a safe, conservative default.
+    """
+    try:
+        h = hashlib.sha256()
+        with path.open("rb") as fh:
+            for raw_line in fh:
+                if not raw_line.lstrip().startswith(b";"):
+                    h.update(raw_line)
+        return h.hexdigest()
+    except OSError:
+        return None
