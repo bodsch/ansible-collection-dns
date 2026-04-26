@@ -1,45 +1,26 @@
 ---
 
+- name: unbound version
+  bodsch.dns.unbound_version:
+  register: _unbound_version
+
 - name: install unbound
   ansible.builtin.package:
     name: unbound
     state: present
 
-- name: unbound root.key
-  when:
-    - ansible_facts.os_family | lower == 'debian'
-  block:
-    - name: test existing root.key
-      ansible.builtin.stat:
-        path: "/var/lib/unbound/root.key"
-        get_mime: true
-      register: __unbound_rootkey_exists
-
-    - name: detect unbound helper
-      ansible.builtin.stat:
-        path: "/usr/lib/unbound/package-helper"
-        get_mime: false
-      register: _package_helper
-
-    - name: detect unbound helper
-      ansible.builtin.stat:
-        path: "/usr/libexec/unbound-helper"
-        get_mime: false
-      register: _unbound_helper
-
-    - name: define helper
-      ansible.builtin.set_fact:
-        unbound_helper: "{{ _package_helper | bodsch.dns.unbound_helper(_unbound_helper) }}"
-
-    - name: create root.key  # noqa no-changed-when
-      ansible.builtin.command: |
-        {{ unbound_helper }} root_trust_anchor_update
-      when:
-        - not __unbound_rootkey_exists.stat.exists
-
 - name: merge unbound config between defaults and custom for server.conf
   ansible.builtin.set_fact:
     unbound_config_server: "{{ unbound_config_server_defaults | combine(unbound_config_server, recursive=True) }}"
+
+- name: unbound root.key
+  when:
+    - ansible_facts.os_family | lower == 'debian'
+  bodsch.dns.unbound_root_key:
+    anchor_file: "{{ unbound_config_server['auto-trust-anchor-file'] }}"
+    owner: "{{ unbound_user }}"
+    group: "{{ unbound_group }}"
+  register: _unbound_root_key
 
 - name: update unbound server confg
   when:
@@ -86,6 +67,30 @@
         mode: "0666"
       when:
         - not __unbound_logfile_exists.stat.exists
+
+- name: create key file
+  become: true
+  bodsch.dns.unbound_control_setup:
+    conf_dir: "{{ unbound_conf_dir }}"
+    certs: "{{ unbound_certs }}"
+    owner: "{{ unbound_user }}"
+    group: "{{ unbound_group }}"
+  register: _unbound_control
+
+- name: force update with cert
+  become: true
+  bodsch.dns.unbound_anchor:
+    config: /etc/unbound/unbound.conf
+    params:
+      - -v
+      - -F
+    iana_verify: true
+    iana_dir: "{{ unbound_conf_dir }}"
+    force_download: false
+    anchor_file: "{{ unbound_config_server['auto-trust-anchor-file'] }}"
+    owner: "{{ unbound_user }}"
+    group: "{{ unbound_group }}"
+  register: _unbound_anchor
 
 # -----------------------------------------------------------------
 

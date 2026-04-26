@@ -1,7 +1,5 @@
 ---
 
-# DNS_ROOT_KEY_FILE="/usr/share/dns/root.key" -> ROOT_TRUST_ANCHOR_FILE="/var/lib/unbound/root.key"
-
 - name: merge unbound config between defaults and custom for server.conf
   ansible.builtin.set_fact:
     unbound_config_server: "{{ unbound_config_server_defaults | combine(unbound_config_server, recursive=True) }}"
@@ -9,20 +7,6 @@
     unbound_config_cachedb: "{{ unbound_config_cachedb_defaults | combine(unbound_config_cachedb, recursive=True) }}"
     unbound_config_forward_zone: "{{ unbound_config_forward_zone_defaults | combine(unbound_config_forward_zone, recursive=True) }}"
     unbound_config_stub_zone: "{{ unbound_config_stub_zone_defaults | combine(unbound_config_stub_zone, recursive=True) }}"
-
-- name: create key file
-  ansible.builtin.command: |
-    unbound-control-setup -d {{ unbound_conf_dir }}
-  args:
-    creates: "{{ unbound_certs.server.key_file }}"
-
-- name: force update with cert
-  ansible.builtin.command: |
-    unbound-anchor -v -F -C /etc/unbound/unbound.conf
-  register: anchor
-  ignore_errors: true
-  changed_when: anchor.rc != 0
-  failed_when: anchor.rc != 0
 
 - name: create {{ unbound_environment_file }}
   ansible.builtin.template:
@@ -132,3 +116,4 @@
     msg: "{{ __configuration_check.stderr_lines }}"
   when:
     - not __configuration_check.rc | int == 0
+

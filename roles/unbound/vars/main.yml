@@ -58,6 +58,10 @@ unbound_config_remote_control_defaults:
 unbound_config_cachedb_defaults: {}
 
 unbound_certs:
+  iana:
+    root_anchor: ""
+    anchor: ""
+    bundle_pem: ""
   server:
     key_file: "{{ unbound_conf_dir }}/unbound_server.key"
     cert_file: "{{ unbound_conf_dir }}/unbound_server.pem"
