@@ -16,7 +16,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts(HOST)
 
 
-def pp_json(json_thing, sort=True, indents=2):
+def print(json_thing, sort=True, indents=2):
     if type(json_thing) is str:
         print(json.dumps(json.loads(json_thing), sort_keys=sort, indent=indents))
     else:
@@ -157,7 +157,7 @@ def test_directories(host, get_vars):
     """
     used config directory
     """
-    pp_json(get_vars)
+    print(get_vars)
 
     directories = [
         get_vars.get("bind_dir"),
