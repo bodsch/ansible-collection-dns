@@ -15,7 +15,7 @@ def test_directories(host, get_vars):
     """
     used config directory
     """
-    pp_json(get_vars)
+    print(get_vars)
 
     directories = [
         "/etc/powerdns/recursor.d",
