@@ -1,0 +1,17 @@
+---
+
+- name: apply DDNS updates
+  bodsch.dns.bind_nsupdate:
+    zone: "{{ item.zone }}"
+    updates: "{{ item.updates }}"
+    key_name: "{{ item.key_name | default(bind_records_nsupdate_key) }}"
+    key_secret: "{{ item.key_secret | default(bind_records_nsupdate_key_secret) }}"
+    key_algorithm: "{{ item.key_algorithm | default(bind_records_nsupdate_key_algorithm) }}"
+    server: "{{ item.server | default(bind_records_nsupdate_server) }}"
+    port: "{{ item.port | default(bind_records_nsupdate_port) }}"
+  loop: "{{ bind_records_updates }}"
+  register: ddns_results
+  tags:
+    - bind_records
+
+...

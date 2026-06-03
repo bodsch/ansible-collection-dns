@@ -1,0 +1,9 @@
+{% if bind_rndc.enable | default(false) | bool %}
+include "{{ bind_rndc_key_file }}";
+controls {
+  inet {{ bind_rndc.controls.listen_on }} port {{ bind_rndc.controls.port }} allow {
+    {{ bind_rndc.controls.allow | join(';\n') | indent(4) }};
+  } keys { "{{ bind_rndc.key.name }}"; };
+};
+// -------------------------------------------------------------------
+{% endif %}

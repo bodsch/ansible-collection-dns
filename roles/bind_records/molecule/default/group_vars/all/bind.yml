@@ -1,0 +1,137 @@
+---
+
+bind_statistics:
+  channels: true
+  allow:
+    - any
+  host: "127.0.0.1"
+
+bind_allow_query:
+  - any
+
+bind_dns_keys:
+  - name: primary_key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_primary_key }}"
+  - name: primary-dns
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_primary_dns }}"
+
+# TSIG key used by the bind_records DDNS updates (bind_records_nsupdate_key).
+# The same secret must be configured for the nsupdate client. The bind role
+# now auto-includes auth_update.conf into named.conf when this list is set.
+bind_update_keys:
+  - name: ddns-key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_primary_key }}"
+
+bind_rndc:
+  enable: true
+  key:
+    name: "rndc-key"
+    algorithm: "hmac-sha256"
+    secret: "{{ vault_rndc_secret }}"
+    # "c2VjcmV0LXJuZGMta2V5LWZvci1tb2xlY3VsZS10ZXN0cw=="
+  controls:
+    listen_on: "127.0.0.1"
+    port: 953
+    allow:
+      - "127.0.0.1"
+      - "::1"
+
+bind_listen:
+  ipv4:
+    - port: 53
+      addresses:
+        - "127.0.0.1"
+        - "10.11.0.1"
+    - port: 5353
+      addresses:
+        - "127.0.1.1"
+  # ipv6:
+  #   - port: 53
+  #     addresses:
+  #       - "{{ ansible_facts.default_ipv6.address }}"
+
+bind_acls:
+  - name: acl1
+    match_list:
+      - 10.11.0.0/24
+
+bind_forwarders:
+  - '9.9.9.9'
+  - '141.1.1.1'
+
+bind_recursion: true
+bind_dns64: true
+
+bind_check_names:
+  - master
+  - ignore
+
+bind_logging:
+  enable: true
+  channels:
+    - channel: general
+      file: "data/general.log"
+      versions: 3
+      size: 10M
+      print_time: true           # true | false
+      print_category: true
+      print_severity: true
+      severity: dynamic          # critical | error | warning | notice | info | debug [level] | dynamic
+    - channel: query
+      file: "data/query.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: debug2             #
+    - channel: dnssec
+      file: "data/dnssec.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: notify
+      file: "data/notify.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: transfers
+      file: "data/transfers.log"
+      versions: 5
+      size: 10M
+      print_time: ""               # true | false
+      severity: info               #
+    - channel: slog
+      syslog: security             # kern | user | mail | daemon | auth | syslog | lpr |
+                                   # news | uucp | cron | authpriv | ftp |
+                                   # local0 | local1 | local2 | local3 |
+                                   # local4 | local5 | local6 | local7
+      print_time: ""               # true | false
+      severity: info               #
+  categories:
+    "xfer-out":
+      - transfers
+      - slog
+    "xfer-in":
+      - transfers
+      - slog
+    notify:
+      - notify
+    "lame-servers":
+      - general
+    config:
+      - general
+    default:
+      - general
+    security:
+      - general
+      - slog
+    dnssec:
+      - dnssec
+    queries:
+      - query
+
+...

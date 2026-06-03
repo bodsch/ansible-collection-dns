@@ -1,0 +1,23 @@
+---
+# Example 5: Forward Zone (Conditional Forwarding)
+# Purpose: Forward unresolved queries to upstream resolvers
+# Use case: Internal corporate domains, upstream DNS
+
+- name: Configure forward zone
+  hosts: ns1.example.com
+  vars:
+    bind_records_zones:
+      - name: corp.internal
+        type: forward
+        forwarders:
+          - 10.0.0.1
+          - 10.0.0.2
+      
+      - name: vendor.external
+        type: forward
+        forwarders:
+          - 8.8.8.8
+          - 8.8.4.4
+  
+  roles:
+    - bind_records

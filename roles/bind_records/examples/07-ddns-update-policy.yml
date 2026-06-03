@@ -1,0 +1,59 @@
+---
+# Example 7: Working DDNS with TSIG key + update-policy
+# Purpose: End-to-end dynamic updates on a zone managed by the bind role
+# Use case: stable base zone (static file) + records added via nsupdate
+#
+# Three pieces must line up for DDNS to succeed:
+#   1. The TSIG key is defined server-side (bind_update_keys) -> the bind role
+#      writes it to auth_update.conf and auto-includes it into named.conf.
+#   2. The zone grants that key update rights (update_policy / allow-update).
+#   3. bind_records uses the SAME key name + secret for the nsupdate client.
+# The secret may be plain text; it is normalised to base64 identically on both
+# sides, so the exact same value must be used for client and server.
+
+- name: BIND with working DDNS updates
+  hosts: ns1.example.com
+  vars:
+    # --- bind role: server-side TSIG key -------------------------------------
+    bind_update_keys:
+      - name: ddns-key
+        algorithm: hmac-sha256
+        secret: "{{ vault_ddns_secret }}"
+
+    # --- bind_records: static base zone that allows DDNS ---------------------
+    bind_records_mode: hybrid
+    bind_records_zones:
+      - name: example.com
+        type: primary
+        hosts:
+          - name: ns1
+            ip: 192.0.2.1
+        name_servers:
+          - ns1.example.com.
+        networks:
+          - 192.0.2.0/24
+        # Grant the ddns-key the right to update names in the zone.
+        update_policy:
+          mode: rules
+          rules:
+            - action: grant
+              identity: ddns-key
+              ruletype: subdomain
+              name: example.com.
+              types: [A, AAAA, TXT]
+
+    # --- bind_records: dynamic updates ---------------------------------------
+    bind_records_ddns_enabled: true
+    bind_records_nsupdate_key: ddns-key
+    bind_records_nsupdate_key_secret: "{{ vault_ddns_secret }}"
+    # Default target is 127.0.0.1; set explicitly if BIND listens elsewhere.
+    # bind_records_nsupdate_server: 127.0.0.1
+    bind_records_updates:
+      - zone: example.com
+        updates:
+          - "update add app01.example.com. 300 A 192.0.2.100"
+          - "update add app02.example.com. 300 A 192.0.2.101"
+
+  roles:
+    - bodsch.dns.bind          # provides rndc, includes the key + zone include
+    - bodsch.dns.bind_records  # writes the zone, declares it, applies DDNS

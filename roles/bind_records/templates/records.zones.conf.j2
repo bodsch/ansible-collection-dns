@@ -1,0 +1,43 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+//
+// {{ ansible_managed }}
+// zone declarations managed by the bodsch.dns.bind_records role
+//
+{% for z in zone_files_result.zone_definitions | default([]) %}
+{% if (z.state | default('present')) == 'present' %}
+zone "{{ z.name }}" IN {
+{% if z.zone_type == 'primary' %}
+  type master;
+  file "{{ bind_records_zone_dir }}/{{ z.filename }}";
+  notify yes;
+{% if z.update_policy %}
+{% if z.update_policy.mode == 'local' %}
+  update-policy local;
+{% elif z.update_policy.mode == 'rules' %}
+  update-policy {
+{% for rule in z.update_policy.rules | default([]) %}
+    {{ rule.action }} {{ rule.identity }} {{ rule.ruletype }}{% if rule.name %} {{ rule.name }}{% endif %} {{ (rule.types | default(['any'])) | join(' ') }};
+{% endfor %}
+  };
+{% endif %}
+{% endif %}
+{% elif z.zone_type == 'secondary' %}
+  type slave;
+  masters {
+{% for p in z.primaries | default([]) %}
+    {{ p }};
+{% endfor %}
+  };
+  file "{{ bind_records_zone_dir }}/{{ z.filename }}";
+{% elif z.zone_type == 'forward' %}
+  type forward;
+  forward only;
+  forwarders {
+{% for f in z.forwarders | default([]) %}
+    {{ f }};
+{% endfor %}
+  };
+{% endif %}
+};
+{% endif %}
+{% endfor %}

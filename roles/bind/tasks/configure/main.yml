@@ -72,8 +72,13 @@
   tags:
     - bind
 
-- name: configure
-  ansible.builtin.include_tasks: configure/zones.yml
+- name: configure rndc control channel
+  ansible.builtin.include_tasks: configure/rndc.yml
+  when:
+    - bind_rndc.enable | default(false) | bool
+
+#- name: configure
+#  ansible.builtin.include_tasks: configure/zones.yml
 
 - name: detect default zone files
   bodsch.core.find_files:
@@ -85,6 +90,18 @@
   become: false
   ansible.builtin.set_fact:
     bind_default_zone_files: "{{ file_check.stat | selectattr('exists') | map(attribute='path') | list }}"
+
+- name: ensure bind_records zones include file exists {{ bind_records_zones_file }}
+  become: true
+  ansible.builtin.copy:
+    content: "// managed by the bodsch.dns.bind_records role\n"
+    dest: "{{ bind_records_zones_file }}"
+    force: false
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0640"
+  tags:
+    - bind
 
 - name: create main bind config file {{ bind_config }}
   become: true

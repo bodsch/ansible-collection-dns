@@ -1,0 +1,6 @@
+---
+
+bind_records_zone_owner: root
+bind_records_zone_group: bind
+
+...

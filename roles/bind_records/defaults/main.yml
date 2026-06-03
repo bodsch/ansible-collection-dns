@@ -1,0 +1,45 @@
+---
+
+# Whether to manage BIND zones
+bind_records_manage_zones: true
+
+# Zone file storage
+bind_records_zone_dir: /etc/bind/zones
+
+# named.conf include file this role writes its zone declarations into.
+# Must match bind_records_zones_file used by the bodsch.dns.bind role, which
+# wires this include into named.conf.
+bind_records_zones_file: /etc/bind/records.zones.conf
+bind_records_zone_owner: bind
+bind_records_zone_group: bind
+bind_records_zone_file_mode: "0640"
+
+# RNDC configuration (local only)
+bind_records_rndc_path: /usr/sbin/rndc
+bind_records_rndc_config: null
+
+# DDNS/nsupdate configuration
+# Server the DDNS updates are sent to. Defaults to the local BIND instance;
+# without it nsupdate would resolve the target from the zone's SOA primary.
+bind_records_nsupdate_server: "127.0.0.1"
+bind_records_nsupdate_port: 53
+bind_records_ddns_enabled: false
+bind_records_nsupdate_path: /usr/bin/nsupdate
+bind_records_nsupdate_key: null
+bind_records_nsupdate_key_secret: null
+bind_records_nsupdate_key_algorithm: HMAC-SHA256
+bind_records_nsupdate_auto_load_keys: true
+
+# Zone management mode: static | dynamic | hybrid
+bind_records_mode: static
+
+# Static zone configuration
+bind_records_zones: []
+
+# Dynamic record updates
+bind_records_updates: []
+
+# Cache directory for zone state tracking
+bind_records_cache_directory: /var/cache/ansible/bind-records
+
+...

@@ -1,0 +1,90 @@
+---
+# Example host variables for ns1.example.com
+
+# Basic zone storage configuration
+bind_records_zone_dir: /etc/bind/zones
+bind_records_zone_owner: bind
+bind_records_zone_group: bind
+bind_records_zone_file_mode: "0640"
+
+# RNDC configuration
+bind_records_rndc_path: /usr/sbin/rndc
+bind_records_rndc_config: /etc/bind/rndc.conf
+
+# DDNS/nsupdate configuration
+bind_records_ddns_enabled: true
+bind_records_nsupdate_path: /usr/bin/nsupdate
+bind_records_nsupdate_key: ddns-update-key
+# NOTE: Use Ansible vault for sensitive data
+# bind_records_nsupdate_key_secret: !vault |
+#   $ANSIBLE_VAULT_DATA_HERE
+bind_records_nsupdate_key_algorithm: HMAC-SHA256
+bind_records_nsupdate_auto_load_keys: true
+
+# Zone management mode
+bind_records_mode: hybrid
+
+# Cache directory
+bind_records_cache_directory: /var/cache/ansible/bind-records
+
+# Primary zone with static definition
+bind_records_zones:
+  - name: example.com
+    type: primary
+    create_forward_zones: true
+    create_reverse_zones: true
+    
+    # Infrastructure servers
+    hosts:
+      - name: ns1
+        ip: 192.0.2.1
+        ipv6: "2001:db8::1"
+      
+      - name: ns2
+        ip: 192.0.2.2
+        ipv6: "2001:db8::2"
+      
+      - name: mx1
+        ip: 192.0.2.20
+      
+      - name: mx2
+        ip: 192.0.2.21
+      
+      - name: www
+        ip: 192.0.2.30
+        aliases: [web, web.example.com]
+    
+    mail_servers:
+      - name: mx1.example.com
+        preference: 10
+      - name: mx2.example.com
+        preference: 20
+    
+    name_servers:
+      - ns1.example.com.
+      - ns2.example.com.
+    
+    networks:
+      - 192.0.2.0/24
+    
+    ipv6_networks:
+      - "2001:db8::/32"
+
+# Dynamic DDNS updates
+bind_records_updates:
+  - zone: example.com
+    updates:
+      # Application servers
+      - "update add app01.example.com. 300 A 192.0.2.100"
+      - "update add app02.example.com. 300 A 192.0.2.101"
+      - "update add app03.example.com. 300 A 192.0.2.102"
+      
+      # Database servers
+      - "update add db01.example.com. 300 A 192.0.2.110"
+      - "update add db02.example.com. 300 A 192.0.2.111"
+      
+      # Load balancer
+      - "update add lb.example.com. 300 A 192.0.2.50"
+      
+      # Monitoring
+      - "update add monitor.example.com. 300 A 192.0.2.200"

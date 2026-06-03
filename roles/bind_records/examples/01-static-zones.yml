@@ -1,0 +1,78 @@
+---
+# Example 1: Static Zone Management
+# Purpose: Generate zone files from structured data, reload via rndc
+# Use case: Traditional DNS administration with zone files
+
+- name: Configure static zones
+  hosts: ns1.example.com
+  vars:
+    bind_records_zones:
+      - name: example.com
+        type: primary
+        create_forward_zones: true
+        create_reverse_zones: true
+        
+        # Hosts (generates A, AAAA, CNAME, and reverse PTR records)
+        hosts:
+          - name: ns1
+            ip: 192.0.2.1
+            ipv6: "2001:db8::1"
+          
+          - name: ns2
+            ip: 192.0.2.2
+            ipv6: "2001:db8::2"
+          
+          - name: www
+            ip: 192.0.2.10
+            aliases:
+              - web
+              - web1
+          
+          - name: mail
+            ip: 192.0.2.20
+          
+          - name: db
+            ip: 192.0.2.30
+            ipv6: "2001:db8::30"
+        
+        # Mail servers
+        mail_servers:
+          - name: mail.example.com
+            preference: 10
+          - name: mail2.example.com
+            preference: 20
+        
+        # SRV records (services)
+        services:
+          - name: _ldap._tcp
+            target: ldap.example.com
+            weight: 100
+            port: 389
+          
+          - name: _kerberos._udp
+            target: kdc.example.com
+            weight: 100
+            port: 88
+        
+        # TXT records
+        text:
+          - name: "@"
+            text: ["v=spf1 mx -all"]
+          
+          - name: _dmarc
+            text: ["v=DMARC1; p=reject"]
+        
+        # Nameservers
+        name_servers:
+          - ns1.example.com.
+          - ns2.example.com.
+        
+        # Reverse zone networks
+        networks:
+          - 192.0.2.0/24
+        
+        ipv6_networks:
+          - "2001:db8::/32"
+  
+  roles:
+    - bind_records

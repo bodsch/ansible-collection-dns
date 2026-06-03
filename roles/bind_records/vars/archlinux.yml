@@ -1,0 +1,10 @@
+---
+
+bind_records_zone_owner: root
+bind_records_zone_group: named
+
+# On Arch the BIND config dir is /var/named (matches the bind role's
+# bind_conf_dir), so the include lives there as well.
+bind_records_zones_file: /var/named/records.zones.conf
+
+...

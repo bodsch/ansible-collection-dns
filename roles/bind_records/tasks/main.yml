@@ -1,0 +1,40 @@
+---
+
+- name: prepare
+  ansible.builtin.include_tasks: prepare.yml
+
+- name: create cache directory for zone state tracking
+  become: true
+  ansible.builtin.file:
+    path: "{{ bind_records_cache_directory }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - bind_records
+
+- name: check BIND accessibility via rndc
+  bodsch.dns.bind_rndc_status:
+    # rndc_path: "{{ bind_records_rndc_path }}"
+    rndc_config: "{{ bind_records_rndc_config }}"
+  when: bind_records_manage_zones | bool
+  register: rndc_status
+  tags:
+    - bind_records
+
+- name: manage static zones
+  ansible.builtin.include_tasks: static_zones.yml
+  when:
+    - bind_records_manage_zones | bool
+    - bind_records_mode in ['static', 'hybrid']
+  tags:
+    - bind_records
+
+- name: apply dynamic updates
+  ansible.builtin.include_tasks: dynamic_zones.yml
+  when:
+    - bind_records_ddns_enabled | bool
+    - bind_records_mode in ['dynamic', 'hybrid']
+  tags:
+    - bind_records
+
+...

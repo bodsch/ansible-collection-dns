@@ -1,0 +1,48 @@
+---
+# Example 6: Combined with bind Role
+# Purpose: Install BIND and manage zones in one playbook
+# Use case: Full DNS server setup from scratch
+
+- name: Setup complete DNS server
+  hosts: ns1.example.com
+  vars:
+    # BIND role variables
+    bind_listen:
+      ipv4:
+        - port: 53
+          addresses: ["192.0.2.1"]
+    
+    bind_allow_query:
+      - "any"
+    
+    bind_recursion: false
+    
+    bind_dnssec:
+      enable: true
+      validation: auto
+    
+    bind_update_keys:
+      - name: ddns-update-key
+        algorithm: hmac-sha256
+        secret: "your-secret-key-here"
+    
+    # bind_records role variables
+    bind_records_zones:
+      - name: example.com
+        type: primary
+        hosts:
+          - name: www
+            ip: 192.0.2.10
+          - name: mail
+            ip: 192.0.2.20
+        name_servers:
+          - ns1.example.com.
+        networks:
+          - 192.0.2.0/24
+    
+    bind_records_ddns_enabled: true
+    bind_records_nsupdate_auto_load_keys: true
+  
+  roles:
+    - bind          # Install BIND
+    - bind_records  # Manage zones

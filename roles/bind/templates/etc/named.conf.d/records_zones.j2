@@ -1,0 +1,5 @@
+{% if bind_records_zones_file is defined %}
+// zone declarations managed by the bodsch.dns.bind_records role
+include "{{ bind_records_zones_file }}";
+// -------------------------------------------------------------------
+{% endif %}

@@ -1,0 +1,58 @@
+---
+# Example 3: Hybrid Mode
+# Purpose: Combine static zones with dynamic updates
+# Use case: Stable infrastructure + frequently changing records
+
+- name: Configure hybrid zone management
+  hosts: ns1.example.com
+  vars:
+    bind_records_mode: hybrid
+    
+    # Static zones (zone file based)
+    bind_records_zones:
+      - name: example.com
+        type: primary
+        
+        # Core infrastructure (static)
+        hosts:
+          - name: ns1
+            ip: 192.0.2.1
+          - name: ns2
+            ip: 192.0.2.2
+          - name: mx1
+            ip: 192.0.2.20
+          - name: mx2
+            ip: 192.0.2.21
+        
+        mail_servers:
+          - name: mx1.example.com
+            preference: 10
+          - name: mx2.example.com
+            preference: 20
+        
+        name_servers:
+          - ns1.example.com.
+          - ns2.example.com.
+        
+        networks:
+          - 192.0.2.0/24
+    
+    # Dynamic records (DDNS updates)
+    bind_records_ddns_enabled: true
+    bind_records_nsupdate_key: ddns-key
+    bind_records_nsupdate_key_secret: "{{ vault_nsupdate_secret }}"
+    
+    bind_records_updates:
+      - zone: example.com
+        # Application instances (auto-scaled)
+        updates:
+          - "update add app01.example.com. 300 A 192.0.2.100"
+          - "update add app02.example.com. 300 A 192.0.2.101"
+          - "update add app03.example.com. 300 A 192.0.2.102"
+          
+          # API endpoints
+          - "update add api.example.com. 300 A 192.0.2.110"
+          - "update add api-v2.example.com. 300 A 192.0.2.111"
+  
+  roles:
+    - bind_records

@@ -1,0 +1,13 @@
+---
+
+- name: converge
+  hosts: instance
+  any_errors_fatal: false
+  gather_facts: true
+
+  environment:
+    NETRC: ''
+
+  roles:
+    # - role: bodsch.dns.bind
+    - role: bodsch.dns.bind_records

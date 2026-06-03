@@ -1,0 +1,105 @@
+---
+
+- name: create zone directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ bind_records_zone_dir }}"
+    state: directory
+    owner: "{{ bind_records_zone_owner }}"
+    group: "{{ bind_records_zone_group }}"
+    mode: "0770"
+  tags:
+    - bind_records
+
+# Plan first (no writes) so we know which already-existing dynamic zones will
+# change and therefore need a freeze before their file is rewritten.
+- name: plan zone files (dry-run)
+  bodsch.dns.bind_zone_files:
+    zones: "{{ bind_records_zones }}"
+    zone_directory: "{{ bind_records_zone_dir }}"
+    cache_directory: "{{ bind_records_cache_directory }}"
+    serial_strategy: "unix"
+    owner: "{{ bind_records_zone_owner }}"
+    group: "{{ bind_records_zone_group }}"
+    mode: "{{ bind_records_zone_file_mode }}"
+  check_mode: true
+  changed_when: false
+  register: zone_plan
+  tags:
+    - bind_records
+
+- name: determine dynamic zones
+  ansible.builtin.set_fact:
+    bind_records_dynamic_zone_files: "{{ zone_plan.zone_definitions | selectattr('update_policy') | map(attribute='filename') | list }}"
+  tags:
+    - bind_records
+
+- name: freeze dynamic zones before rewriting their files
+  bodsch.dns.bind_rndc_reload:
+    action: freeze
+    zone_names: "{{ zone_plan.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | intersect(bind_records_dynamic_zone_files) }}"
+    rndc_config: "{{ bind_records_rndc_config }}"
+  when:
+    - (zone_plan.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | intersect(bind_records_dynamic_zone_files)) | length > 0
+  tags:
+    - bind_records
+
+- name: create/reconcile zone files
+  bodsch.dns.bind_zone_files:
+    zones: "{{ bind_records_zones }}"
+    zone_directory: "{{ bind_records_zone_dir }}"
+    cache_directory: "{{ bind_records_cache_directory }}"
+    serial_strategy: "unix"
+    owner: "{{ bind_records_zone_owner }}"
+    group: "{{ bind_records_zone_group }}"
+    mode: "{{ bind_records_zone_file_mode }}"
+  register: zone_files_result
+  tags:
+    - bind_records
+
+- name: write zone declarations into named.conf include
+  become: true
+  ansible.builtin.template:
+    src: records.zones.conf.j2
+    dest: "{{ bind_records_zones_file }}"
+    owner: "{{ bind_records_zone_owner }}"
+    group: "{{ bind_records_zone_group }}"
+    mode: "0640"
+  register: zones_include
+  tags:
+    - bind_records
+
+# reconfig loads newly declared zones (created) and removes vanished ones.
+- name: reconfigure BIND to load newly declared zones
+  bodsch.dns.bind_rndc_reload:
+    action: reconfig
+    rndc_config: "{{ bind_records_rndc_config }}"
+  when:
+    - zones_include is changed
+  tags:
+    - bind_records
+
+# Thaw reloads dynamic zones from the rewritten file and re-enables updates.
+- name: thaw dynamic zones after rewriting their files
+  bodsch.dns.bind_rndc_reload:
+    action: thaw
+    zone_names: "{{ zone_files_result.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | intersect(bind_records_dynamic_zone_files) }}"
+    rndc_config: "{{ bind_records_rndc_config }}"
+  when:
+    - (zone_files_result.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | intersect(bind_records_dynamic_zone_files)) | length > 0
+  tags:
+    - bind_records
+
+# Plain reload for changed static (non-dynamic) zones. Newly created zones are
+# already loaded by the reconfig above, so only updated ones need a reload.
+- name: reload changed static zones via rndc
+  bodsch.dns.bind_rndc_reload:
+    action: reload
+    zone_names: "{{ zone_files_result.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | difference(bind_records_dynamic_zone_files) }}"
+    rndc_config: "{{ bind_records_rndc_config }}"
+  when:
+    - (zone_files_result.changes | selectattr('action', 'equalto', 'updated') | map(attribute='filename') | list | difference(bind_records_dynamic_zone_files)) | length > 0
+  tags:
+    - bind_records
+
+...

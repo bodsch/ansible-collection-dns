@@ -1,0 +1,39 @@
+---
+# Example 2: Dynamic DDNS Updates
+# Purpose: Update records without zone file modification
+# Use case: Auto-scaling environments, temporary hosts, certificate validation
+
+- name: Configure dynamic DDNS updates
+  hosts: ns1.example.com
+  vars:
+    bind_records_mode: dynamic
+    bind_records_ddns_enabled: true
+    
+    # TSIG authentication (optional but recommended)
+    bind_records_nsupdate_key: ddns-update-key
+    bind_records_nsupdate_key_secret: "{{ vault_nsupdate_secret }}"
+    bind_records_nsupdate_key_algorithm: HMAC-SHA256
+    
+    # Updates to apply
+    bind_records_updates:
+      - zone: example.com
+        updates:
+          # Add web servers
+          - "update add web1.example.com. 300 A 192.0.2.100"
+          - "update add web2.example.com. 300 A 192.0.2.101"
+          - "update add web3.example.com. 300 A 192.0.2.102"
+          
+          # Add API servers
+          - "update add api.example.com. 300 A 192.0.2.110"
+          - "update add api2.example.com. 300 A 192.0.2.111"
+          
+          # Certificate validation records
+          - "update add _acme-challenge.example.com. 60 TXT \"validation-token-abc123\""
+      
+      - zone: internal.example.com
+        updates:
+          - "update add cache01.internal.example.com. 300 A 10.0.0.50"
+          - "update add cache02.internal.example.com. 300 A 10.0.0.51"
+  
+  roles:
+    - bind_records

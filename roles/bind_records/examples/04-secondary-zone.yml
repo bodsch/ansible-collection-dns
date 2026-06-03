@@ -1,0 +1,28 @@
+---
+# Example 4: Secondary Zone with Dynamic Updates
+# Purpose: Zone transfer from primary + dynamic record management
+# Use case: Secondary nameserver with custom records
+
+- name: Configure secondary zone
+  hosts: ns2.example.com
+  vars:
+    bind_records_zones:
+      - name: example.com
+        type: secondary
+        primaries:
+          - 192.0.2.1    # Primary NS IP
+          - 192.0.2.2    # Another primary NS
+    
+    # Allow dynamic updates on secondary
+    bind_records_ddns_enabled: true
+    bind_records_mode: hybrid
+    
+    bind_records_updates:
+      - zone: example.com
+        updates:
+          # Monitoring servers (only on secondary)
+          - "update add monitor.example.com. 300 A 192.0.2.200"
+          - "update add health.example.com. 300 A 192.0.2.201"
+  
+  roles:
+    - bind_records

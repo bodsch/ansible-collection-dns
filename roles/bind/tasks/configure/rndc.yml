@@ -1,0 +1,47 @@
+---
+
+# Provide a working rndc control channel so that 'rndc status' / 'rndc reload'
+# (used e.g. by the bodsch.dns.bind_records role) can talk to named.
+
+- name: generate rndc key {{ bind_rndc_key_file }}
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      rndc-confgen -a
+      -A {{ bind_rndc.key.algorithm }}
+      -k {{ bind_rndc.key.name }}
+      -c {{ bind_rndc_key_file }}
+    creates: "{{ bind_rndc_key_file }}"
+  when:
+    - bind_rndc.key.secret | default('') | string | length == 0
+  notify:
+    - restart bind
+  tags:
+    - bind
+
+- name: deploy rndc key {{ bind_rndc_key_file }}
+  become: true
+  ansible.builtin.template:
+    src: etc/rndc.key.j2
+    dest: "{{ bind_rndc_key_file }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0640"
+  when:
+    - bind_rndc.key.secret | default('') | string | length > 0
+  notify:
+    - restart bind
+  tags:
+    - bind
+
+- name: ensure rndc key permissions {{ bind_rndc_key_file }}
+  become: true
+  ansible.builtin.file:
+    path: "{{ bind_rndc_key_file }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0640"
+  tags:
+    - bind
+
+...

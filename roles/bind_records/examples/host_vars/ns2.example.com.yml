@@ -1,0 +1,23 @@
+---
+# Example host variables for ns2.example.com (secondary)
+
+bind_records_zone_dir: /etc/bind/zones
+bind_records_zone_owner: bind
+bind_records_zone_group: bind
+
+# RNDC configuration for secondary
+bind_records_rndc_path: /usr/sbin/rndc
+
+# DDNS for secondary
+bind_records_ddns_enabled: false
+bind_records_mode: static
+
+# Secondary zone (receives zone transfers from primary)
+bind_records_zones:
+  - name: example.com
+    type: secondary
+    primaries:
+      - 192.0.2.1    # Primary NS1
+      - 192.0.2.2    # Primary NS2
+
+bind_records_cache_directory: /var/cache/ansible/bind-records
