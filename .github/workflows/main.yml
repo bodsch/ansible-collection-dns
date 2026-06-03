@@ -53,6 +53,7 @@ jobs:
           - default
         collection_role:
           - bind
+          - bind_records
           - knot
           - knot_resolver
           - dnsmasq
