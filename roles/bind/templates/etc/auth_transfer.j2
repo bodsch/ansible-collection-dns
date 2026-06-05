@@ -2,6 +2,8 @@
 //
 // {{ ansible_managed }}
 
+{# Per-remote-server TSIG. A 'server' statement supports only ONE key, so #}
+{# map each remote server IP to its key via bind_key_mapping. #}
 {% if bind_key_mapping | length > 0 %}
   {% for primary in bind_key_mapping.keys() %}
 server {{ primary }} {
@@ -10,13 +12,9 @@ server {{ primary }} {
   {% endfor %}
 
 {% endif %}
-server {{ ansible_facts.default_ipv4.address }} {
-  keys { {% for mykey in bind_dns_keys %} {{ mykey.name }}; {% endfor %} };
-};
-
 {% for mykey in bind_dns_keys %}
 key {{ mykey.name }} {
   algorithm {{ mykey.algorithm }};
-  secret "{{ mykey.secret }}";
+  secret "{{ mykey.secret | bodsch.dns.tsig_base64 }}";
 };
 {% endfor %}

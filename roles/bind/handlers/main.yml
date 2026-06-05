@@ -14,4 +14,13 @@
     name: "{{ bind_service }}"
     state: reloaded
 
+# A changed rndc key or controls statement cannot be picked up by a reload:
+# on systemd the reload itself runs via rndc, which would fail against the
+# still-running named that holds the old key. Restart so named loads it fresh.
+- name: restart bind
+  become: true
+  ansible.builtin.service:
+    name: "{{ bind_service }}"
+    state: restarted
+
 ...

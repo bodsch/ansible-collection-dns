@@ -4,3 +4,11 @@ include "{{ file }}";
 {% for file in bind_extra_include_files %}
 include "{{ file }}";
 {% endfor %}
+{# auto-include the generated key files when keys are defined, unless the #}
+{# user already wired them in via bind_extra_include_files above. #}
+{% if bind_dns_keys | default([]) | length > 0 and bind_auth_file not in (bind_extra_include_files | default([])) %}
+include "{{ bind_auth_file }}";
+{% endif %}
+{% if bind_update_keys | default([]) | length > 0 and bind_auth_update_file not in (bind_extra_include_files | default([])) %}
+include "{{ bind_auth_update_file }}";
+{% endif %}

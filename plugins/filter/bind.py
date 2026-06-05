@@ -11,6 +11,9 @@ from typing import Hashable, TypeVar
 
 from ansible.utils.display import Display
 from ansible_collections.bodsch.dns.plugins.module_utils.network_type import reverse_dns
+from ansible_collections.bodsch.dns.plugins.module_utils.tsig import (
+    ensure_base64_secret,
+)
 
 T = TypeVar("T", bound=Hashable)
 
@@ -46,9 +49,18 @@ class FilterModule(object):
             "forward_zone_data": self.forward_zone_data,
             "reverse_zone_data": self.reverse_zone_data,
             "zone_filename": self.zone_filename,
+            "tsig_base64": self.tsig_base64,
             # "combine_zone_data": self.combine_zone_data,
             # "when_reverse_zone": self.when_reverse_zone,
         }
+
+    def tsig_base64(self, secret):
+        """Return a TSIG key secret as valid base64.
+
+        Mirrors the normalisation the bind_nsupdate module applies, so the
+        named key{} statement and nsupdate derive identical key bytes.
+        """
+        return ensure_base64_secret(secret)
 
     def zone_type(self, data, all_addresses):
         """ """

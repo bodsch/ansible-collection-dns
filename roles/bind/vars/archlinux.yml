@@ -21,4 +21,8 @@ bind_conf_dir: "{{ bind_dir }}"
 bind_owner: root
 bind_group: named
 
+# On Arch the rndc binary's sysconfdir is /etc, so a plain 'rndc' call
+# (without '-c') looks for /etc/rndc.conf resp. /etc/rndc.key.
+bind_rndc_key_file: /etc/rndc.key
+
 ...

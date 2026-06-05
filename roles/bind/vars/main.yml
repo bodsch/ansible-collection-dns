@@ -24,6 +24,16 @@ bind_conf_dir: "/etc/bind"
 bind_auth_file: "{{ bind_conf_dir }}/auth_transfer.conf"
 bind_auth_update_file: "{{ bind_conf_dir }}/auth_update.conf"
 
+# Location of the rndc key file. This is the path 'rndc' searches by default
+# (compiled-in sysconfdir), so a plain 'rndc' call without '-c' finds it.
+# On Debian based systems rndc's sysconfdir is /etc/bind.
+bind_rndc_key_file: "{{ bind_conf_dir }}/rndc.key"
+
+# Include file for zone declarations managed by the bodsch.dns.bind_records
+# role. This role only ensures the include exists and is wired into named.conf;
+# bind_records owns its content. Both roles must agree on this path.
+bind_records_zones_file: "{{ bind_conf_dir }}/records.zones.conf"
+
 bind_owner: root
 bind_group: bind
 

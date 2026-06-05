@@ -31,7 +31,9 @@ options {
 {% include('named.conf.d/dns64.j2') %}
 };
 // -------------------------------------------------------------------
+{% include('named.conf.d/controls.j2') %}
 {% include('named.conf.d/includes.j2') %}
+{% include('named.conf.d/records_zones.j2') %}
 {% include('named.conf.d/statistics.j2') %}
 {% include('named.conf.d/logging.j2') %}
 {% include('named.conf.d/zones.j2') %}

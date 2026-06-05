@@ -6,17 +6,39 @@ bind_zones: []
 # List of acls.
 bind_acls: []
 
-# Key binding for secondary servers
+# Key binding for secondary servers.
+# When set, the keys are written to bind_auth_file (auth_transfer.conf) and
+# automatically included into named.conf.
 bind_dns_keys: []
 #  - name: primary_key
 #    algorithm: hmac-sha256
 #    secret: "azertyAZERTY123456"
 
-# Key binding for DDNS updates
+# Key binding for DDNS updates.
+# When set, the keys are written to bind_auth_update_file (auth_update.conf)
+# and automatically included into named.conf.
 bind_update_keys: []
 #  - name: update_key
 #    algorithm: hmac-sha256
 #    secret: "azertyAZERTY123456"
+
+# rndc remote control channel.
+# Required so that tools like the bodsch.dns.bind_records role can talk to
+# named via 'rndc' (e.g. 'rndc status' / 'rndc reload').
+bind_rndc:
+  enable: true
+  key:
+    name: "rndc-key"
+    algorithm: "hmac-sha256"
+    # If left empty a key is generated automatically with 'rndc-confgen'.
+    # For reproducible deployments set a (vault-protected) secret here.
+    secret: ""
+  controls:
+    listen_on: "127.0.0.1"
+    port: 953
+    allow:
+      - "127.0.0.1"
+      - "::1"
 
 # List of IPv4 address of the network interface(s) to listen on. Set to "any"
 # to listen on all interfaces

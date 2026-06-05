@@ -8,6 +8,6 @@
 {% for mykey in bind_update_keys %}
 key {{ mykey.name }} {
   algorithm {{ mykey.algorithm }};
-  secret "{{ mykey.secret }}";
+  secret "{{ mykey.secret | bodsch.dns.tsig_base64 }}";
 };
 {% endfor %}
