@@ -184,7 +184,7 @@ class FilterModule(object):
         if not hostmaster_email:
             hostmaster_email = f"hostmaster.{domain}."
         else:
-            if not hostmaster_email[:-1] == ".":
+            if not hostmaster_email[-1] == ".":
                 hostmaster_email = f"{hostmaster_email}.{domain}."
 
         # append domain to ns entry, when the tast char not a dot is
@@ -271,7 +271,7 @@ class FilterModule(object):
         if not hostmaster_email:
             hostmaster_email = f"hostmaster.{domain}."
         else:
-            if not hostmaster_email[:-1] == ".":
+            if not hostmaster_email[-1] == ".":
                 hostmaster_email = f"{hostmaster_email}.{domain}."
 
         # append domain to ns entry, when the tast char not a dot is
