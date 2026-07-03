@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import os
 import grp
 import pwd
 from dataclasses import asdict
@@ -133,10 +134,17 @@ class BindZoneFilesModule:
     def __init__(self, module: AnsibleModule) -> None:
         """Initialize the module wrapper."""
         self.module = module
+
+        self.module.log("BindZoneFilesModule::__init__()")
+
+        _zone_directory = self.module.params["zone_directory"]
+        _cache_directory = self.module.params["cache_directory"]
+        _cache_directory = os.path.expanduser(os.path.expandvars(_cache_directory))
+
         self._builder = ZoneSpecBuilder()
         self._reconciler = ZoneFileReconciler(
-            zone_directory=self.module.params["zone_directory"],
-            cache_directory=self.module.params["cache_directory"],
+            zone_directory=_zone_directory,
+            cache_directory=_cache_directory,
         )
 
     def run(self) -> dict[str, Any]:
