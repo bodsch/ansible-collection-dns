@@ -6,7 +6,7 @@
     state: directory
     owner: "{{ pdns_file_owner }}"
     group: "{{ pdns_file_group }}"
-    mode: "0750"
+    mode: "0755"
 
 - name: create directory for pdns 'include-dir'
   ansible.builtin.file:
@@ -14,7 +14,7 @@
     state: directory
     owner: "{{ pdns_file_owner }}"
     group: "{{ pdns_file_group }}"
-    mode: "0750"
+    mode: "0755"
   when:
     - pdns_config_include is defined
 

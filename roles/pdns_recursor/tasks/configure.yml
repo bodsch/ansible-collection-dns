@@ -46,7 +46,7 @@
     dest: "{{ pdns_recursor_config_dir }}/recursor.conf"
     owner: "{{ pdns_recursor_owner }}"
     group: "{{ pdns_recursor_group }}"
-    mode: "0640"
+    mode: "0644"
     backup: true
   notify:
     - restart powerdns-recursor
