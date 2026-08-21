@@ -46,6 +46,7 @@ class ZoneFileCacheStore:
             kind=spec.kind,
             family=spec.family,
             network=spec.network,
+            dynamic_updates=spec.dynamic_updates,
             content_sha256=content_sha256,
         )
         payload = {

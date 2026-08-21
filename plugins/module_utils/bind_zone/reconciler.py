@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .cache import ZoneFileCacheStore
-from .models import ReconcileResult, ZoneFileChange, ZoneFileSpec
+from .models import ReconcileResult, ZoneFileCacheEntry, ZoneFileChange, ZoneFileSpec
 from .reader import ZoneFileReader
 from .renderer import ZoneFileRenderer
 from .serials import SerialNumberService
@@ -59,12 +59,21 @@ class ZoneFileReconciler:
 
         desired_by_key = {zone_file.key: zone_file for zone_file in zone_files}
         cache_entries = self._cache_store.read_all()
+        dynamic_to_static_zones = tuple(
+            zone_file.origin.removesuffix(".")
+            for zone_file in zone_files
+            if self._is_dynamic_to_static_transition(
+                zone_file=zone_file,
+                cache_entry=cache_entries.get(zone_file.key),
+            )
+        )
 
         changes: list[ZoneFileChange] = []
         for zone_file in zone_files:
             changes.append(
                 self._reconcile_one(
                     zone_file=zone_file,
+                    cache_entry=cache_entries.get(zone_file.key),
                     serial_strategy=serial_strategy,
                     check_mode=check_mode,
                     file_mode=file_mode,
@@ -87,12 +96,17 @@ class ZoneFileReconciler:
                 )
 
         changed = any(item.changed for item in changes)
-        return ReconcileResult(changed=changed, changes=tuple(changes))
+        return ReconcileResult(
+            changed=changed,
+            changes=tuple(changes),
+            dynamic_to_static_zones=dynamic_to_static_zones,
+        )
 
     def _reconcile_one(
         self,
         *,
         zone_file: ZoneFileSpec,
+        cache_entry: ZoneFileCacheEntry | None,
         serial_strategy: str,
         check_mode: bool,
         file_mode: int | None,
@@ -104,6 +118,12 @@ class ZoneFileReconciler:
         """Reconcile one desired zone file."""
         target_path = self._zone_directory / zone_file.filename
         current_state = self._reader.read(str(target_path))
+        journal_removed = self._remove_journal_for_dynamic_to_static_transition(
+            zone_file=zone_file,
+            cache_entry=cache_entry,
+            target_path=target_path,
+            check_mode=check_mode,
+        )
 
         if zone_file.state == "absent":
             removed = False
@@ -126,6 +146,25 @@ class ZoneFileReconciler:
                 changed=changed,
                 old_serial=current_state.serial,
                 new_serial=None,
+            )
+
+        if zone_file.dynamic_updates and current_state.exists:
+            if not check_mode:
+                content_sha256 = None
+                if current_state.content is not None:
+                    content_sha256 = hashlib.sha256(
+                        current_state.content.encode("utf-8")
+                    ).hexdigest()
+                self._cache_store.write(zone_file, content_sha256=content_sha256)
+
+            cache_missing = cache_entry is None
+            return ZoneFileChange(
+                key=zone_file.key,
+                filename=zone_file.filename,
+                action="unchanged",
+                changed=(cache_missing and not check_mode) or journal_removed,
+                old_serial=current_state.serial,
+                new_serial=current_state.serial,
             )
 
         rendered_compare = self._renderer.normalize_rendered_content(
@@ -185,6 +224,43 @@ class ZoneFileReconciler:
             new_serial=next_serial,
             diff_before=current_state.content if include_diff else None,
             diff_after=rendered_compare if include_diff else None,
+        )
+
+    def _remove_journal_for_dynamic_to_static_transition(
+        self,
+        *,
+        zone_file: ZoneFileSpec,
+        cache_entry: ZoneFileCacheEntry | None,
+        target_path: Path,
+        check_mode: bool,
+    ) -> bool:
+        """Discard the journal when a previously dynamic zone becomes static."""
+        converting_to_static = self._is_dynamic_to_static_transition(
+            zone_file=zone_file,
+            cache_entry=cache_entry,
+        )
+        journal_path = target_path.with_name(f"{target_path.name}.jnl")
+
+        if not converting_to_static or not journal_path.exists():
+            return False
+
+        if not check_mode:
+            journal_path.unlink()
+        return True
+
+    def _is_dynamic_to_static_transition(
+        self,
+        *,
+        zone_file: ZoneFileSpec,
+        cache_entry: ZoneFileCacheEntry | None,
+    ) -> bool:
+        """Return whether a previously dynamic managed zone is now static."""
+        return (
+            cache_entry is not None
+            and cache_entry.source_zone_name == zone_file.source_zone_name
+            and cache_entry.dynamic_updates
+            and not zone_file.dynamic_updates
+            and zone_file.state == "present"
         )
 
     def _purge_stale_entry(
