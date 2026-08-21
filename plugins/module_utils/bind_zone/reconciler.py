@@ -257,6 +257,7 @@ class ZoneFileReconciler:
         """Return whether a previously dynamic managed zone is now static."""
         return (
             cache_entry is not None
+            and cache_entry.source_zone_name == zone_file.source_zone_name
             and cache_entry.dynamic_updates
             and not zone_file.dynamic_updates
             and zone_file.state == "present"

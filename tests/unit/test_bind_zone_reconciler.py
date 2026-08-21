@@ -274,6 +274,73 @@ def test_reconciler_drops_ddns_records_when_zone_becomes_static(
     assert journal_file.exists() is False
 
 
+def test_reconciler_does_not_transition_reassigned_reverse_zone(
+    tmp_path: Path,
+) -> None:
+    models_mod = _load_bind_zone_module("models")
+    reconciler_mod = _load_bind_zone_module("reconciler")
+
+    zone_dir = tmp_path / "zones"
+    cache_dir = tmp_path / "cache"
+    zone_dir.mkdir()
+    cache_dir.mkdir()
+
+    zone_file = zone_dir / "3.168.192.in-addr.arpa"
+    journal_file = zone_dir / "3.168.192.in-addr.arpa.jnl"
+    zone_file.write_text("EXISTING REVERSE ZONE\n", encoding="utf-8")
+    journal_file.write_text("JOURNAL FROM UNKNOWN LIVE STATE\n", encoding="utf-8")
+
+    cached_dynamic_spec = models_mod.ZoneFileSpec(
+        key="reverse:ipv4:192.168.3.0/24",
+        source_zone_name="ddns.example",
+        state="present",
+        zone_type="primary",
+        kind="reverse",
+        family="ipv4",
+        filename="3.168.192.in-addr.arpa",
+        origin="3.168.192.in-addr.arpa.",
+        network="192.168.3.0/24",
+        dynamic_updates=True,
+        records=(),
+    )
+    desired_static_spec = models_mod.ZoneFileSpec(
+        key="reverse:ipv4:192.168.3.0/24",
+        source_zone_name="infra.example",
+        state="present",
+        zone_type="primary",
+        kind="reverse",
+        family="ipv4",
+        filename="3.168.192.in-addr.arpa",
+        origin="3.168.192.in-addr.arpa.",
+        network="192.168.3.0/24",
+        records=(
+            models_mod.ZoneRecord(
+                owner="@",
+                rtype="NS",
+                value="ns1.infra.example.",
+            ),
+            models_mod.ZoneRecord(
+                owner="1",
+                rtype="PTR",
+                value="router.infra.example.",
+            ),
+        ),
+    )
+
+    reconciler = reconciler_mod.ZoneFileReconciler(
+        zone_directory=str(zone_dir),
+        cache_directory=str(cache_dir),
+    )
+    reconciler.reconcile((cached_dynamic_spec,))
+
+    plan = reconciler.reconcile((desired_static_spec,), check_mode=True)
+
+    assert plan.dynamic_to_static_zones == ()
+    assert journal_file.read_text(encoding="utf-8") == (
+        "JOURNAL FROM UNKNOWN LIVE STATE\n"
+    )
+
+
 def test_reconciler_keeps_journal_for_dynamic_zone(tmp_path: Path) -> None:
     models_mod = _load_bind_zone_module("models")
     reconciler_mod = _load_bind_zone_module("reconciler")
