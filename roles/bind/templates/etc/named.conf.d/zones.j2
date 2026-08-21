@@ -105,7 +105,8 @@ zone "{{ bind_zone.name }}" IN {
     {% if bind_zone.networks is defined %}
       {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.networks) %}
-        {% set _reverse_allow_updates = bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
+        {% set _reverse_update_policy = bind_zone.reverse_update_policy | default(None) %}
+        {% set _reverse_allow_updates = [] if _reverse_update_policy else bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
         {% for network in bind_zone.networks %}
 
 zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa" IN {
@@ -129,6 +130,18 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
           {% else %}
   allow-update {
     none
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+        {% if _reverse_update_policy %}
+          {% if _reverse_update_policy.mode == 'local' %}
+  update-policy local;
+          {% elif _reverse_update_policy.mode == 'rules' %}
+  update-policy {
+            {% for rule in _reverse_update_policy.rules %}
+    {{ rule.action }} {{ rule.identity }} {{ rule.ruletype }}{% if rule.name is defined %} {{ rule.name }}{% endif %} {{ (rule.types | default(['any'])) | join(' ') }};
+            {% endfor %}
   };
           {% endif %}
         {% endif %}
@@ -165,7 +178,8 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
     {% if bind_zone.ipv6_networks is defined %}
       {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.ipv6_networks) %}
-        {% set _reverse_allow_updates = bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
+        {% set _reverse_update_policy = bind_zone.reverse_update_policy | default(None) %}
+        {% set _reverse_allow_updates = [] if _reverse_update_policy else bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
         {% for network in bind_zone.ipv6_networks %}
 
 zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):] }}" IN {
@@ -189,6 +203,18 @@ zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace
           {% else %}
   allow-update {
     none
+  };
+          {% endif %}
+        {% endif %}
+  {# -------------------------------------------- #}
+        {% if _reverse_update_policy %}
+          {% if _reverse_update_policy.mode == 'local' %}
+  update-policy local;
+          {% elif _reverse_update_policy.mode == 'rules' %}
+  update-policy {
+            {% for rule in _reverse_update_policy.rules %}
+    {{ rule.action }} {{ rule.identity }} {{ rule.ruletype }}{% if rule.name is defined %} {{ rule.name }}{% endif %} {{ (rule.types | default(['any'])) | join(' ') }};
+            {% endfor %}
   };
           {% endif %}
         {% endif %}
