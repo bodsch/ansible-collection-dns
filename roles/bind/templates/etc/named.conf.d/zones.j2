@@ -105,6 +105,7 @@ zone "{{ bind_zone.name }}" IN {
     {% if bind_zone.networks is defined %}
       {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.networks) %}
+        {% set _reverse_allow_updates = bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
         {% for network in bind_zone.networks %}
 
 zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr.arpa" IN {
@@ -118,10 +119,10 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
   };
             {% endif %}
   {# -------------------------------------------- #}
-        {% if bind_zone.allow_updates | default([]) | count > 0 %}
-          {% if bind_zone.allow_updates | bodsch.core.type == "list" %}
+        {% if _reverse_allow_updates | count > 0 %}
+          {% if _reverse_allow_updates | bodsch.core.type == "list" %}
   allow-update {
-            {% for u in bind_zone.allow_updates %}
+            {% for u in _reverse_allow_updates %}
     {{ u }};
             {% endfor %}
   };
@@ -164,6 +165,7 @@ zone "{{ ('.'.join(network.replace(network+'.','').split('.')[::-1])) }}.in-addr
     {% if bind_zone.ipv6_networks is defined %}
       {% if bind_zone.create_reverse_zones | default('true') | bool %}
         {% set _type = bind_zone | bodsch.dns.zone_type(all_addresses=bind_zone.ipv6_networks) %}
+        {% set _reverse_allow_updates = bind_zone.reverse_allow_updates | default(bind_zone.allow_updates | default([])) %}
         {% for network in bind_zone.ipv6_networks %}
 
 zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace('^.*/','') | int)//2):] }}" IN {
@@ -177,10 +179,10 @@ zone "{{ (network | ansible.utils.ipaddr('revdns'))[-(9+(network | regex_replace
   };
             {% endif %}
   {# -------------------------------------------- #}
-        {% if bind_zone.allow_updates | default([]) | count > 0 %}
-          {% if bind_zone.allow_updates | bodsch.core.type == "list" %}
+        {% if _reverse_allow_updates | count > 0 %}
+          {% if _reverse_allow_updates | bodsch.core.type == "list" %}
   allow-update {
-            {% for u in bind_zone.allow_updates %}
+            {% for u in _reverse_allow_updates %}
     {{ u }};
             {% endfor %}
   };

@@ -219,6 +219,9 @@ bind_zones:
     allow_updates:
       - "10.0.1.2"
       - 'key "external-dns"'
+    # Optional update ACL for reverse zones. Defaults to allow_updates when omitted.
+    reverse_allow_updates:
+      - 'key "reverse-ddns"'
     allow_transfers:
       - 'key "external-dns"'
     update_policy:
