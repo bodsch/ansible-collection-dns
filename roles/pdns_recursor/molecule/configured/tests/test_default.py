@@ -8,8 +8,32 @@ testinfra_hosts = infra_hosts(host_name="instance")
 
 # --- tests -----------------------------------------------------------------
 
-# _facts = local_facts(host=host, fact="pdns_records")
+# _facts = local_facts(host=host, fact="pdns_recursor")
 
+def test_user(host, get_vars):
+    """
+        archlinux:
+            pdns-recursor:x:968:968:PowerDNS Recursor:/:/usr/bin/nologin
+        debian:13
+            pdns:x:100:102:PowerDNS:/var/spool/powerdns:/bin/false
+    """
+    shell = '/bin/false'
+
+    user = get_vars.get("pdns_recursor_owner", "pdns-recursor")
+    group = get_vars.get("pdns_recursor_group", "pdns-recursor")
+
+    distribution = host.system_info.distribution
+
+    if distribution == "arch":
+        shell = "/usr/bin/nologin"
+
+    u = host.user(user)
+    g = host.group(group)
+
+    assert g.exists
+    assert u.exists
+    assert user in u.groups
+    assert u.shell == shell
 
 def test_directories(host, get_vars):
     """
@@ -42,27 +66,60 @@ def test_files(host, get_vars):
         assert f.is_file
 
 
-# def test_user(host, get_vars):
-#     """
-#       created user
-#     """
-#     shell = '/bin/false'
-#
-#     distribution = host.system_info.distribution
-#
-#     if distribution in ['centos', 'redhat', 'ol']:
-#         shell = "/sbin/nologin"
-#     elif distribution == "arch":
-#         shell = "/usr/bin/nologin"
-#
-#     user_name = "mysql"
-#     u = host.user(user_name)
-#     g = host.group(user_name)
-#
-#     assert g.exists
-#     assert u.exists
-#     assert user_name in u.groups
-#     assert u.shell == shell
+def test_powerdns_directory(host, get_vars):
+    """ """
+    config_dir = get_vars.get("pdns_recursor_recursor", {}).get("config_dir", "/etc/powerdns")
+
+    user = "root"
+    group = "root"
+
+    print(config_dir)
+
+    if config_dir:
+        directory = host.file(config_dir)
+        assert directory.is_directory
+
+        assert directory.user == user
+        assert directory.group == group
+        assert directory.mode == 0o755
+
+def test_recursor_files(host, get_vars):
+    """ """
+    config_dir = get_vars.get("pdns_recursor_recursor", {}).get("config_dir", "/etc/powerdns")
+
+    user = get_vars.get("pdns_recursor_owner", "pdns-recursor")
+    group = get_vars.get("pdns_recursor_group", "pdns-recursor")
+
+    print(config_dir)
+
+    if config_dir:
+
+        recursor_config = f"{config_dir}/recursor.yml"
+
+        _file = host.file(recursor_config)
+        assert _file.is_file
+
+        assert _file.user == user
+        assert _file.group == group
+        assert _file.mode == 0o644
+
+
+def test_recursor_direcory(host, get_vars):
+    """ """
+    include_dir = get_vars.get("pdns_recursor_recursor", {}).get("include_dir", "/etc/powerdns/recursor.d")
+
+    user = get_vars.get("pdns_recursor_owner", "pdns-recursor")
+    group = get_vars.get("pdns_recursor_group", "pdns-recursor")
+
+    print(include_dir)
+
+    if include_dir:
+        directory = host.file(include_dir)
+        assert directory.is_directory
+
+        assert directory.user == user
+        assert directory.group == group
+        assert directory.mode == 0o755
 
 
 def test_service_running_and_enabled(host, get_vars):
@@ -84,8 +141,10 @@ def test_listening_socket(host, get_vars):
         print(i)
 
     listen = []
-    listen.append(f"tcp://127.0.0.1:53")
-    listen.append(f"udp://127.0.0.1:53")
+    listen.append("tcp://127.0.0.1:53")
+    listen.append("udp://127.0.0.1:53")
+    listen.append("tcp://172.17.0.2:53")
+    listen.append("udp://172.17.0.2:53")
 
     for spec in listen:
         socket = host.socket(spec)

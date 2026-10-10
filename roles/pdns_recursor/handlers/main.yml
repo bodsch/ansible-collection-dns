@@ -8,6 +8,12 @@
   when:
     - ansible_facts.service_mgr | lower == "systemd"
 
+- name: validate recursor config
+  ansible.builtin.command:
+    cmd: "pdns_recursor --config-dir={{ pdns_recursor_recursor.config_dir }} --config=check"
+  changed_when: false
+  # listen: restart pdns-recursor
+
 - name: reload powerdns-recursor
   become: true
   ansible.builtin.service:

@@ -1,0 +1,23 @@
+---
+
+pdns_recursor_incoming:
+  allow_from:
+    - 127.0.0.0/8
+    - 172.17.0.1/16
+  listen:
+    - 127.0.0.1
+    - "{{ ansible_facts.default_ipv4.address }}"
+
+pdns_recursor_recursor:
+  forward_zones:
+    - zone: matrix.lan
+      forwarders:
+        - 127.0.0.1:5300
+    - zone: google.de
+      forwarders:
+        - 127.0.0.1
+    - zone: google.com
+      forwarders:
+        - 127.0.0.1
+
+...

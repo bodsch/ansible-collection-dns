@@ -55,9 +55,9 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - debian:12
+          - debain:13
         ansible-version:
-          - '9.5'
+          - '12.3'
         python_version:
           - '3.12'
         scenario:
@@ -107,9 +107,9 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - ubuntu:22.04
+          - ubuntu:24.04
         ansible-version:
-          - '9.5'
+          - '12.3'
         python_version:
           - '3.12'
         scenario:
@@ -150,7 +150,6 @@ jobs:
               -e COLLECTION_ROLE="${{ matrix.collection_role }}" \
               -e COLLECTION_SCENARIO="${{ matrix.scenario }}"
 
-
   scenarios:
     name: "${{ matrix.image }} / ${{ matrix.scenario }} / ${{ matrix.ansible-version }} / ${{ matrix.python_version }}"
     runs-on: ubuntu-22.04
@@ -160,13 +159,14 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - debian:12
+          - debain:13
         ansible-version:
-          - '9.5'
+          - '12.3'
         python_version:
           - '3.12'
         scenario:
           - configured
+          - configured-with-pdns
         collection_role:
           - pdns_recursor
 

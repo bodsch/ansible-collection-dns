@@ -4,7 +4,8 @@ pdns_recursor_requirements: []
 pdns_recursor_packages: []
 
 # The directory where the PowerDNS configuration is located
-pdns_recursor_config_dir: '/etc/powerdns'
+# see: pdns_recursor_defaults_recursor.config_dir
+# pdns_recursor_config_dir: '/etc/powerdns'
 
 pdns_recursor_owner: pdns-recursor
 pdns_recursor_group: pdns-recursor

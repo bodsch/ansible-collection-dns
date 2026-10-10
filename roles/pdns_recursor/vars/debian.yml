@@ -15,7 +15,7 @@ pdns_recursor_defaults_recursor:
   forward_zones_recurse: []
   forwarding_catalog_zones: []
   include_dir: /etc/powerdns/recursor.d
-  lua_config_file: /etc/powerdns/recursor.lua
+  lua_config_file: ""                                           # /etc/powerdns/recursor.lua
   lua_dns_script: ''
   setgid: ""
   setuid: ""
