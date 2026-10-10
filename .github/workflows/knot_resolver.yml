@@ -55,7 +55,7 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - debain:13
+          - debian:13
         ansible-version:
           - '12.3'
         python_version:
@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - debain:13
+          - debian:13
         ansible-version:
           - '12.3'
         python_version:
