@@ -101,6 +101,7 @@ class ZoneFileSpec:
     filename: str
     origin: str
     network: str | None = None
+    dynamic_updates: bool = False
     default_ttl: int = 86400
     records: tuple[ZoneRecord, ...] = field(default_factory=tuple)
 
@@ -151,6 +152,7 @@ class ZoneFileCacheEntry:
     kind: ZoneFileKind
     family: AddressFamily
     network: str | None = None
+    dynamic_updates: bool = False
     content_sha256: str | None = None
 
 
@@ -168,3 +170,4 @@ class ReconcileResult:
 
     changed: bool
     changes: tuple[ZoneFileChange, ...] = field(default_factory=tuple)
+    dynamic_to_static_zones: tuple[str, ...] = field(default_factory=tuple)

@@ -72,9 +72,6 @@
   tags:
     - bind
 
-- name: configure
-  ansible.builtin.include_tasks: configure/zones.yml
-
 - name: detect default zone files
   bodsch.core.find_files:
     file_list: "{{ bind_default_zone_files }}"
@@ -86,17 +83,42 @@
   ansible.builtin.set_fact:
     bind_default_zone_files: "{{ file_check.stat | selectattr('exists') | map(attribute='path') | list }}"
 
-- name: create main bind config file {{ bind_config }}
-  become: true
-  ansible.builtin.template:
-    src: etc/named.conf.j2
-    dest: "{{ bind_config }}"
-    owner: "{{ bind_owner }}"
-    group: "{{ bind_group }}"
-    mode: "0640"
-    backup: true
-    validate: 'named-checkconf %s'
-  notify:
-    - reload bind
+- name: reconcile zone files and configuration
+  block:
+    - name: configure zone files
+      ansible.builtin.include_tasks: configure/zones.yml
+
+    - name: create main bind config file {{ bind_config }}
+      become: true
+      ansible.builtin.template:
+        src: etc/named.conf.j2
+        dest: "{{ bind_config }}"
+        owner: "{{ bind_owner }}"
+        group: "{{ bind_group }}"
+        mode: "0640"
+        backup: true
+        validate: 'named-checkconf %s'
+      notify:
+        - reload bind
+
+    - name: apply dynamic to static zone transitions
+      ansible.builtin.meta: flush_handlers
+      when:
+        - bind_zone_file_plan.dynamic_to_static_zones | length > 0
+
+  rescue:
+    - name: thaw zones after a failed dynamic to static transition
+      become: true
+      ansible.builtin.command:
+        cmd: "rndc thaw {{ item }}"
+      loop: "{{ bind_zone_file_plan.dynamic_to_static_zones | default([]) }}"
+      changed_when: true
+      failed_when: false
+
+    - name: report failed zone transition
+      ansible.builtin.fail:
+        msg: >-
+          Failed to reconcile BIND zone files and configuration:
+          {{ ansible_failed_result.msg | default(ansible_failed_result) }}
 
 ...

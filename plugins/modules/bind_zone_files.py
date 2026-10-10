@@ -115,6 +115,12 @@ changes:
   returned: always
   type: list
   elements: dict
+dynamic_to_static_zones:
+  description:
+    - Zone names that were dynamic on the preceding managed run and are now static.
+  returned: always
+  type: list
+  elements: str
 zone_files:
   description: Canonical zone file specs built from the raw input.
   returned: always
@@ -167,6 +173,9 @@ class BindZoneFilesModule:
 
         return {
             "changed": reconcile_result.changed,
+            "dynamic_to_static_zones": list(
+                reconcile_result.dynamic_to_static_zones
+            ),
             "zone_files": [asdict(item) for item in build_result.zone_files],
             "zone_definitions": [
                 asdict(item) for item in build_result.zone_definitions
