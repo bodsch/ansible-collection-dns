@@ -383,6 +383,19 @@ jede Regel hat mindestens:
 ```
 
 
+## Dynamic zone management
+
+Primary zones configured with a non-empty `allow_updates` or `update_policy`
+are dynamic. The role creates a missing dynamic zone file, then leaves the file
+and its BIND journal unchanged on later runs so DDNS records survive.
+
+When a zone managed as dynamic on the preceding role run is changed to static,
+the role intentionally drops its DDNS state. It freezes the zone, deletes its
+journal, renders a new zone file containing only the records declared in
+`bind_zones`, installs the static BIND configuration, and reloads BIND. Run the
+role at least once with the zone configured as dynamic before converting it so
+the role's cache can identify the transition.
+
 ## Contribution
 
 Please read [Contribution](CONTRIBUTING.md)

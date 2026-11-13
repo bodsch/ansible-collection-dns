@@ -110,6 +110,7 @@ class ZoneSpecBuilder:
             zone_type=zone_type,
             allow_update_present=bool(raw_zone.get("allow_update")),
         )
+        dynamic_updates = self._is_dynamic_zone(raw_zone)
 
         definitions: list[ZoneDefinitionSpec] = []
         files: list[ZoneFileSpec] = []
@@ -137,6 +138,7 @@ class ZoneSpecBuilder:
                         zone_name=zone_name,
                         zone_type=zone_type,
                         state=state,
+                        dynamic_updates=dynamic_updates,
                     )
                 )
 
@@ -167,6 +169,7 @@ class ZoneSpecBuilder:
                             zone_type=zone_type,
                             state=state,
                             network=network,
+                            dynamic_updates=dynamic_updates,
                         )
                     )
 
@@ -198,6 +201,7 @@ class ZoneSpecBuilder:
                             zone_type=zone_type,
                             state=state,
                             network=network,
+                            dynamic_updates=dynamic_updates,
                         )
                     )
 
@@ -345,6 +349,7 @@ class ZoneSpecBuilder:
         zone_name: str,
         zone_type: str,
         state: str,
+        dynamic_updates: bool,
     ) -> ZoneFileSpec:
         """Build the canonical forward zone file model."""
         records = ()
@@ -362,6 +367,7 @@ class ZoneSpecBuilder:
             family="none",
             filename=zone_name,
             origin=self._ensure_trailing_dot(zone_name),
+            dynamic_updates=dynamic_updates,
             records=records,
         )
 
@@ -372,6 +378,7 @@ class ZoneSpecBuilder:
         zone_type: str,
         state: str,
         network: IPv4Network,
+        dynamic_updates: bool,
     ) -> ZoneFileSpec:
         """Build one canonical IPv4 reverse zone file model."""
         filename = self._ipv4_reverse_zone_name(network)
@@ -391,6 +398,7 @@ class ZoneSpecBuilder:
             filename=filename,
             origin=self._ensure_trailing_dot(filename),
             network=network.with_prefixlen,
+            dynamic_updates=dynamic_updates,
             records=records,
         )
 
@@ -401,6 +409,7 @@ class ZoneSpecBuilder:
         zone_type: str,
         state: str,
         network: IPv6Network,
+        dynamic_updates: bool,
     ) -> ZoneFileSpec:
         """Build one canonical IPv6 reverse zone file model."""
         filename = self._ipv6_reverse_zone_name(network)
@@ -420,7 +429,15 @@ class ZoneSpecBuilder:
             filename=filename,
             origin=self._ensure_trailing_dot(filename),
             network=network.with_prefixlen,
+            dynamic_updates=dynamic_updates,
             records=records,
+        )
+
+    def _is_dynamic_zone(self, raw_zone: Mapping[str, Any]) -> bool:
+        """Return True when a zone is configured for dynamic updates."""
+        return any(
+            self._has_non_empty_value(raw_zone.get(field))
+            for field in ("allow_updates", "allow_update", "update_policy")
         )
 
     def _build_forward_records(

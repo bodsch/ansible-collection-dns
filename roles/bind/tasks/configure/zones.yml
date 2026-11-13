@@ -12,7 +12,25 @@
     host_all_addresses: "{{ ansible_facts.all_ipv4_addresses | union(ansible_facts.all_ipv6_addresses) }}"
   tags: bind
 
+- name: plan bind zone file changes
+  become: true
+  bodsch.dns.bind_zone_files:
+    zones: "{{ bind_zones }}"
+    zone_directory: "{{ bind_zone_dir }}"
+    serial_strategy: "increment"
+  check_mode: true
+  changed_when: false
+  register: bind_zone_file_plan
+
+- name: freeze dynamic zones being converted to static
+  become: true
+  ansible.builtin.command:
+    cmd: "rndc freeze {{ item }}"
+  loop: "{{ bind_zone_file_plan.dynamic_to_static_zones }}"
+  changed_when: true
+
 - name: create bind zone files
+  become: true
   bodsch.dns.bind_zone_files:
     zones: "{{ bind_zones }}"
     zone_directory: "{{ bind_zone_dir }}"
