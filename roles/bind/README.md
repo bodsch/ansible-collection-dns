@@ -219,6 +219,18 @@ bind_zones:
     allow_updates:
       - "10.0.1.2"
       - 'key "external-dns"'
+    # Optional update ACL for reverse zones. Defaults to allow_updates when omitted.
+    reverse_allow_updates:
+      - 'key "reverse-ddns"'
+    # Prefer this over reverse_allow_updates to restrict names or record types.
+    reverse_update_policy:
+      mode: rules
+      rules:
+        - action: grant
+          identity: reverse-ddns
+          ruletype: zonesub
+          types:
+            - PTR
     allow_transfers:
       - 'key "external-dns"'
     update_policy:
