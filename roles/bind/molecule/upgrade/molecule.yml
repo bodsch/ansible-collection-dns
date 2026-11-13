@@ -25,7 +25,7 @@ platforms:
       - /run
       - /tmp
     tty: true
-    environment:
+    env:
       container: docker
     groups:
       - dns
@@ -54,7 +54,7 @@ platforms:
       - /run
       - /tmp
     tty: true
-    environment:
+    env:
       container: docker
     groups:
       - dns
@@ -78,7 +78,7 @@ platforms:
       - /run
       - /tmp
     tty: true
-    environment:
+    env:
       container: docker
     groups:
       - dns
